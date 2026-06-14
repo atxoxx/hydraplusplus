@@ -1,10 +1,11 @@
 import { app } from "electron";
 import path from "node:path";
 import { SystemPath } from "./services/system-path";
+import { envConfig } from "./env-config";
 
 export const defaultDownloadsPath = SystemPath.getPath("downloads");
 
-export const isStaging = import.meta.env.MAIN_VITE_API_URL.includes("staging");
+export const isStaging = envConfig.apiUrl.includes("staging");
 
 export const windowsStartMenuPath = path.join(
   SystemPath.getPath("appData"),

@@ -613,7 +613,7 @@ declare global {
     /* Misc */
     openExternal: (src: string) => Promise<void>;
     openCheckout: () => Promise<void>;
-    getCloudIframeUrl: () => Promise<string>;
+    getCloudIframeUrl: () => Promise<string | null>;
     getVersion: () => Promise<string>;
     isStaging: () => Promise<boolean>;
     ping: () => string;

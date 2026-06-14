@@ -1,4 +1,5 @@
 import { appVersion, defaultDownloadsPath, isStaging } from "@main/constants";
+import { envConfig } from "@main/env-config";
 import { ipcMain } from "electron";
 
 import "./auth";
@@ -28,6 +29,7 @@ ipcMain.handle("getVersion", () => appVersion);
 ipcMain.handle("isStaging", () => isStaging);
 ipcMain.handle("isPortableVersion", () => isPortableVersion());
 ipcMain.handle("getDefaultDownloadsPath", () => defaultDownloadsPath);
-ipcMain.handle("getCloudIframeUrl", () =>
-  new URL("/cloud", import.meta.env.MAIN_VITE_CHECKOUT_URL).toString()
-);
+ipcMain.handle("getCloudIframeUrl", () => {
+  if (!envConfig.checkoutUrl) return null;
+  return new URL("/cloud", envConfig.checkoutUrl).toString();
+});

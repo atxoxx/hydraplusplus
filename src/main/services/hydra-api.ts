@@ -7,6 +7,7 @@ import { networkLogger as logger } from "./logger";
 import { UserNotLoggedInError, SubscriptionRequiredError } from "@shared";
 import { omit } from "lodash-es";
 import { appVersion } from "@main/constants";
+import { envConfig } from "@main/env-config";
 import { getUserData } from "./user/get-user-data";
 import { db } from "@main/level";
 import { levelKeys } from "@main/level/sublevels";
@@ -131,7 +132,7 @@ export class HydraApi {
 
   static async setupApi() {
     this.instance = axios.create({
-      baseURL: import.meta.env.MAIN_VITE_API_URL,
+      baseURL: envConfig.apiUrl,
       headers: { "User-Agent": `Hydra Launcher v${appVersion}` },
     });
 

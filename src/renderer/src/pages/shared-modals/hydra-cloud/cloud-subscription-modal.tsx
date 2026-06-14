@@ -21,7 +21,7 @@ export function CloudSubscriptionModal({
   const { t, i18n } = useTranslation("hydra_cloud");
   const lang = i18n.language?.split("-")[0] || "en";
   const [isClosing, setIsClosing] = useState(false);
-  const [cloudIframeUrl, setCloudIframeUrl] = useState("");
+  const [cloudIframeUrl, setCloudIframeUrl] = useState<string | null>("");
   const [isIframeUnavailable, setIsIframeUnavailable] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const cloudIframeOrigin = cloudIframeUrl
@@ -40,7 +40,7 @@ export function CloudSubscriptionModal({
 
     getCloudIframeUrl()
       .then((url) => {
-        if (isMounted) setCloudIframeUrl(url);
+        if (isMounted) setCloudIframeUrl(url ?? "");
       })
       .catch(() => {
         if (isMounted) setIsIframeUnavailable(true);

@@ -8,9 +8,9 @@ import { useAppSelector, useToast } from "@renderer/hooks";
 
 import { settingsContext } from "@renderer/context";
 import { LinkExternalIcon } from "@primer/octicons-react";
+import { getRendererEnv } from "@shared";
 
-const realDebridReferralId = import.meta.env
-  .RENDERER_VITE_REAL_DEBRID_REFERRAL_ID;
+const realDebridReferralId = getRendererEnv("RENDERER_VITE_REAL_DEBRID_REFERRAL_ID");
 
 const REAL_DEBRID_URL = realDebridReferralId
   ? `https://real-debrid.com/?id=${realDebridReferralId}`

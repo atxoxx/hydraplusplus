@@ -5,6 +5,7 @@ import type {
 } from "@types";
 import { levelDBService } from "@renderer/services/leveldb.service";
 import axios from "axios";
+import { getRendererEnv } from "@shared";
 import {
   useCallback,
   useDeferredValue,
@@ -188,7 +189,7 @@ interface LaunchboxFiltersResponse {
 }
 
 const externalResourcesInstance = axios.create({
-  baseURL: import.meta.env.RENDERER_VITE_EXTERNAL_RESOURCES_URL,
+  baseURL: getRendererEnv("RENDERER_VITE_EXTERNAL_RESOURCES_URL"),
 });
 
 function parseJsonParam(value: string | null): unknown {

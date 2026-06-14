@@ -23,6 +23,7 @@ import { logger } from "./logger";
 import { addCookieInterceptor } from "./cookies";
 import * as Sentry from "@sentry/react";
 import { levelDBService } from "./services/leveldb.service";
+import { getRendererEnv } from "@shared";
 import Catalogue from "./pages/catalogue/catalogue";
 import Home from "./pages/home/home";
 import Downloads from "./pages/downloads/downloads";
@@ -51,7 +52,7 @@ import BigPictureProfile from "../../big-picture/src/pages/profile/profile";
 console.log = logger.log;
 
 Sentry.init({
-  dsn: import.meta.env.RENDERER_VITE_SENTRY_DSN,
+  dsn: getRendererEnv("RENDERER_VITE_SENTRY_DSN"),
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),

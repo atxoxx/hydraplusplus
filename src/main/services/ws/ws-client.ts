@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import { HydraApi } from "../hydra-api";
 import { Envelope } from "@main/generated/envelope";
 import { logger } from "../logger";
+import { envConfig } from "../../env-config";
 import { friendRequestEvent } from "./events/friend-request";
 import { friendGameSessionEvent } from "./events/friend-game-session";
 import { friendPresenceEvent } from "./events/friend-presence";
@@ -21,7 +22,7 @@ export class WSClient {
     try {
       const { token } = await HydraApi.post<{ token: string }>("/auth/ws");
 
-      this.ws = new WebSocket(import.meta.env.MAIN_VITE_WS_URL, {
+      this.ws = new WebSocket(envConfig.wsUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -38,6 +38,7 @@ import {
   removeCustomCss,
 } from "./helpers";
 import { levelDBService } from "./services/leveldb.service";
+import { getRendererEnv } from "@shared";
 
 export interface AppProps {
   children: React.ReactNode;
@@ -260,7 +261,7 @@ export function App() {
     if (!document.getElementById("external-resources")) {
       const $script = document.createElement("script");
       $script.id = "external-resources";
-      $script.src = `${import.meta.env.RENDERER_VITE_EXTERNAL_RESOURCES_URL}/bundle.js?t=${Date.now()}`;
+      $script.src = `${getRendererEnv("RENDERER_VITE_EXTERNAL_RESOURCES_URL")}/bundle.js?t=${Date.now()}`;
       document.head.appendChild($script);
     }
   }, [fetchUserDetails, updateUserDetails, dispatch, setupWorkWonders]);

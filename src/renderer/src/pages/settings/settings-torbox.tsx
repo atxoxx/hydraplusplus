@@ -8,8 +8,9 @@ import { useAppSelector, useToast } from "@renderer/hooks";
 
 import { settingsContext } from "@renderer/context";
 import { LinkExternalIcon } from "@primer/octicons-react";
+import { getRendererEnv } from "@shared";
 
-const torBoxReferralCode = import.meta.env.RENDERER_VITE_TORBOX_REFERRAL_CODE;
+const torBoxReferralCode = getRendererEnv("RENDERER_VITE_TORBOX_REFERRAL_CODE");
 
 const TORBOX_URL = torBoxReferralCode
   ? `https://torbox.app/subscription?referral=${torBoxReferralCode}`

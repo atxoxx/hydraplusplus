@@ -10,6 +10,7 @@ import { PowerSaveBlockerManager } from "./power-save-blocker";
 import path from "node:path";
 import { AchievementWatcherManager } from "./achievements/achievement-watcher-manager";
 import { INTERVALS } from "@main/constants";
+import { envConfig } from "@main/env-config";
 import { Wine } from "./wine";
 import { NativeAddon } from "./native-addon";
 import { emulatorSessions } from "./emulators/emulator-session-tracker";
@@ -85,8 +86,7 @@ const getGameExecutables = async () => {
   const gameExecutables = (
     await axios
       .get(
-        import.meta.env.MAIN_VITE_EXTERNAL_RESOURCES_URL +
-          "/game-executables.json"
+        envConfig.externalResourcesUrl + "/game-executables.json"
       )
       .catch(() => {
         return { data: {} };

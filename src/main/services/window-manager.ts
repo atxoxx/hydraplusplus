@@ -27,6 +27,7 @@ import path from "node:path";
 import UserAgent from "user-agents";
 import { HydraApi } from "./hydra-api";
 import { logger } from "./logger";
+import { envConfig } from "../env-config";
 
 export class WindowManager {
   public static mainWindow: Electron.BrowserWindow | null = null;
@@ -69,11 +70,11 @@ export class WindowManager {
     // Load the remote URL for development or the local html file for production.
     if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
       window.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}#/${hash}`);
-    } else if (import.meta.env.MAIN_VITE_LAUNCHER_SUBDOMAIN) {
+    } else if (envConfig.launcherSubdomain) {
       // Try to load from remote URL in production
       try {
         await window.loadURL(
-          `https://release-v${this.formatVersionNumber(app.getVersion())}.${import.meta.env.MAIN_VITE_LAUNCHER_SUBDOMAIN}#/${hash}`
+          `https://release-v${this.formatVersionNumber(app.getVersion())}.${envConfig.launcherSubdomain}#/${hash}`
         );
       } catch (error) {
         // Fall back to local file if remote URL fails
@@ -480,7 +481,7 @@ export class WindowManager {
       if (!app.isPackaged) authWindow.webContents.openDevTools();
 
       authWindow.loadURL(
-        `${import.meta.env.MAIN_VITE_AUTH_URL}${page}?${searchParams.toString()}`
+        `${envConfig.authUrl}${page}?${searchParams.toString()}`
       );
 
       authWindow.once("ready-to-show", () => {
