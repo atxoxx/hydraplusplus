@@ -132,6 +132,12 @@ contextBridge.exposeInMainWorld("electron", {
   getRandomGame: () => ipcRenderer.invoke("getRandomGame"),
   getGameStats: (objectId: string, shop: GameShop) =>
     ipcRenderer.invoke("getGameStats", objectId, shop),
+  getSteamPlayerCount: (shop: GameShop, objectId: string, gameTitle: string) =>
+    ipcRenderer.invoke("getSteamPlayerCount", shop, objectId, gameTitle),
+  getSteamReviewSummary: (shop: GameShop, objectId: string, gameTitle: string) =>
+    ipcRenderer.invoke("getSteamReviewSummary", shop, objectId, gameTitle),
+  getSteamReviewAnalysis: (shop: GameShop, objectId: string, gameTitle: string) =>
+    ipcRenderer.invoke("getSteamReviewAnalysis", shop, objectId, gameTitle),
   getGameAssets: (objectId: string, shop: GameShop) =>
     ipcRenderer.invoke("getGameAssets", objectId, shop),
   onUpdateAchievements: (

@@ -50,6 +50,9 @@ import type {
   EmulationSavePlatform,
   MemcardRestoreResult,
   MemcardRestoreTarget,
+  SteamPlayerCount,
+  SteamReviewSummary,
+  SteamReviewAnalysis,
 } from "@types";
 import type { AxiosProgressEvent } from "axios";
 
@@ -126,6 +129,21 @@ declare global {
     ) => Promise<ShopDetailsWithAssets | null>;
     getRandomGame: () => Promise<Steam250Game>;
     getGameStats: (objectId: string, shop: GameShop) => Promise<GameStats>;
+    getSteamPlayerCount: (
+      shop: GameShop,
+      objectId: string,
+      gameTitle: string
+    ) => Promise<SteamPlayerCount | null>;
+    getSteamReviewSummary: (
+      shop: GameShop,
+      objectId: string,
+      gameTitle: string
+    ) => Promise<SteamReviewSummary | null>;
+    getSteamReviewAnalysis: (
+      shop: GameShop,
+      objectId: string,
+      gameTitle: string
+    ) => Promise<SteamReviewAnalysis | null>;
     getGameAssets: (
       objectId: string,
       shop: GameShop

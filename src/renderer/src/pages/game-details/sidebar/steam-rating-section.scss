@@ -1,0 +1,124 @@
+@use "../../../scss/globals.scss";
+
+.steam-rating-section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(globals.$spacing-unit * 1.5);
+  padding: calc(globals.$spacing-unit * 2);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__score-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__descriptor {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  &__percentage {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  &__details-button {
+    font-size: 11px;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid globals.$border-color;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  &__bar {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  &__breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: calc(globals.$spacing-unit * 0.75);
+  }
+
+  &__breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: globals.$small-font-size;
+    color: globals.$muted-color;
+
+    &--total {
+      padding-top: calc(globals.$spacing-unit * 0.75);
+      border-top: 1px solid globals.$border-color;
+      font-weight: 600;
+      color: globals.$body-color;
+    }
+  }
+
+  &__breakdown-count {
+    font-variant-numeric: tabular-nums;
+    color: globals.$body-color;
+  }
+
+  &__recent {
+    padding-top: calc(globals.$spacing-unit * 0.75);
+    border-top: 1px solid globals.$border-color;
+  }
+
+  &__recent-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: globals.$muted-color;
+    margin: 0 0 6px 0;
+  }
+
+  &__recent-detail {
+    font-size: 12px;
+    color: globals.$muted-color;
+    margin: 0;
+  }
+
+  &__recent-descriptor {
+    font-weight: 600;
+  }
+
+  &__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: calc(globals.$spacing-unit);
+    padding: calc(globals.$spacing-unit * 2);
+  }
+
+  &__placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: calc(globals.$spacing-unit * 2);
+    color: globals.$muted-color;
+    font-size: globals.$small-font-size;
+
+    p {
+      margin: 0;
+    }
+  }
+}

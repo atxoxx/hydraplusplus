@@ -88,3 +88,43 @@ export interface SteamShortcut {
 export interface CreateSteamShortcutOptions {
   openVr?: boolean;
 }
+
+export interface SteamPlayerCount {
+  currentPlayers: number;
+  allTimePeak: number | null;
+  trend24h: number | null;
+  trend7d: number | null;
+  timestamp: number;
+}
+
+export interface SteamReviewSummary {
+  reviewScoreDescriptor: string;
+  totalPositive: number;
+  totalNegative: number;
+  totalReviews: number;
+  reviewScore: number;
+  recentReviewScoreDescriptor: string | null;
+  recentPositive: number | null;
+  recentNegative: number | null;
+  recentTotal: number | null;
+  recentReviewScore: number | null;
+}
+
+export interface SteamReviewHistoryPoint {
+  date: string;
+  positive: number;
+  negative: number;
+  total: number;
+}
+
+export interface SteamPlayerHistoryPoint {
+  date: string;
+  players: number;
+}
+
+export interface SteamReviewAnalysis {
+  summary: SteamReviewSummary;
+  history: SteamReviewHistoryPoint[];
+  languageBreakdown: { language: string; count: number }[];
+  playerHistory: SteamPlayerHistoryPoint[];
+}

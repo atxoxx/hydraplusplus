@@ -1,0 +1,130 @@
+@use "../../../scss/globals.scss";
+
+.steam-review-modal {
+  display: flex;
+  flex-direction: column;
+  gap: calc(globals.$spacing-unit * 2);
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    gap: calc(globals.$spacing-unit * 2);
+    padding: calc(globals.$spacing-unit * 2);
+  }
+
+  &__error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: calc(globals.$spacing-unit * 6);
+    color: globals.$muted-color;
+    font-size: globals.$body-font-size;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid globals.$border-color;
+  }
+
+  &__tab {
+    padding: calc(globals.$spacing-unit) calc(globals.$spacing-unit * 2);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: globals.$muted-color;
+    font-size: globals.$small-font-size;
+    cursor: pointer;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
+
+    &:hover {
+      color: globals.$body-color;
+    }
+
+    &--active {
+      color: globals.$body-color;
+      border-bottom-color: globals.$brand-teal;
+    }
+  }
+
+  &__content {
+    padding: 0 calc(globals.$spacing-unit * 2) calc(globals.$spacing-unit * 2);
+  }
+
+  &__overview {
+    display: flex;
+    flex-direction: column;
+    gap: calc(globals.$spacing-unit * 3);
+  }
+
+  &__score-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(globals.$spacing-unit * 0.5);
+    padding: calc(globals.$spacing-unit * 3) 0;
+  }
+
+  &__big-descriptor {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  &__big-score {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  &__total-count {
+    font-size: globals.$small-font-size;
+    color: globals.$muted-color;
+  }
+
+  &__recent-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: calc(globals.$spacing-unit * 2);
+    border: 1px solid globals.$border-color;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: globals.$small-font-size;
+    color: globals.$muted-color;
+  }
+
+  &__recent-descriptor {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  &__section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: globals.$muted-color;
+    margin: 0 0 calc(globals.$spacing-unit) 0;
+  }
+
+  &__chart-section {
+    padding: calc(globals.$spacing-unit) 0;
+  }
+
+  &__empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: calc(globals.$spacing-unit * 6);
+    color: globals.$muted-color;
+
+    p {
+      margin: 0;
+    }
+  }
+}

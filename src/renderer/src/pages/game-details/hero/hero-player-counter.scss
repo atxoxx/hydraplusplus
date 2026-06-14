@@ -1,0 +1,60 @@
+@use "../../../scss/globals.scss";
+
+.hero-player-counter {
+  position: absolute;
+  top: calc(globals.$spacing-unit * 1.5);
+  right: calc(globals.$spacing-unit * 2);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: calc(globals.$spacing-unit * 0.75);
+  padding: calc(globals.$spacing-unit * 0.75) calc(globals.$spacing-unit * 1.25);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: globals.$body-color;
+  font-size: globals.$small-font-size;
+  animation: slide-in 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+
+  &__count {
+    font-weight: 700;
+    font-size: 14px;
+    color: #ffffff;
+  }
+
+  &__live {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: globals.$muted-color;
+  }
+
+  &__live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #4caf50;
+    animation: hero-player-counter-pulse 2s ease-in-out infinite;
+  }
+
+  &__trend {
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 2px;
+  }
+}
+
+@keyframes hero-player-counter-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 
 import { HeroPanel } from "./hero";
+import { HeroPlayerCounter } from "./hero/hero-player-counter";
 import { DescriptionHeader } from "./description-header/description-header";
 import { GallerySlider } from "./gallery-slider/gallery-slider";
 import { Sidebar } from "./sidebar/sidebar";
@@ -365,6 +366,8 @@ export function GameDetailsContent() {
             className="game-details__hero-logo-backdrop"
             style={{ opacity: backdropOpacity }}
           >
+            <HeroPlayerCounter />
+
             <div className="game-details__hero-content">
               {!renderClassicsHero && (
                 <GameLogo game={game} shopDetails={shopDetails} />

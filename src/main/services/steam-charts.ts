@@ -1,0 +1,527 @@
+import axios from "axios";
+import { logger } from "./logger";
+import type {
+  SteamPlayerCount,
+  SteamReviewSummary,
+  SteamReviewAnalysis,
+} from "@types";
+
+const STEAM_API_BASE = "https://api.steampowered.com";
+const STEAM_STORE_API = "https://store.steampowered.com/api";
+const STEAM_STORE_REVIEWS_API = "https://store.steampowered.com";
+const STEAMSPY_API = "https://steamspy.com/api.php";
+const STEAMCHARTS_URL = "https://steamcharts.com/app";
+
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+const playerCountCache = new Map<
+  string,
+  { data: SteamPlayerCount; timestamp: number }
+>();
+const reviewSummaryCache = new Map<
+  string,
+  { data: SteamReviewSummary; timestamp: number }
+>();
+
+function getCached<T>(
+  cache: Map<string, { data: T; timestamp: number }>,
+  key: string
+): T | null {
+  const entry = cache.get(key);
+  if (entry && Date.now() - entry.timestamp < CACHE_TTL) {
+    return entry.data;
+  }
+  return null;
+}
+
+function setCache<T>(
+  cache: Map<string, { data: T; timestamp: number }>,
+  key: string,
+  data: T
+): void {
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
+/**
+ * Get current player count from Steam's official API.
+ * Endpoint: ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid={appid}
+ */
+export async function getCurrentPlayerCount(
+  appId: number
+): Promise<number | null> {
+  try {
+    const response = await axios.get<{
+      response: { player_count: number; result: number };
+    }>(`${STEAM_API_BASE}/ISteamUserStats/GetNumberOfCurrentPlayers/v1/`, {
+      params: { appid: appId },
+      timeout: 8000,
+    });
+
+    if (response.data?.response?.result === 1) {
+      return response.data.response.player_count;
+    }
+    return null;
+  } catch (err) {
+    logger.error("Failed to fetch current player count", err);
+    return null;
+  }
+}
+
+/**
+ * Get all-time peak from SteamSpy API.
+ * SteamSpy endpoint: ?request=appdetails&appid={appid}
+ * Returns ccu (concurrent users) field which represents the peak.
+ */
+export async function getSteamSpyPeak(
+  appId: number
+): Promise<number | null> {
+  try {
+    const response = await axios.get<{ ccu?: number }>(STEAMSPY_API, {
+      params: { request: "appdetails", appid: appId },
+      timeout: 8000,
+    });
+
+    if (response.data?.ccu && response.data.ccu > 0) {
+      return response.data.ccu;
+    }
+    return null;
+  } catch (err) {
+    logger.error("Failed to fetch SteamSpy peak data", err);
+    return null;
+  }
+}
+
+/**
+ * Scrape SteamCharts.com for trend data (24h and 7d change percentages)
+ * and all-time peak as a fallback.
+ */
+export async function scrapeSteamChartsData(
+  appId: number
+): Promise<{
+  allTimePeak: number | null;
+  trend24h: number | null;
+  trend7d: number | null;
+} | null> {
+  try {
+    const response = await axios.get<string>(`${STEAMCHARTS_URL}/${appId}`, {
+      timeout: 10000,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml",
+      },
+    });
+
+    const html = response.data;
+
+    // Try to parse the all-time peak from the page
+    // SteamCharts typically shows: "all-time peak: X,XXX"
+    const peakMatch = html.match(
+      /all-time peak[:\s]*([\d,]+)/i
+    );
+    const allTimePeak = peakMatch
+      ? parseInt(peakMatch[1].replace(/,/g, ""), 10)
+      : null;
+
+    // Try to parse 24h and 7d trend percentages
+    // SteamCharts shows percentage changes like "+12.5%" or "-5.3%"
+    const trend24hMatch = html.match(
+      /(?:24h|24 hour|past 24 hours)[^<]*?([+-]?\d+\.?\d*)\s*%/i
+    );
+    const trend7dMatch = html.match(
+      /(?:7d|7 day|past 7 days|past week)[^<]*?([+-]?\d+\.?\d*)\s*%/i
+    );
+
+    const trend24h = trend24hMatch
+      ? parseFloat(trend24hMatch[1])
+      : null;
+    const trend7d = trend7dMatch
+      ? parseFloat(trend7dMatch[1])
+      : null;
+
+    return { allTimePeak, trend24h, trend7d };
+  } catch (err) {
+    logger.error("Failed to scrape SteamCharts", err);
+    return null;
+  }
+}
+
+/**
+ * Get the full player count data combining multiple sources.
+ * 1. Current players: Steam API
+ * 2. All-time peak: SteamSpy → SteamCharts fallback
+ * 3. Trends: SteamCharts scraping
+ */
+export async function getSteamPlayerCountData(
+  appId: number
+): Promise<SteamPlayerCount | null> {
+  const cacheKey = `player_count:${appId}`;
+  const cached = getCached(playerCountCache, cacheKey);
+  if (cached) return cached;
+
+  const currentPlayers = await getCurrentPlayerCount(appId);
+  if (currentPlayers === null) {
+    return null;
+  }
+
+  const [steamSpyPeak, steamChartsData] = await Promise.all([
+    getSteamSpyPeak(appId),
+    scrapeSteamChartsData(appId),
+  ]);
+
+  const allTimePeak =
+    steamSpyPeak ?? steamChartsData?.allTimePeak ?? null;
+
+  const result: SteamPlayerCount = {
+    currentPlayers,
+    allTimePeak,
+    trend24h: steamChartsData?.trend24h ?? null,
+    trend7d: steamChartsData?.trend7d ?? null,
+    timestamp: Date.now(),
+  };
+
+  setCache(playerCountCache, cacheKey, result);
+  return result;
+}
+
+// ---- Steam Reviews API DTOs (based on Playnite ReviewViewer reference) ----
+
+interface SteamReviewsResponse {
+  success: number;
+  query_summary: {
+    num_reviews: number;
+    review_score: number;
+    review_score_desc: string;
+    total_positive: number;
+    total_negative: number;
+    total_reviews: number;
+  };
+  reviews: SteamReview[];
+  cursor: string;
+}
+
+interface SteamReview {
+  recommendationid: number;
+  author: {
+    steamid: string;
+    personaname: string;
+    num_games_owned: number;
+    num_reviews: number;
+    playtime_forever: number;
+    playtime_last_two_weeks: number;
+    playtime_at_review: number;
+    last_played: number;
+  };
+  language: string;
+  review: string;
+  timestamp_created: number;
+  timestamp_updated: number;
+  voted_up: boolean;
+  votes_up: number;
+  votes_funny: number;
+  weighted_vote_score: string;
+  comment_count: number;
+  steam_purchase: boolean;
+  received_for_free: boolean;
+  written_during_early_access: boolean;
+}
+
+interface SteamReviewSummaryRaw {
+  totalPositive: number;
+  totalNegative: number;
+  totalReviews: number;
+  reviewScore: number;
+  reviewScoreDesc: string;
+}
+
+/**
+ * Build the Steam reviews API URL matching the Playnite ReviewViewer reference.
+ * Uses proper cursor-based pagination, language filters, review type, purchase type,
+ * date range, playtime filters, display mode, and helpful system.
+ */
+function buildSteamReviewsUrl(
+  appId: number,
+  options: {
+    cursor?: string;
+    filter?: "summary" | "all" | "recent" | "funny";
+    reviewType?: "all" | "positive" | "negative";
+    purchaseType?: "all" | "steam" | "non_steam_purchase";
+    language?: string;
+    dayRange?: number;
+    numPerPage?: number;
+  } = {}
+): string {
+  const {
+    cursor = "*",
+    filter = "summary",
+    reviewType = "all",
+    purchaseType = "all",
+    language = "all",
+    dayRange,
+    numPerPage = 20,
+  } = options;
+
+  const params = new URLSearchParams();
+  params.set("json", "1");
+  params.set("cursor", cursor);
+  params.set("filter", filter);
+  params.set("language", language);
+  params.set("review_type", reviewType);
+  params.set("purchase_type", purchaseType);
+  params.set("num_per_page", String(numPerPage));
+
+  // Filter offtopic activity by default
+  params.set("filter_offtopic_activity", "1");
+
+  // Interface language (separate from review language)
+  params.set("l", "english");
+
+  // Date range for "recent" reviews — when dayRange is set, use it exclusively
+  if (dayRange) {
+    params.set("day_range", String(dayRange));
+  } else {
+    // Lifetime date range
+    params.set("date_range_type", "all");
+    params.set("start_date", "-1");
+    params.set("end_date", "-1");
+  }
+
+  // No playtime filter
+  params.set("playtime_filter_min", "0");
+  params.set("playtime_filter_max", "0");
+
+  // All device types
+  params.set("playtime_type", "all");
+
+  // Use Steam's review quality/helpfulness system
+  params.set("use_review_quality", "1");
+
+  return `${STEAM_STORE_REVIEWS_API}/appreviews/${appId}?${params.toString()}`;
+}
+
+/**
+ * Fetch a single page of Steam reviews.
+ */
+async function fetchReviewPage(
+  appId: number,
+  options: {
+    cursor?: string;
+    filter?: "summary" | "all" | "recent" | "funny";
+    language?: string;
+    dayRange?: number;
+    numPerPage?: number;
+  } = {},
+  signal?: AbortSignal
+): Promise<SteamReviewsResponse | null> {
+  try {
+    const url = buildSteamReviewsUrl(appId, options);
+    const response = await axios.get<SteamReviewsResponse>(url, {
+      timeout: 12000,
+      signal,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Accept: "application/json",
+      },
+    });
+
+    if (response.data?.success === 1) {
+      return response.data;
+    }
+    return null;
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.code === "ERR_CANCELED") return null;
+    logger.error("Failed to fetch Steam review page", err);
+    return null;
+  }
+}
+
+/**
+ * Get review summary from Steam Store API.
+ * Uses filter=summary to get only the query_summary without review text.
+ */
+async function getReviewSummaryRaw(
+  appId: number,
+  dayRange?: number
+): Promise<SteamReviewSummaryRaw | null> {
+  const page = await fetchReviewPage(appId, {
+    filter: "summary",
+    dayRange,
+    numPerPage: 0,
+  });
+
+  if (page?.query_summary) {
+    const s = page.query_summary;
+    return {
+      totalPositive: s.total_positive,
+      totalNegative: s.total_negative,
+      totalReviews: s.total_reviews,
+      reviewScore: s.review_score,
+      reviewScoreDesc: s.review_score_desc,
+    };
+  }
+  return null;
+}
+
+/**
+ * Get the full review summary (all-time + recent 30 days).
+ */
+export async function getSteamReviewSummaryData(
+  appId: number
+): Promise<SteamReviewSummary | null> {
+  const cacheKey = `review_summary:${appId}`;
+  const cached = getCached(reviewSummaryCache, cacheKey);
+  if (cached) return cached;
+
+  const [allTime, recent] = await Promise.all([
+    getReviewSummaryRaw(appId),
+    getReviewSummaryRaw(appId, 30),
+  ]);
+
+  if (!allTime) return null;
+
+  const result: SteamReviewSummary = {
+    reviewScoreDescriptor: allTime.reviewScoreDesc,
+    totalPositive: allTime.totalPositive,
+    totalNegative: allTime.totalNegative,
+    totalReviews: allTime.totalReviews,
+    reviewScore: allTime.reviewScore,
+    recentReviewScoreDescriptor: recent?.reviewScoreDesc ?? null,
+    recentPositive: recent?.totalPositive ?? null,
+    recentNegative: recent?.totalNegative ?? null,
+    recentTotal: recent?.totalReviews ?? null,
+    recentReviewScore: recent?.reviewScore ?? null,
+  };
+
+  setCache(reviewSummaryCache, cacheKey, result);
+  return result;
+}
+
+/**
+ * Single pagination pass that collects BOTH language breakdown
+ * and review history from Steam reviews. Avoids duplicating API calls.
+ * Fetches up to 10 pages max (up to 1000 reviews with numPerPage=100).
+ */
+async function collectReviewData(
+  appId: number,
+  signal?: AbortSignal
+): Promise<{
+  languageBreakdown: { language: string; count: number }[];
+  history: { date: string; positive: number; negative: number; total: number }[];
+}> {
+  const languageCounts = new Map<string, number>();
+  const monthlyBuckets = new Map<
+    string,
+    { positive: number; negative: number }
+  >();
+  let cursor = "*";
+  const maxPages = 10;
+
+  for (let page = 0; page < maxPages; page++) {
+    // Small delay between pages to avoid rate limiting
+    if (page > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+
+    const data = await fetchReviewPage(
+      appId,
+      { filter: "all", numPerPage: 100, cursor },
+      signal
+    );
+
+    if (!data || data.reviews.length === 0) break;
+
+    for (const review of data.reviews) {
+      // Language breakdown
+      const lang = review.language || "unknown";
+      languageCounts.set(lang, (languageCounts.get(lang) || 0) + 1);
+
+      // Monthly history aggregation
+      const date = new Date(review.timestamp_created * 1000);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
+      const bucket = monthlyBuckets.get(monthKey) || {
+        positive: 0,
+        negative: 0,
+      };
+      if (review.voted_up) {
+        bucket.positive++;
+      } else {
+        bucket.negative++;
+      }
+      monthlyBuckets.set(monthKey, bucket);
+    }
+
+    cursor = data.cursor;
+    if (!cursor || cursor === "" || data.reviews.length < 100) break;
+  }
+
+  return {
+    languageBreakdown: Array.from(languageCounts.entries())
+      .map(([language, count]) => ({ language, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 15),
+    history: Array.from(monthlyBuckets.entries())
+      .map(([date, counts]) => ({
+        date: `${date}-01`,
+        positive: counts.positive,
+        negative: counts.negative,
+        total: counts.positive + counts.negative,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date)),
+  };
+}
+
+/**
+ * Get full review analysis including history and language breakdown.
+ * Uses cursor-based pagination from the Steam reviews API to collect
+ * real review history data and language distribution.
+ */
+export async function getSteamReviewAnalysisData(
+  appId: number,
+  signal?: AbortSignal
+): Promise<SteamReviewAnalysis | null> {
+  const summary = await getSteamReviewSummaryData(appId);
+  if (!summary) return null;
+
+  const { languageBreakdown, history } = await collectReviewData(
+    appId,
+    signal
+  );
+
+  const result: SteamReviewAnalysis = {
+    summary,
+    history,
+    languageBreakdown,
+    playerHistory: [],
+  };
+
+  return result;
+}
+
+/**
+ * Search Steam store for a game by name to find its App ID.
+ * Used for non-Steam games.
+ */
+export async function searchSteamGame(
+  gameTitle: string
+): Promise<number | null> {
+  try {
+    const response = await axios.get<{
+      items?: Array<{ id: number; name: string }>;
+    }>(`${STEAM_STORE_API}/storesearch/`, {
+      params: { term: gameTitle, l: "english" },
+      timeout: 8000,
+    });
+
+    const items = response.data?.items;
+    if (items && items.length > 0) {
+      // Return the first match's app ID
+      return items[0].id;
+    }
+    return null;
+  } catch (err) {
+    logger.error("Failed to search Steam store", err);
+    return null;
+  }
+}

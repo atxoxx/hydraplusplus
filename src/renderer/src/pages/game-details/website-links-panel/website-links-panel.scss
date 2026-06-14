@@ -13,8 +13,7 @@
     display: flex;
     align-items: center;
     width: 100%;
-    padding: calc(globals.$spacing-unit * 2.5)
-      calc(globals.$spacing-unit * 2);
+    padding: calc(globals.$spacing-unit * 2.5) calc(globals.$spacing-unit * 2);
     gap: globals.$spacing-unit;
     background-color: transparent;
     color: globals.$muted-color;
@@ -93,7 +92,9 @@
     border: none;
     border-bottom: 2px solid transparent;
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease,
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
       border-color 0.15s ease;
     flex-shrink: 0;
 
@@ -233,7 +234,10 @@
     background-color: transparent;
     color: globals.$body-color;
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      opacity 0.15s ease;
 
     &:hover:not(:disabled) {
       background-color: rgba(255, 255, 255, 0.08);
@@ -268,7 +272,10 @@
     background-color: rgba(0, 0, 0, 0.3);
     border: 1px solid globals.$border-color;
     border-radius: 14px;
-    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
 
     &:focus-within {
       border-color: globals.$brand-teal;
@@ -337,12 +344,7 @@
     z-index: 1;
 
     .react-loading-skeleton {
-      background: linear-gradient(
-        90deg,
-        #1c1c1c 25%,
-        #2a2a2a 50%,
-        #1c1c1c 75%
-      );
+      background: linear-gradient(90deg, #1c1c1c 25%, #2a2a2a 50%, #1c1c1c 75%);
       background-size: 200% 100%;
       animation: website-links-skeleton-loading 1.5s infinite;
     }

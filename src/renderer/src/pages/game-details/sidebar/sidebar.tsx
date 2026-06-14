@@ -27,6 +27,8 @@ import { useSubscription } from "@renderer/hooks/use-subscription";
 import "./sidebar.scss";
 import { GameLanguageSection } from "./game-language-section";
 import { ControllerSupportSection } from "./controller-support-section";
+import { SteamRatingSection } from "./steam-rating-section";
+import { SteamReviewModal } from "../modals/steam-review-modal";
 
 const ProtonDBSection = lazy(async () => {
   const mod = await import("./protondb-section");
@@ -124,6 +126,8 @@ export function Sidebar() {
   const { t } = useTranslation("game_details");
   const { formatDateTime } = useDate();
   const { numberFormatter } = useFormat();
+
+  const [showSteamReviewModal, setShowSteamReviewModal] = useState(false);
 
   useEffect(() => {
     if (objectId) {
@@ -353,7 +357,16 @@ export function Sidebar() {
         </SidebarSection>
       )}
 
+      <SteamRatingSection
+        onOpenDetails={() => setShowSteamReviewModal(true)}
+      />
+
       <GameLanguageSection />
+
+      <SteamReviewModal
+        visible={showSteamReviewModal}
+        onClose={() => setShowSteamReviewModal(false)}
+      />
     </aside>
   );
 }
