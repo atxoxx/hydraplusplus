@@ -76,6 +76,8 @@ export function GameDetailsContent() {
     game,
     hasNSFWContentBlocked,
     shop,
+    effectiveShop,
+    effectiveObjectId,
     setShowGameOptionsModal,
     setGameOptionsInitialCategory,
   } = useContext(gameDetailsContext);
@@ -194,7 +196,7 @@ export function GameDetailsContent() {
   const hideClassicsBookmark = userPreferences?.hideClassicsBookmark ?? false;
   const classicsUseHeroLayout = userPreferences?.classicsUseHeroLayout ?? false;
 
-  const isCustomGame = game?.shop === "custom";
+  const isCustomGame = game?.shop === "custom" && !game?.linkedShop;
   const isLaunchboxGame = shop === "launchbox";
   const renderClassicsHero = isLaunchboxGame && !classicsUseHeroLayout;
 
@@ -442,15 +444,15 @@ export function GameDetailsContent() {
 
             <WebsiteLinksPanel />
 
-            {shop !== "custom" && shop && objectId && (
-              <GameActivityPanel shop={shop} objectId={objectId} />
+            {effectiveShop !== "custom" && shop && objectId && (
+              <GameActivityPanel shop={effectiveShop} objectId={effectiveObjectId} />
             )}
 
-            {shop !== "custom" && shop && objectId && (
+            {effectiveShop !== "custom" && shop && objectId && (
               <div ref={reviewsRef}>
                 <GameReviews
-                  shop={shop}
-                  objectId={objectId}
+                  shop={effectiveShop}
+                  objectId={effectiveObjectId}
                   game={game}
                   userDetailsId={userDetails?.id}
                   isGameInLibrary={isGameInLibrary}
@@ -461,7 +463,7 @@ export function GameDetailsContent() {
             )}
           </div>
 
-          {shop !== "custom" && <Sidebar />}
+          {effectiveShop !== "custom" && <Sidebar />}
         </div>
       </section>
     </div>

@@ -7,7 +7,8 @@ import { Tooltip } from "react-tooltip";
 import "./hero-player-counter.scss";
 
 export function HeroPlayerCounter() {
-  const { objectId, shop, gameTitle } = useContext(gameDetailsContext);
+  const { effectiveShop, effectiveObjectId, gameTitle } =
+    useContext(gameDetailsContext);
   const { t } = useTranslation("game_details");
 
   const [playerData, setPlayerData] = useState<SteamPlayerCount | null>(null);
@@ -17,15 +18,15 @@ export function HeroPlayerCounter() {
     setPlayerData(null);
     setVisible(false);
 
-    if (!objectId || !shop) return;
+    if (!effectiveObjectId || !effectiveShop) return;
 
     let cancelled = false;
 
     const fetchData = async () => {
       try {
         const result = await window.electron.getSteamPlayerCount(
-          shop,
-          objectId,
+          effectiveShop,
+          effectiveObjectId,
           gameTitle
         );
         if (!cancelled && result) {
@@ -42,7 +43,7 @@ export function HeroPlayerCounter() {
     return () => {
       cancelled = true;
     };
-  }, [objectId, shop, gameTitle]);
+  }, [effectiveObjectId, effectiveShop, gameTitle]);
 
   if (!visible || !playerData) return null;
 
@@ -67,7 +68,7 @@ export function HeroPlayerCounter() {
     .filter(Boolean)
     .join(" | ");
 
-  const tooltipId = `player-count-tooltip-${objectId}`;
+  const tooltipId = `player-count-tooltip-${effectiveObjectId}`;
 
   const renderTrend = () => {
     if (playerData.trend24h === null) return null;

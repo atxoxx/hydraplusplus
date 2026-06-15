@@ -119,8 +119,16 @@ export function Sidebar() {
   const [activeRequirement, setActiveRequirement] =
     useState<keyof SteamAppDetails["pc_requirements"]>("minimum");
 
-  const { gameTitle, shopDetails, objectId, shop, stats, achievements } =
-    useContext(gameDetailsContext);
+  const {
+    gameTitle,
+    shopDetails,
+    objectId,
+    shop,
+    effectiveShop,
+    effectiveObjectId,
+    stats,
+    achievements,
+  } = useContext(gameDetailsContext);
 
   const { showHydraCloudModal } = useSubscription();
   const { t } = useTranslation("game_details");
@@ -136,7 +144,7 @@ export function Sidebar() {
       // Directly fetch from API without checking cache
       window.electron.hydraApi
         .get<HowLongToBeatCategory[] | null>(
-          `/games/${shop}/${objectId}/how-long-to-beat`,
+          `/games/${effectiveShop}/${effectiveObjectId}/how-long-to-beat`,
           {
             needsAuth: false,
           }
@@ -148,24 +156,24 @@ export function Sidebar() {
           setHowLongToBeat({ isLoading: false, data: null });
         });
     }
-  }, [objectId, shop]);
+  }, [effectiveObjectId, effectiveShop]);
 
   useEffect(() => {
-    if (!shouldShowProtonFeatures || !objectId) {
+    if (!shouldShowProtonFeatures || !effectiveObjectId) {
       setProtonDB({ isLoading: false, data: null });
       return;
     }
 
     setProtonDB({ isLoading: true, data: null });
 
-    getProtonDBData(shop, objectId)
+    getProtonDBData(effectiveShop, effectiveObjectId)
       .then((protonData) => {
         setProtonDB({ isLoading: false, data: protonData });
       })
       .catch(() => {
         setProtonDB({ isLoading: false, data: null });
       });
-  }, [shouldShowProtonFeatures, objectId, shop]);
+  }, [shouldShowProtonFeatures, effectiveObjectId, effectiveShop]);
 
   return (
     <aside className="content-sidebar">
@@ -232,8 +240,8 @@ export function Sidebar() {
               <li key={achievement.displayName}>
                 <Link
                   to={buildGameAchievementPath({
-                    shop: shop,
-                    objectId: objectId!,
+                    shop: effectiveShop,
+                    objectId: effectiveObjectId,
                     title: gameTitle,
                   })}
                   className="list__item"
@@ -259,8 +267,8 @@ export function Sidebar() {
 
             <Link
               to={buildGameAchievementPath({
-                shop: shop,
-                objectId: objectId!,
+                shop: effectiveShop,
+                objectId: effectiveObjectId,
                 title: gameTitle,
               })}
             >

@@ -42,7 +42,8 @@ function getSteamScoreColor(descriptor: string): string {
 export function SteamRatingSection({
   onOpenDetails,
 }: Readonly<SteamRatingSectionProps>) {
-  const { objectId, shop, gameTitle } = useContext(gameDetailsContext);
+  const { effectiveShop, effectiveObjectId, gameTitle } =
+    useContext(gameDetailsContext);
   const { t } = useTranslation("game_details");
   const { numberFormatter } = useFormat();
 
@@ -57,7 +58,7 @@ export function SteamRatingSection({
     setIsLoading(true);
     setHasError(false);
 
-    if (!objectId || !shop) {
+    if (!effectiveObjectId || !effectiveShop) {
       setIsLoading(false);
       setHasError(true);
       return;
@@ -66,7 +67,7 @@ export function SteamRatingSection({
     let cancelled = false;
 
     window.electron
-      .getSteamReviewSummary(shop, objectId, gameTitle)
+      .getSteamReviewSummary(effectiveShop, effectiveObjectId, gameTitle)
       .then((result) => {
         if (!cancelled) {
           if (result) {
@@ -87,7 +88,7 @@ export function SteamRatingSection({
     return () => {
       cancelled = true;
     };
-  }, [objectId, shop, gameTitle]);
+  }, [effectiveObjectId, effectiveShop, gameTitle]);
 
   if (isLoading) {
     return (

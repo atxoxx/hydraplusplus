@@ -21,6 +21,10 @@ export interface GameDetailsContext {
   shopDetails: ShopDetailsWithAssets | null;
   repacks: GameRepack[];
   shop: GameShop;
+  /** The effective shop — if the game has a linked catalogue source, this is the linked shop (e.g. "steam"), otherwise the original shop */
+  effectiveShop: GameShop;
+  /** The effective objectId — if the game has a linked catalogue source, this is the linked objectId, otherwise the original objectId */
+  effectiveObjectId: string;
   gameTitle: string;
   isGameRunning: boolean;
   isLoading: boolean;

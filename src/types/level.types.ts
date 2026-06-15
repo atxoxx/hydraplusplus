@@ -85,6 +85,10 @@ export interface Game {
   steamFamilyOwnerId?: string | null;
   /** Display name of the family member who owns this game (Steam Family Share) */
   steamFamilyOwnerName?: string | null;
+  /** When a custom game is linked to a catalogue entry, the original shop (e.g. "steam") */
+  linkedShop?: GameShop | null;
+  /** When a custom game is linked to a catalogue entry, the original objectId */
+  linkedObjectId?: string | null;
 }
 
 export interface Download {

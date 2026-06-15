@@ -1,7 +1,7 @@
 import type { GameShop, UserAchievement, UserPreferences } from "@types";
 import { registerEvent } from "../register-event";
 import { getGameAchievementData } from "@main/services/achievements/get-game-achievement-data";
-import { db, gameAchievementsSublevel, levelKeys } from "@main/level";
+import { db, gameAchievementsSublevel, gamesSublevel, levelKeys } from "@main/level";
 import { AchievementWatcherManager } from "@main/services/achievements/achievement-watcher-manager";
 
 export const getUnlockedAchievements = async (
@@ -80,6 +80,19 @@ const getUnlockedAchievementsEvent = async (
   objectId: string,
   shop: GameShop
 ): Promise<UserAchievement[]> => {
+  // Redirect custom games with linked catalogue source
+  if (shop === "custom") {
+    const gameKey = levelKeys.game(shop, objectId);
+    const game = await gamesSublevel.get(gameKey).catch(() => null);
+    if (game?.linkedShop && game?.linkedObjectId) {
+      await AchievementWatcherManager.firstSyncWithRemoteIfNeeded(
+        game.linkedShop as GameShop,
+        game.linkedObjectId
+      );
+      return getUnlockedAchievements(game.linkedObjectId, game.linkedShop as GameShop, false);
+    }
+  }
+
   await AchievementWatcherManager.firstSyncWithRemoteIfNeeded(shop, objectId);
   return getUnlockedAchievements(objectId, shop, false);
 };

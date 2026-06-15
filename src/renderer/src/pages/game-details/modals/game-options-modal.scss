@@ -1,6 +1,20 @@
 @use "../../../scss/globals.scss";
 
 .game-options-modal {
+  &__assets-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__metadata-search-row {
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+
   &__container {
     display: flex;
     min-height: 520px;

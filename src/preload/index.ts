@@ -34,6 +34,7 @@ import type {
   MemcardRestoreTarget,
   SteamFamilyGame,
   PlatformGame,
+  FoundExe,
 } from "@types";
 import type { AuthPage } from "@shared";
 import type { AxiosProgressEvent } from "axios";
@@ -483,7 +484,11 @@ contextBridge.exposeInMainWorld("electron", {
     executablePath: string,
     iconUrl?: string,
     logoImageUrl?: string,
-    libraryHeroImageUrl?: string
+    libraryHeroImageUrl?: string,
+    libraryImageUrl?: string,
+    coverImageUrl?: string,
+    linkedShop?: GameShop | null,
+    linkedObjectId?: string | null
   ) =>
     ipcRenderer.invoke(
       "addCustomGameToLibrary",
@@ -491,7 +496,11 @@ contextBridge.exposeInMainWorld("electron", {
       executablePath,
       iconUrl,
       logoImageUrl,
-      libraryHeroImageUrl
+      libraryHeroImageUrl,
+      libraryImageUrl,
+      coverImageUrl,
+      linkedShop,
+      linkedObjectId
     ),
   copyCustomGameAsset: (
     sourcePath: string,
@@ -659,6 +668,20 @@ contextBridge.exposeInMainWorld("electron", {
   scanSteamFamily: () => ipcRenderer.invoke("scanSteamFamily"),
   importSteamFamilyGames: (games: SteamFamilyGame[]) =>
     ipcRenderer.invoke("importSteamFamilyGames", games),
+  scanFolderForExes: (folderPath: string) =>
+    ipcRenderer.invoke("scanFolderForExes", folderPath) as Promise<FoundExe[]>,
+  bulkAddCustomGamesToLibrary: (entries: {
+    title: string;
+    executablePath: string;
+    iconUrl?: string;
+    logoImageUrl?: string;
+    libraryHeroImageUrl?: string;
+    libraryImageUrl?: string;
+    coverImageUrl?: string;
+    linkedShop?: GameShop | null;
+    linkedObjectId?: string | null;
+  }[]) =>
+    ipcRenderer.invoke("bulkAddCustomGamesToLibrary", entries),
   scanPlatforms: () => ipcRenderer.invoke("scanPlatforms"),
   importPlatformGames: (games: PlatformGame[]) =>
     ipcRenderer.invoke("importPlatformGames", games),

@@ -34,6 +34,8 @@ export const gameDetailsContext = createContext<GameDetailsContext>({
   shopDetails: null,
   repacks: [],
   shop: "steam",
+  effectiveShop: "steam",
+  effectiveObjectId: "",
   gameTitle: "",
   isGameRunning: false,
   isLoading: false,
@@ -93,6 +95,10 @@ export function GameDetailsContextProvider({
   const [gameOptionsInitialCategory, setGameOptionsInitialCategory] =
     useState<GameOptionsCategoryId>("general");
   const [repacks, setRepacks] = useState<GameRepack[]>([]);
+
+  // Compute effective shop/objectId from linked source for custom games
+  const effectiveShop = game?.linkedShop || shop;
+  const effectiveObjectId = game?.linkedObjectId || objectId;
 
   const { i18n } = useTranslation("game_details");
   const location = useLocation();
@@ -178,7 +184,7 @@ export function GameDetailsContextProvider({
     abortControllerRef.current = abortController;
 
     const shopDetailsPromise = window.electron
-      .getGameShopDetails(objectId, shop, getSteamLanguage(i18n.language))
+      .getGameShopDetails(effectiveObjectId, effectiveShop, getSteamLanguage(i18n.language))
       .then((result) => {
         if (abortController.signal.aborted) return;
 
@@ -198,14 +204,13 @@ export function GameDetailsContextProvider({
         }
       });
 
-    if (shop !== "custom") {
-      window.electron.getGameStats(objectId, shop).then((result) => {
-        if (abortController.signal.aborted) return;
-        setStats(result);
-      });
-    }
+    // Fetch stats using effective shop (will redirect linked custom games via IPC)
+    window.electron.getGameStats(effectiveObjectId, effectiveShop).then((result) => {
+      if (abortController.signal.aborted) return;
+      setStats(result);
+    });
 
-    const assetsPromise = window.electron.getGameAssets(objectId, shop);
+    const assetsPromise = window.electron.getGameAssets(effectiveObjectId, effectiveShop);
 
     Promise.all([shopDetailsPromise, assetsPromise])
       .then(([_, assets]) => {
@@ -225,9 +230,9 @@ export function GameDetailsContextProvider({
         setIsLoading(false);
       });
 
-    if (userDetails && shop !== "custom") {
+    if (userDetails) {
       window.electron
-        .getUnlockedAchievements(objectId, shop)
+        .getUnlockedAchievements(effectiveObjectId, effectiveShop)
         .then((achievements) => {
           if (abortController.signal.aborted) return;
           setAchievements(achievements);
@@ -360,8 +365,8 @@ export function GameDetailsContextProvider({
 
   useEffect(() => {
     const unsubscribe = window.electron.onUpdateAchievements(
-      objectId,
-      shop,
+      effectiveObjectId,
+      effectiveShop,
       (achievements) => {
         if (!userDetails) return;
         setAchievements(achievements);
@@ -371,8 +376,10 @@ export function GameDetailsContextProvider({
     return () => {
       unsubscribe();
     };
-  }, [objectId, shop, userDetails]);
+  }, [effectiveObjectId, effectiveShop, userDetails]);
 
+  // Don't fetch download sources for custom games (even with linked source — 
+  // the linked game may have different download options)
   useEffect(() => {
     if (shop === "custom") return;
 
@@ -447,6 +454,8 @@ export function GameDetailsContextProvider({
         game,
         shopDetails,
         shop,
+        effectiveShop,
+        effectiveObjectId,
         repacks,
         gameTitle,
         isGameRunning,

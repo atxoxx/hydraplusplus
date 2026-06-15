@@ -1,3 +1,10 @@
+/** Represents a single executable found by folder scanning */
+export interface FoundExe {
+  filePath: string;
+  fileName: string;
+  folderName: string;
+}
+
 import type { Cracker, DownloadSourceStatus, Downloader } from "@shared";
 import type { SteamAppDetails } from "./steam.types";
 import type { Download, Game, Subscription } from "./level.types";

@@ -1,4 +1,5 @@
 import "./add-custom-game-to-library";
+import "./bulk-add-custom-games-to-library";
 import "./add-game-to-favorites";
 import "./add-game-to-library";
 import "./assign-game-to-collection";
@@ -41,6 +42,7 @@ import "./remove-game-from-library";
 import "./remove-game";
 import "./reset-game-achievements";
 import "./scan-installed-games";
+import "./scan-folder-for-exes";
 import "./scan-steam-family";
 import "./scan-platforms";
 import "./select-game-proton-path";

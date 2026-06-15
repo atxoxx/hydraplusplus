@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Modal } from "@renderer/components";
+import { Modal, Button, MetadataSearchModal } from "@renderer/components";
 import { formatBytes, GAMEMODE_SITE_URL, MANGOHUD_SITE_URL } from "@shared";
 
 import type {
@@ -31,6 +31,7 @@ import {
   FileDirectoryIcon,
   GearIcon,
   ImageIcon,
+  SearchIcon,
 } from "@primer/octicons-react";
 import { Wrench } from "lucide-react";
 import { GameAssetsSettings } from "./game-assets-settings";
@@ -119,6 +120,7 @@ export function GameOptionsModal({
     string | null
   >(null);
   const [showSteamShortcutModal, setShowSteamShortcutModal] = useState(false);
+  const [showMetadataSearchModal, setShowMetadataSearchModal] = useState(false);
   const [steamShortcutExists, setSteamShortcutExists] = useState(false);
 
   const {
@@ -766,6 +768,12 @@ export function GameOptionsModal({
         onClose={() => setShowSteamShortcutModal(false)}
         onConfirm={handleCreateSteamShortcut}
       />
+      <MetadataSearchModal
+        visible={showMetadataSearchModal}
+        game={game}
+        onClose={() => setShowMetadataSearchModal(false)}
+        onMetadataApplied={updateGame}
+      />
 
       <Modal
         visible={visible}
@@ -868,11 +876,22 @@ export function GameOptionsModal({
               />
             )}
             {selectedCategory === "assets" && (
-              <GameAssetsSettings
-                game={game}
-                shopDetails={shopDetails}
-                onGameUpdated={updateGame}
-              />
+              <div className="game-options-modal__assets-wrapper">
+                <div className="game-options-modal__metadata-search-row">
+                  <Button
+                    theme="outline"
+                    onClick={() => setShowMetadataSearchModal(true)}
+                  >
+                    <SearchIcon size={14} />
+                    {t("settings_category_search_metadata")}
+                  </Button>
+                </div>
+                <GameAssetsSettings
+                  game={game}
+                  shopDetails={shopDetails}
+                  onGameUpdated={updateGame}
+                />
+              </div>
             )}
             {selectedCategory === "hydra_cloud" && (
               <HydraCloudSettingsSection

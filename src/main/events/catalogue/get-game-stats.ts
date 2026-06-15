@@ -1,7 +1,7 @@
 import type { GameShop, GameStats } from "@types";
 import { registerEvent } from "../register-event";
 import { HydraApi } from "@main/services";
-import { gamesStatsCacheSublevel, levelKeys } from "@main/level";
+import { gamesStatsCacheSublevel, gamesSublevel, levelKeys } from "@main/level";
 
 const LOCAL_CACHE_EXPIRATION = 1000 * 60 * 30; // 30 minutes
 
@@ -10,7 +10,13 @@ const getGameStats = async (
   objectId: string,
   shop: GameShop
 ) => {
+  // Redirect custom games with linked catalogue source
   if (shop === "custom") {
+    const gameKey = levelKeys.game(shop, objectId);
+    const game = await gamesSublevel.get(gameKey).catch(() => null);
+    if (game?.linkedShop && game?.linkedObjectId) {
+      return getGameStats(_event, game.linkedObjectId, game.linkedShop as GameShop);
+    }
     return null;
   }
 

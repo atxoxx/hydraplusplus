@@ -9,6 +9,7 @@ import type {
 
 import { registerEvent } from "../register-event";
 import {
+  gamesSublevel,
   gamesShopAssetsSublevel,
   gamesShopCacheSublevel,
   levelKeys,
@@ -202,7 +203,23 @@ const getGameShopDetails = async (
   shop: GameShop,
   language: string
 ): Promise<ShopDetailsWithAssets | null> => {
-  if (shop === "custom") return null;
+  // For custom games, check if they're linked to a catalogue source
+  if (shop === "custom") {
+    const gameKey = levelKeys.game(shop, objectId);
+    const game = await gamesSublevel.get(gameKey).catch(() => null);
+
+    if (game?.linkedShop && game?.linkedObjectId) {
+      // Redirect to the linked source to fetch full details
+      return getGameShopDetails(
+        _event,
+        game.linkedObjectId,
+        game.linkedShop as GameShop,
+        language
+      );
+    }
+
+    return null;
+  }
 
   if (shop === "launchbox") {
     return getLaunchboxShopDetails(objectId, shop, language);

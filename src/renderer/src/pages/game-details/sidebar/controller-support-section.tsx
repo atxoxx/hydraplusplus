@@ -16,19 +16,19 @@ import "./sidebar.scss";
 
 export function ControllerSupportSection() {
   const { t } = useTranslation("game_details");
-  const { shop, shopDetails, isLoading } = useContext(gameDetailsContext);
+  const { effectiveShop, shopDetails, isLoading } = useContext(gameDetailsContext);
 
   const controllerSupport = useMemo(() => {
-    if (!shopDetails || shop !== "steam") return null;
+    if (!shopDetails || effectiveShop !== "steam") return null;
 
     const details = shopDetails as ControllerSupportDetails;
     return resolveControllerSupport(details);
-  }, [shop, shopDetails]);
+  }, [effectiveShop, shopDetails]);
 
-  const isPending = shop === "steam" && isLoading && !shopDetails;
+  const isPending = effectiveShop === "steam" && isLoading && !shopDetails;
 
   if (
-    shop !== "steam" ||
+    effectiveShop !== "steam" ||
     (!isPending && (!controllerSupport || controllerSupport === "none"))
   ) {
     return null;

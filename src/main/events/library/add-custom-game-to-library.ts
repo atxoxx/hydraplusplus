@@ -9,7 +9,11 @@ const addCustomGameToLibrary = async (
   executablePath: string,
   iconUrl?: string,
   logoImageUrl?: string,
-  libraryHeroImageUrl?: string
+  libraryHeroImageUrl?: string,
+  libraryImageUrl?: string,
+  coverImageUrl?: string,
+  linkedShop?: GameShop | null,
+  linkedObjectId?: string | null
 ) => {
   const objectId = randomUUID();
   const shop: GameShop = "custom";
@@ -33,10 +37,10 @@ const addCustomGameToLibrary = async (
     title,
     iconUrl: iconUrl || null,
     libraryHeroImageUrl: libraryHeroImageUrl || "",
-    libraryImageUrl: iconUrl || "",
+    libraryImageUrl: libraryImageUrl || iconUrl || "",
     logoImageUrl: logoImageUrl || "",
     logoPosition: null,
-    coverImageUrl: iconUrl || "",
+    coverImageUrl: coverImageUrl || iconUrl || "",
     downloadSources: [],
   };
   await gamesShopAssetsSublevel.put(gameKey, assets);
@@ -56,6 +60,8 @@ const addCustomGameToLibrary = async (
     executablePath,
     executablePathUpdatedAt: new Date(),
     launchOptions: null,
+    linkedShop: linkedShop ?? null,
+    linkedObjectId: linkedObjectId ?? null,
     favorite: false,
     automaticCloudSync: false,
     hasManuallyUpdatedPlaytime: false,

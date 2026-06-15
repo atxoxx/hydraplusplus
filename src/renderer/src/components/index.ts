@@ -26,3 +26,4 @@ export * from "./create-collection-modal/create-collection-modal";
 export * from "./progress-bar/progress-bar";
 export * from "./classics-onboarding-modal/classics-onboarding-modal";
 export * from "./discovery-wizard-modal/discovery-wizard-modal";
+export * from "./metadata-search-modal/metadata-search-modal";

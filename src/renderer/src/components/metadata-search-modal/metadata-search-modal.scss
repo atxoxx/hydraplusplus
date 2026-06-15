@@ -1,0 +1,150 @@
+.metadata-search-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 420px;
+
+  &__search-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__results {
+    min-height: 120px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  &__status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 16px;
+    color: var(--color-text-secondary);
+    text-align: center;
+    font-size: 13px;
+  }
+
+  &__results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    &--selected {
+      background: rgba(var(--color-primary-rgb, 60, 120, 255), 0.1);
+      border-color: var(--color-primary, #3c78ff);
+    }
+  }
+
+  &__result-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &__result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__result-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__result-shop {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    text-transform: capitalize;
+  }
+
+  &__preview {
+    padding: 12px;
+    background: rgba(60, 200, 120, 0.06);
+    border: 1px solid rgba(60, 200, 120, 0.15);
+    border-radius: 8px;
+  }
+
+  &__preview-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__preview-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &__preview-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__preview-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3cc878;
+  }
+
+  &__preview-shop {
+    font-size: 11px;
+    color: rgba(60, 200, 120, 0.7);
+    text-transform: capitalize;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  &__spinner {
+    animation: metadata-search-spin 1s linear infinite;
+  }
+}
+
+@keyframes metadata-search-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
