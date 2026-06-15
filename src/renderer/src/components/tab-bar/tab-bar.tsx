@@ -14,11 +14,7 @@ import {
 } from "@primer/octicons-react";
 import cn from "classnames";
 
-import {
-  useDownload,
-  useLibrary,
-  useUserDetails,
-} from "@renderer/hooks";
+import { useDownload, useLibrary, useUserDetails } from "@renderer/hooks";
 import type { ProfileFriends } from "@types";
 
 import { DownloadsDropdown } from "../downloads-dropdown/downloads-dropdown";
@@ -198,10 +194,10 @@ export function TabBar() {
           {hasActiveDownload && (
             <span
               className={cn("tab-bar__badge", "tab-bar__badge--pulse", {
-              "tab-bar__badge--count": pendingDownloadCount > 1,
-            })}
-          >
-            {pendingDownloadCount > 1 ? pendingDownloadCount : ""}
+                "tab-bar__badge--count": pendingDownloadCount > 1,
+              })}
+            >
+              {pendingDownloadCount > 1 ? pendingDownloadCount : ""}
             </span>
           )}
         </button>

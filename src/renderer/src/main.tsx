@@ -119,7 +119,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route element={<App />}>
             <Route path="/" element={<Navigate to="/store" replace />} />
             <Route path="/store" element={<Store />} />
-            <Route path="/catalogue" element={<Navigate to="/store" replace />} />
+            <Route
+              path="/catalogue"
+              element={<Navigate to="/store" replace />}
+            />
             <Route path="/library" element={<Library />} />
             <Route path="/activity" element={<Activity />} />
             <Route path="/downloads" element={<Downloads />} />

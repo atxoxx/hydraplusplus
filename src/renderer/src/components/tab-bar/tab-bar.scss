@@ -36,7 +36,9 @@
   background: none;
   font-family: inherit;
   position: relative;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
   border-radius: 6px;
   -webkit-app-region: no-drag;
 
@@ -80,7 +82,9 @@
   color: globals.$body-color;
   cursor: pointer;
   position: relative;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
   -webkit-app-region: no-drag;
 
   &:hover {

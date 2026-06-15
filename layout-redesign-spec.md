@@ -9,16 +9,19 @@ Redesign the Hydra Launcher main renderer layout to be more efficient, sleek, an
 ## 1. Sidebar (Left Panel)
 
 ### 1.1 — What Stays
+
 - **SidebarProfile** — Keep at the very top (avatar, username, subscription status)
 - **Collections section** — Collapsible, with create button, context menus (rename/delete), favorite pin
 - **Games section** — Collapsible, with add-game button, playable-only toggle, filter input
 - **Sidebar resizing** — Keep the drag handle and width persistence (`localStorage`)
 
 ### 1.2 — What Goes
+
 - **Remove all route navigation items** from the sidebar: Home, Catalogue, Library, Downloads, Watchlist, Settings, Activity, Friends, Big Picture
 - These move to the tab bar (below) or right-side action buttons
 
 ### 1.3 — Game Card Enhancement (SidebarGameItem)
+
 Add playtime display to each sidebar game item:
 
 ```
@@ -34,6 +37,7 @@ Add playtime display to each sidebar game item:
 - **Future-proof**: Design the layout to accommodate additional metadata fields easily
 
 ### 1.4 — Sidebar Help Button
+
 - Keep the "Need Help" support chat button at the bottom (visible with active subscription)
 
 ---
@@ -41,18 +45,21 @@ Add playtime display to each sidebar game item:
 ## 2. Tab Bar (Above Header)
 
 ### 2.1 — Placement
+
 - **Position**: Above the current `<Header />` component
 - Rendered as a dedicated `<TabBar />` component in `app.tsx` before the `<article className="container">`
 
 ### 2.2 — Tabs
-| Tab       | Route       | Icon                     |
-|-----------|-------------|--------------------------|
-| Store     | `/store`    | `AppsIcon` (or new icon) |
-| Library   | `/library`  | `BookIcon`               |
-| Watchlist | `/watchlist`| `ListUnorderedIcon`      |
-| Activity  | `/activity` | `ClockIcon`              |
+
+| Tab       | Route        | Icon                     |
+| --------- | ------------ | ------------------------ |
+| Store     | `/store`     | `AppsIcon` (or new icon) |
+| Library   | `/library`   | `BookIcon`               |
+| Watchlist | `/watchlist` | `ListUnorderedIcon`      |
+| Activity  | `/activity`  | `ClockIcon`              |
 
 ### 2.3 — Tab Behavior
+
 - **Active state**: Highlighted with accent color (brand teal `#16b195` underline or background)
 - **Click**: Navigate to the corresponding route
 - **Transitions**: Keep existing page transitions (each page handles its own animations)
@@ -64,6 +71,7 @@ Add playtime display to each sidebar game item:
   - Active indicator (e.g., bottom border or background tint)
 
 ### 2.4 — Future-Proofing
+
 - The tab bar component should be designed to easily add new tabs in the future
 - Tab definitions should be a simple config array
 
@@ -72,18 +80,20 @@ Add playtime display to each sidebar game item:
 ## 3. Right-Side Action Buttons
 
 ### 3.1 — Placement
+
 Same row as the Tab Bar, on the far right side.
 
 ### 3.2 — Buttons
 
-| Button      | Icon                | Behavior                                      | Badge                                    |
-|-------------|---------------------|-----------------------------------------------|------------------------------------------|
-| Downloads   | `DownloadIcon`      | Opens mini-dropdown + link to `/downloads`    | Progress count/pulse when downloading    |
-| Settings    | `GearIcon`          | Navigate to `/settings`                       | None                                     |
-| Friends     | `PeopleIcon`        | Open friends window (`openFriendsWindow()`)   | Online friends count                     |
-| Big Picture | `VideoIcon`         | Open big picture window (`openBigPictureWindow()`) | None                                 |
+| Button      | Icon           | Behavior                                           | Badge                                 |
+| ----------- | -------------- | -------------------------------------------------- | ------------------------------------- |
+| Downloads   | `DownloadIcon` | Opens mini-dropdown + link to `/downloads`         | Progress count/pulse when downloading |
+| Settings    | `GearIcon`     | Navigate to `/settings`                            | None                                  |
+| Friends     | `PeopleIcon`   | Open friends window (`openFriendsWindow()`)        | Online friends count                  |
+| Big Picture | `VideoIcon`    | Open big picture window (`openBigPictureWindow()`) | None                                  |
 
 ### 3.3 — Style
+
 - **Icon-only** with tooltip on hover
 - Circular or rounded hover background
 - Badge: Small pill/circle overlay showing count (matching existing `sidebar__online-count` style for Friends)
@@ -91,7 +101,9 @@ Same row as the Tab Bar, on the far right side.
 - Consistent spacing between buttons (`gap: 8px`)
 
 ### 3.4 — Downloads Mini-Dropdown
+
 When clicking the Downloads button:
+
 - Opens a compact dropdown/popover below the button
 - Shows:
   - Current download progress (game title + % + ETA/download speed)
@@ -106,17 +118,21 @@ When clicking the Downloads button:
 ## 4. Header Changes
 
 ### 4.1 — What Changes
+
 - The header is now positioned **below** the tab bar
 - **Remove**: The hardcoded page title logic from the header (title is now in the tabs)
 - **Keep**: Back button, search bar, scan button, AutoUpdateSubHeader
 
 ### 4.2 — New Header Title Logic
+
 Instead of the current title map (`pathTitle`), the header title should be:
+
 - Derived from the active tab (e.g., tab label) for top-level pages
 - The existing `headerTitle` from Redux state for nested pages (game details, achievements, profile)
 - Empty/hidden for the Store tab since it's the default/home
 
 ### 4.3 — Search Behavior
+
 - Search remains in the header
 - Context-aware: searching on Library tab searches library, searching on Store tab navigates to catalogue section
 - On the Store page, search should jump to/show the catalogue section
@@ -126,11 +142,13 @@ Instead of the current title map (`pathTitle`), the header title should be:
 ## 5. Store Page (Combined Home + Catalogue)
 
 ### 5.1 — Route
+
 - Path: `/store` (replaces both `/` and `/catalogue`)
 - The old `/` route should redirect to `/store`
 - The `/catalogue` route should redirect to `/store`
 
 ### 5.2 — Layout
+
 Two-section stacked page:
 
 ```
@@ -157,6 +175,7 @@ Two-section stacked page:
 ```
 
 ### 5.3 — Home Section (Top)
+
 - Reuse the current `Home` component's logic and UI:
   - Hero component
   - Category buttons (Hot, Weekly, Achievements + Surprise Me)
@@ -164,10 +183,12 @@ Two-section stacked page:
 - Category change only updates the home section cards (not the catalogue below)
 
 ### 5.4 — Divider
+
 - Clear visual separator between home section and catalogue section
 - Could be a section header with "Browse All Games" text, or a thin line with padding
 
 ### 5.5 — Catalogue Section (Bottom)
+
 - Reuse the current `Catalogue` component's logic and UI:
   - Search results display
   - Right-side filter panel (genres, tags, developers, publishers, ProtonDB, release year, watchlist toggle, mode toggle)
@@ -177,6 +198,7 @@ Two-section stacked page:
 - The catalogue section should have its own header/controls row
 
 ### 5.6 — Scroll Behavior
+
 - The entire Store page scrolls as one continuous page
 - When search filters are applied in the catalogue section, auto-scroll to that section
 
@@ -185,15 +207,18 @@ Two-section stacked page:
 ## 6. Other Pages (Now Accessed via Tabs)
 
 ### 6.1 — Library (`/library`)
+
 - **No design changes** — keep the current library page exactly as-is
 - Accessed via the Library tab
 - CategoryFilter, PlatformFilter, ViewOptions, and collection pills remain as inline controls within the page
 
 ### 6.2 — Watchlist (`/watchlist`)
+
 - **No design changes** — keep current card grid layout with priority badges, add-to-library, and remove actions
 - Accessed via the Watchlist tab
 
 ### 6.3 — Activity (`/activity`)
+
 - **No design changes** — keep current stats/analytics layout
 - Accessed via the Activity tab
 
@@ -202,6 +227,7 @@ Two-section stacked page:
 ## 7. Route & Navigation Updates
 
 ### 7.1 — Router Changes (`main.tsx`)
+
 ```
 Old routes to remove/redirect:
   "/"            → redirect to "/store"
@@ -220,11 +246,14 @@ Keep:
 ```
 
 ### 7.2 — Sidebar Routes Config
+
 Remove most items from `src/renderer/src/components/sidebar/routes.tsx`:
+
 - Keep only items that make sense in the sidebar (none of the main nav items)
 - Or repurpose/remove the file entirely if the sidebar no longer has route links
 
 ### 7.3 — Default Route
+
 - When app opens, default to `/store` (was `/`)
 
 ---
@@ -240,6 +269,7 @@ Remove most items from `src/renderer/src/components/sidebar/routes.tsx`:
 ## 9. Visual Design Guidelines
 
 ### 9.1 — Tab Bar Styling
+
 ```
 Background:  $dark-background-color (#0d0d0d)
 Height:       ~44px
@@ -249,6 +279,7 @@ Layout:       flex, space-between (tabs left, actions right)
 ```
 
 ### 9.2 — Tab Styling
+
 ```
 Font size:      13px
 Font weight:    500
@@ -262,6 +293,7 @@ Border radius:    6px
 ```
 
 ### 9.3 — Right Action Buttons Styling
+
 ```
 Size:          32x32px (icon 16x16)
 Hover:         background rgba(255,255,255,0.1), border-radius 8px
@@ -270,6 +302,7 @@ Badge:         16px circle, positioned top-right, matching sidebar badge styles
 ```
 
 ### 9.4 — Download Progress Badge
+
 ```
 Style:         Small green pulsing dot when active
                Or: Count number in badge (e.g., "2") when items queued
@@ -282,12 +315,14 @@ Color:         $success-color (#1c9749) for active
 ## 10. Component Architecture
 
 ### 10.1 — New Components
+
 - `TabBar` — `src/renderer/src/components/tab-bar/tab-bar.tsx`
 - `TabBar` SCSS — `src/renderer/src/components/tab-bar/tab-bar.scss`
 - `DownloadsDropdown` — `src/renderer/src/components/downloads-dropdown/downloads-dropdown.tsx`
 - `Store` page — `src/renderer/src/pages/store/store.tsx`
 
 ### 10.2 — Modified Components
+
 - `Sidebar` — Remove route navigation items; keep collections + games
 - `SidebarGameItem` — Add playtime display
 - `Header` — Update title logic; simplify
@@ -315,10 +350,13 @@ Color:         $success-color (#1c9749) for active
 ## 11. Playtime Display Implementation
 
 ### 11.1 — Data Source
+
 - `game.playTimeInMilliseconds` (from `LibraryGame` type)
 
 ### 11.2 — Formatting Function
+
 Create a shared utility `formatPlayTimeShort(ms: number)`:
+
 ```
 0ms          → ""
 < 1 hour     → "45m"
@@ -327,6 +365,7 @@ Create a shared utility `formatPlayTimeShort(ms: number)`:
 ```
 
 ### 11.3 — SidebarGameItem Layout Update
+
 ```
 Current:
 [icon] TitleText              [badge]
@@ -336,6 +375,7 @@ New:
 ```
 
 The playtime text should:
+
 - Be right-aligned with `margin-left: auto` before the badge
 - Use `font-size: 10px`, `color: rgba(255,255,255,0.5)`
 - Not wrap or shrink
@@ -374,22 +414,22 @@ The playtime text should:
 
 ## 14. Files Affected (Initial Assessment)
 
-| File | Change |
-|------|--------|
-| `src/renderer/src/app.tsx` | Add TabBar, restructure layout |
-| `src/renderer/src/app.scss` | Adjust layout if needed |
-| `src/renderer/src/main.tsx` | Add `/store` route, redirects |
-| `src/renderer/src/components/sidebar/sidebar.tsx` | Remove nav items |
-| `src/renderer/src/components/sidebar/sidebar.scss` | Minor cleanup |
-| `src/renderer/src/components/sidebar/sidebar-game-item.tsx` | Add playtime |
-| `src/renderer/src/components/sidebar/routes.tsx` | Remove/reduce |
-| `src/renderer/src/components/header/header.tsx` | Simplify title logic |
-| `src/renderer/src/components/header/header.scss` | Minor adjustments |
-| `src/renderer/src/components/index.ts` | Export new components |
-| **NEW** `src/renderer/src/components/tab-bar/tab-bar.tsx` | Tab bar component |
-| **NEW** `src/renderer/src/components/tab-bar/tab-bar.scss` | Tab bar styles |
-| **NEW** `src/renderer/src/components/downloads-dropdown/downloads-dropdown.tsx` | Downloads dropdown |
-| **NEW** `src/renderer/src/components/downloads-dropdown/downloads-dropdown.scss` | Dropdown styles |
-| **NEW** `src/renderer/src/pages/store/store.tsx` | Combined Store page |
-| **NEW** `src/renderer/src/pages/store/store.scss` | Store page styles |
-| **NEW** `src/shared/format-playtime-short.ts` (or in shared/index.ts) | Playtime formatter |
+| File                                                                             | Change                         |
+| -------------------------------------------------------------------------------- | ------------------------------ |
+| `src/renderer/src/app.tsx`                                                       | Add TabBar, restructure layout |
+| `src/renderer/src/app.scss`                                                      | Adjust layout if needed        |
+| `src/renderer/src/main.tsx`                                                      | Add `/store` route, redirects  |
+| `src/renderer/src/components/sidebar/sidebar.tsx`                                | Remove nav items               |
+| `src/renderer/src/components/sidebar/sidebar.scss`                               | Minor cleanup                  |
+| `src/renderer/src/components/sidebar/sidebar-game-item.tsx`                      | Add playtime                   |
+| `src/renderer/src/components/sidebar/routes.tsx`                                 | Remove/reduce                  |
+| `src/renderer/src/components/header/header.tsx`                                  | Simplify title logic           |
+| `src/renderer/src/components/header/header.scss`                                 | Minor adjustments              |
+| `src/renderer/src/components/index.ts`                                           | Export new components          |
+| **NEW** `src/renderer/src/components/tab-bar/tab-bar.tsx`                        | Tab bar component              |
+| **NEW** `src/renderer/src/components/tab-bar/tab-bar.scss`                       | Tab bar styles                 |
+| **NEW** `src/renderer/src/components/downloads-dropdown/downloads-dropdown.tsx`  | Downloads dropdown             |
+| **NEW** `src/renderer/src/components/downloads-dropdown/downloads-dropdown.scss` | Dropdown styles                |
+| **NEW** `src/renderer/src/pages/store/store.tsx`                                 | Combined Store page            |
+| **NEW** `src/renderer/src/pages/store/store.scss`                                | Store page styles              |
+| **NEW** `src/shared/format-playtime-short.ts` (or in shared/index.ts)            | Playtime formatter             |

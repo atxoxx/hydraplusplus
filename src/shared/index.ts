@@ -81,9 +81,7 @@ export const formatBytesToMbps = (bytesPerSecond: number): string => {
   return `${Math.trunc(mbps * 10) / 10} Mbps`;
 };
 
-export const formatPlayTimeShort = (
-  playTimeInMilliseconds = 0
-): string => {
+export const formatPlayTimeShort = (playTimeInMilliseconds = 0): string => {
   if (playTimeInMilliseconds <= 0) return "";
 
   const minutes = playTimeInMilliseconds / 60000;
