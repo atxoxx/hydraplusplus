@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
 
-import type { GameCollection, LibraryGame, ProfileFriends } from "@types";
+import type { GameCollection, LibraryGame } from "@types";
 
 import {
   Button,
@@ -22,8 +22,6 @@ import {
 } from "@renderer/hooks";
 import { AuthPage } from "@shared";
 
-import { routes } from "./routes";
-
 import "./sidebar.scss";
 
 import { buildGameDetailsPath } from "@renderer/helpers";
@@ -34,11 +32,9 @@ import {
   FileDirectoryIcon,
   HeartIcon,
   PencilIcon,
-  PeopleIcon,
   PlayIcon,
   PlusIcon,
   TrashIcon,
-  VideoIcon,
 } from "@primer/octicons-react";
 import deckyIcon from "@renderer/assets/icons/decky.png";
 import { setCollections } from "@renderer/features";
@@ -54,7 +50,6 @@ const SIDEBAR_MIN_WIDTH = 200;
 const SIDEBAR_INITIAL_WIDTH = 250;
 const SIDEBAR_MAX_WIDTH = 450;
 const FAVORITES_COLLECTION_ID = "__favorites__";
-const electron = globalThis.electron as Electron;
 
 const initialSidebarWidth = window.localStorage.getItem("sidebarWidth");
 
@@ -74,7 +69,6 @@ export function Sidebar() {
   }>({ installed: false, version: null, outdated: false });
   const [homebrewFolderExists, setHomebrewFolderExists] = useState(false);
   const [showDeckyConfirmModal, setShowDeckyConfirmModal] = useState(false);
-  const [onlineFriendsCount, setOnlineFriendsCount] = useState(0);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -226,51 +220,6 @@ export function Sidebar() {
     };
   }, [dispatch]);
 
-  const updateOnlineFriendsCount = useCallback(async () => {
-    if (!userDetails) {
-      setOnlineFriendsCount(0);
-      return;
-    }
-
-    try {
-      const response = await electron.hydraApi.get<ProfileFriends>(
-        "/profile/friends",
-        { params: { take: 5, skip: 0 } }
-      );
-      setOnlineFriendsCount(response.onlineFriends);
-    } catch {
-      // ignore transient errors; the next refresh will retry
-    }
-  }, [userDetails]);
-
-  useEffect(() => {
-    updateOnlineFriendsCount();
-
-    // Authoritative refetches avoid count drift from duplicate/replayed
-    // presence messages while still avoiding polling on newer preloads.
-    const unsubscribeFriends = electron.onFriendsUpdated(() => {
-      updateOnlineFriendsCount();
-    });
-    let interval: ReturnType<typeof setInterval> | null = null;
-    const unsubscribePresence =
-      typeof electron.onFriendPresence === "function"
-        ? electron.onFriendPresence(() => {
-            updateOnlineFriendsCount();
-          })
-        : () => {
-            if (interval) clearInterval(interval);
-          };
-
-    if (typeof electron.onFriendPresence !== "function") {
-      interval = setInterval(updateOnlineFriendsCount, 30_000);
-    }
-
-    return () => {
-      unsubscribeFriends();
-      unsubscribePresence();
-    };
-  }, [updateOnlineFriendsCount]);
-
   const sidebarRef = useRef<HTMLElement>(null);
 
   const cursorPos = useRef({ x: 0 });
@@ -351,12 +300,6 @@ export function Sidebar() {
       return t("paused", { title: game.title });
 
     return game.title;
-  };
-
-  const handleSidebarItemClick = (path: string) => {
-    if (path !== location.pathname) {
-      navigate(path);
-    }
   };
 
   const handleSidebarGameClick = (
@@ -584,14 +527,6 @@ export function Sidebar() {
     ];
   }, [collections, favoritesCount, t]);
 
-  const handleOpenBigPictureWindow = () => {
-    globalThis.window.electron.openBigPictureWindow();
-  };
-
-  const handleOpenFriendsWindow = () => {
-    globalThis.window.electron.openFriendsWindow();
-  };
-
   return (
     <aside
       ref={sidebarRef}
@@ -609,88 +544,6 @@ export function Sidebar() {
         <SidebarProfile />
 
         <div className="sidebar__content">
-          <section className="sidebar__section">
-            <ul className="sidebar__menu">
-              {routes.map(({ nameKey, path, render }) => (
-                <li
-                  key={nameKey}
-                  className={cn("sidebar__menu-item", {
-                    "sidebar__menu-item--active": location.pathname === path,
-                  })}
-                >
-                  <button
-                    type="button"
-                    className="sidebar__menu-item-button"
-                    onClick={() => handleSidebarItemClick(path)}
-                  >
-                    {render()}
-                    <span>{t(nameKey)}</span>
-                  </button>
-                </li>
-              ))}
-
-              {userDetails && (
-                <li className="sidebar__menu-item">
-                  <button
-                    type="button"
-                    className="sidebar__menu-item-button"
-                    onClick={handleOpenFriendsWindow}
-                  >
-                    <span className="sidebar__friends-icon">
-                      <PeopleIcon />
-                    </span>
-                    <span>{t("friends")}</span>
-                    <span
-                      className={`sidebar__online-count${
-                        onlineFriendsCount > 0
-                          ? " sidebar__online-count--online"
-                          : ""
-                      }`}
-                    >
-                      {onlineFriendsCount}
-                    </span>
-                  </button>
-                </li>
-              )}
-
-              <li className="sidebar__menu-item">
-                <button
-                  type="button"
-                  className="sidebar__menu-item-button"
-                  onClick={handleOpenBigPictureWindow}
-                >
-                  <VideoIcon />
-                  <span>{t("big_picture")}</span>
-                </button>
-              </li>
-
-              {window.electron.platform === "linux" && homebrewFolderExists && (
-                <li className="sidebar__menu-item sidebar__menu-item--decky">
-                  <button
-                    type="button"
-                    className="sidebar__menu-item-button"
-                    onClick={handleInstallHydraDeckyPlugin}
-                  >
-                    <img
-                      src={deckyIcon}
-                      alt=""
-                      style={{ width: 16, height: 16 }}
-                    />
-                    <span>
-                      {deckyPluginInfo.installed && !deckyPluginInfo.outdated
-                        ? t("decky_plugin_installed_version", {
-                            version: deckyPluginInfo.version,
-                          })
-                        : deckyPluginInfo.installed && deckyPluginInfo.outdated
-                          ? t("update_decky_plugin")
-                          : t("install_decky_plugin")}
-                    </span>
-                  </button>
-                </li>
-              )}
-            </ul>
-          </section>
-
           <section className="sidebar__section">
             <div className="sidebar__section-header">
               <button
@@ -855,6 +708,35 @@ export function Sidebar() {
               </>
             )}
           </section>
+
+          {window.electron.platform === "linux" && homebrewFolderExists && (
+            <section className="sidebar__section">
+              <ul className="sidebar__menu">
+                <li className="sidebar__menu-item sidebar__menu-item--decky">
+                  <button
+                    type="button"
+                    className="sidebar__menu-item-button"
+                    onClick={handleInstallHydraDeckyPlugin}
+                  >
+                    <img
+                      src={deckyIcon}
+                      alt=""
+                      style={{ width: 16, height: 16 }}
+                    />
+                    <span>
+                      {deckyPluginInfo.installed && !deckyPluginInfo.outdated
+                        ? t("decky_plugin_installed_version", {
+                            version: deckyPluginInfo.version,
+                          })
+                        : deckyPluginInfo.installed && deckyPluginInfo.outdated
+                          ? t("update_decky_plugin")
+                          : t("install_decky_plugin")}
+                    </span>
+                  </button>
+                </li>
+              </ul>
+            </section>
+          )}
         </div>
       </div>
 

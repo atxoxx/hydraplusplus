@@ -1,0 +1,41 @@
+@use "../../scss/globals.scss";
+
+.store {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.store__home {
+  display: flex;
+  flex-direction: column;
+  gap: calc(globals.$spacing-unit * 2);
+  padding-bottom: calc(globals.$spacing-unit * 3);
+}
+
+.store__divider {
+  display: flex;
+  align-items: center;
+  gap: calc(globals.$spacing-unit * 2);
+  padding: 0 calc(globals.$spacing-unit * 3) calc(globals.$spacing-unit * 3);
+}
+
+.store__divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: globals.$border-color;
+}
+
+.store__divider-text {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(255, 255, 255, 0.3);
+  white-space: nowrap;
+}
+
+/* Override Catalogue standalone-page scroll behavior inside the Store page */
+.store .catalogue {
+  overflow: visible;
+}

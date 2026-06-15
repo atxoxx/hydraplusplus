@@ -144,6 +144,13 @@
     background-size: cover;
   }
 
+  &__game-playtime {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   &__game-badge {
     background-color: rgba(34, 197, 94, 0.15);
     color: rgb(187, 247, 208);

@@ -1,0 +1,111 @@
+@use "../../scss/globals.scss";
+
+.downloads-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: globals.$spacing-unit;
+  width: 280px;
+  background-color: #1a1a1a;
+  border: 1px solid globals.$border-color;
+  border-radius: 10px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  overflow: hidden;
+  animation: downloads-dropdown-enter 0.15s ease-out;
+}
+
+@keyframes downloads-dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.downloads-dropdown__empty {
+  padding: calc(globals.$spacing-unit * 3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.downloads-dropdown__empty-text {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+}
+
+.downloads-dropdown__section {
+  padding: calc(globals.$spacing-unit * 1.5) calc(globals.$spacing-unit * 2);
+
+  & + & {
+    border-top: 1px solid globals.$border-color;
+  }
+}
+
+.downloads-dropdown__section-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: calc(globals.$spacing-unit / 2);
+}
+
+.downloads-dropdown__game {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: globals.$spacing-unit;
+}
+
+.downloads-dropdown__game-title {
+  font-size: 13px;
+  color: globals.$muted-color;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.downloads-dropdown__game-meta {
+  font-size: 12px;
+  color: globals.$success-color;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.downloads-dropdown__eta {
+  margin-top: 4px;
+
+  span {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.35);
+  }
+}
+
+.downloads-dropdown__view-all {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: calc(globals.$spacing-unit * 1.2) calc(globals.$spacing-unit * 2);
+  color: globals.$brand-teal;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  border-top: 1px solid globals.$border-color;
+  background: none;
+  font-family: inherit;
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: rgba(22, 177, 149, 0.08);
+  }
+}

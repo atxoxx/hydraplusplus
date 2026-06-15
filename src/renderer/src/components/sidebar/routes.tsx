@@ -1,47 +1,9 @@
-import {
-  AppsIcon,
-  DownloadIcon,
-  GearIcon,
-  HomeIcon,
-  BookIcon,
-  ClockIcon,
-  ListUnorderedIcon,
-} from "@primer/octicons-react";
+// Navigation routes have been migrated to the TabBar component (tab-bar.tsx).
+// This file is kept for reference in case route definitions are needed elsewhere.
+// The sidebar no longer renders navigation — only collections, games, and profile.
 
-export const routes = [
-  {
-    path: "/",
-    nameKey: "home",
-    render: () => <HomeIcon />,
-  },
-  {
-    path: "/catalogue",
-    nameKey: "catalogue",
-    render: () => <AppsIcon />,
-  },
-  {
-    path: "/library",
-    nameKey: "library",
-    render: () => <BookIcon />,
-  },
-  {
-    path: "/downloads",
-    nameKey: "downloads",
-    render: () => <DownloadIcon />,
-  },
-  {
-    path: "/watchlist",
-    nameKey: "watchlist",
-    render: () => <ListUnorderedIcon />,
-  },
-  {
-    path: "/settings",
-    nameKey: "settings",
-    render: () => <GearIcon />,
-  },
-  {
-    path: "/activity",
-    nameKey: "activity",
-    render: () => <ClockIcon />,
-  },
-];
+export const routes: {
+  path: string;
+  nameKey: string;
+  render: () => null;
+}[] = [];

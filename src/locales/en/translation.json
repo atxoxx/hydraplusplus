@@ -5,6 +5,7 @@
   },
   "home": {
     "surprise_me": "Surprise me",
+    "browse_all_games": "Browse All Games",
     "no_results": "No results found",
     "start_typing": "Start typing to search...",
     "hot": "Hot now",
@@ -12,6 +13,8 @@
     "achievements": "🏆 Games to beat"
   },
   "sidebar": {
+    "store": "Store",
+    "watchlist": "Watchlist",
     "catalogue": "Catalogue",
     "activity": "Activity",
     "library": "Library",

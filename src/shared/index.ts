@@ -81,6 +81,34 @@ export const formatBytesToMbps = (bytesPerSecond: number): string => {
   return `${Math.trunc(mbps * 10) / 10} Mbps`;
 };
 
+export const formatPlayTimeShort = (
+  playTimeInMilliseconds = 0
+): string => {
+  if (playTimeInMilliseconds <= 0) return "";
+
+  const minutes = playTimeInMilliseconds / 60000;
+
+  if (minutes < 60) {
+    return `${Math.floor(minutes)}m`;
+  }
+
+  const hours = minutes / 60;
+
+  if (hours < 10) {
+    const wholeHours = Math.floor(hours);
+    const remainingMinutes = Math.floor((hours - wholeHours) * 60);
+
+    if (remainingMinutes === 0) {
+      return `${wholeHours}h`;
+    }
+
+    return `${wholeHours}h ${remainingMinutes}m`;
+  }
+
+  const roundedHours = Math.round(hours * 10) / 10;
+  return `${roundedHours}h`;
+};
+
 export const pipe =
   <T>(...fns: ((arg: T) => any)[]) =>
   (arg: T) =>

@@ -6,6 +6,7 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { GameContextMenu } from "..";
 import { useAppSelector } from "@renderer/hooks";
+import { formatPlayTimeShort } from "@shared";
 
 interface SidebarGameItemProps {
   game: LibraryGame;
@@ -84,6 +85,12 @@ export function SidebarGameItem({
           <span className="sidebar__menu-item-button-label">
             {getGameTitle(game)}
           </span>
+
+          {game.playTimeInMilliseconds > 0 && (
+            <span className="sidebar__game-playtime">
+              {formatPlayTimeShort(game.playTimeInMilliseconds)}
+            </span>
+          )}
 
           {userPreferences?.enableNewDownloadOptionsBadges !== false &&
             (game.newDownloadOptionsCount ?? 0) > 0 && (

@@ -4,7 +4,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { Provider } from "react-redux";
 import LanguageDetector from "i18next-browser-languagedetector";
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import "@fontsource/noto-sans/400.css";
 import "@fontsource/noto-sans/500.css";
@@ -24,8 +24,7 @@ import { addCookieInterceptor } from "./cookies";
 import * as Sentry from "@sentry/react";
 import { levelDBService } from "./services/leveldb.service";
 import { getRendererEnv } from "@shared";
-import Catalogue from "./pages/catalogue/catalogue";
-import Home from "./pages/home/home";
+import Store from "./pages/store/store";
 import Downloads from "./pages/downloads/downloads";
 import GameDetails from "./pages/game-details/game-details";
 import Settings from "./pages/settings/settings";
@@ -118,8 +117,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <AchievementNotificationOverlay />
         <Routes>
           <Route element={<App />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/catalogue" element={<Catalogue />} />
+            <Route path="/" element={<Navigate to="/store" replace />} />
+            <Route path="/store" element={<Store />} />
+            <Route path="/catalogue" element={<Navigate to="/store" replace />} />
             <Route path="/library" element={<Library />} />
             <Route path="/activity" element={<Activity />} />
             <Route path="/downloads" element={<Downloads />} />
