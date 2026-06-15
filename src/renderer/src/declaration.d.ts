@@ -148,6 +148,21 @@ declare global {
       objectId: string,
       shop: GameShop
     ) => Promise<ShopAssets | null>;
+    searchGameAssets: (
+      gameTitle: string,
+      assetType: "icon" | "logo" | "hero"
+    ) => Promise<{
+      results: {
+        id: string;
+        thumbnailUrl: string;
+        fullImageUrl: string;
+        sourceUrl: string;
+        sourceName: string;
+        width: number | null;
+        height: number | null;
+      }[];
+      query: string;
+    }>;
     onUpdateAchievements: (
       objectId: string,
       shop: GameShop,
@@ -199,6 +214,10 @@ declare global {
     }) => Promise<Game>;
     copyCustomGameAsset: (
       sourcePath: string,
+      assetType: "icon" | "logo" | "hero"
+    ) => Promise<string>;
+    downloadRemoteAsset: (
+      remoteUrl: string,
       assetType: "icon" | "logo" | "hero"
     ) => Promise<string>;
     cleanupUnusedAssets: () => Promise<{

@@ -25,5 +25,6 @@ export * from "./user";
 export * from "./download-sources-checker";
 export * from "./notifications/local-notifications";
 export * from "./power-save-blocker";
+export * from "./google-image-scraper";
 export * from "./native-addon";
 export * as emulators from "./emulators";

@@ -146,6 +146,8 @@ contextBridge.exposeInMainWorld("electron", {
   ) => ipcRenderer.invoke("getSteamReviewAnalysis", shop, objectId, gameTitle),
   getGameAssets: (objectId: string, shop: GameShop) =>
     ipcRenderer.invoke("getGameAssets", objectId, shop),
+  searchGameAssets: (gameTitle: string, assetType: "icon" | "logo" | "hero") =>
+    ipcRenderer.invoke("searchGameAssets", gameTitle, assetType),
   onUpdateAchievements: (
     objectId: string,
     shop: GameShop,
@@ -493,6 +495,10 @@ contextBridge.exposeInMainWorld("electron", {
     sourcePath: string,
     assetType: "icon" | "logo" | "hero"
   ) => ipcRenderer.invoke("copyCustomGameAsset", sourcePath, assetType),
+  downloadRemoteAsset: (
+    remoteUrl: string,
+    assetType: "icon" | "logo" | "hero"
+  ) => ipcRenderer.invoke("downloadRemoteAsset", remoteUrl, assetType),
   saveTempFile: (fileName: string, fileData: Uint8Array) =>
     ipcRenderer.invoke("saveTempFile", fileName, fileData),
   deleteTempFile: (filePath: string) =>
