@@ -33,10 +33,7 @@ export const friendGameOwnershipSlice = createSlice({
   name: "friendGameOwnership",
   initialState,
   reducers: {
-    setOwnershipMap: (
-      state,
-      action: PayloadAction<FriendOwnershipMap>
-    ) => {
+    setOwnershipMap: (state, action: PayloadAction<FriendOwnershipMap>) => {
       state.map = action.payload;
       state.hasLoaded = true;
       state.isLoading = false;
@@ -56,9 +53,7 @@ export const friendGameOwnershipSlice = createSlice({
         const entry = state.map[key];
         if (!entry) continue;
 
-        const friendIndex = entry.friends.findIndex(
-          (f) => f.id === friendId
-        );
+        const friendIndex = entry.friends.findIndex((f) => f.id === friendId);
 
         if (friendIndex === -1) continue;
 

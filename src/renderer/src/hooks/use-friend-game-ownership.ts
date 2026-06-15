@@ -1,5 +1,9 @@
 import { useCallback, useEffect } from "react";
-import { useAppDispatch, useAppSelector, useUserDetails } from "@renderer/hooks";
+import {
+  useAppDispatch,
+  useAppSelector,
+  useUserDetails,
+} from "@renderer/hooks";
 import {
   setOwnershipMap,
   setOwnershipLoading,

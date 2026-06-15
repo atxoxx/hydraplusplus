@@ -118,8 +118,7 @@ export function SettingsContextGeneral({
         userPreferences.sidebarShowPlaytimeBadge ?? true,
       sidebarShowAchievementsBadge:
         userPreferences.sidebarShowAchievementsBadge ?? true,
-      sidebarShowFriendsBadge:
-        userPreferences.sidebarShowFriendsBadge ?? true,
+      sidebarShowFriendsBadge: userPreferences.sidebarShowFriendsBadge ?? true,
     });
   }, [userPreferences, defaultDownloadsPath]);
 
@@ -337,8 +336,7 @@ export function SettingsContextGeneral({
           checked={form.sidebarShowAchievementsBadge}
           onChange={() =>
             handleChange({
-              sidebarShowAchievementsBadge:
-                !form.sidebarShowAchievementsBadge,
+              sidebarShowAchievementsBadge: !form.sidebarShowAchievementsBadge,
             })
           }
         />

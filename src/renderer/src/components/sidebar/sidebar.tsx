@@ -52,7 +52,11 @@ const SIDEBAR_INITIAL_WIDTH = 250;
 const SIDEBAR_MAX_WIDTH = 450;
 const FAVORITES_COLLECTION_ID = "__favorites__";
 
-type SidebarSort = "alphabetical" | "most_played" | "recently_played" | "installed_first";
+type SidebarSort =
+  | "alphabetical"
+  | "most_played"
+  | "recently_played"
+  | "installed_first";
 
 const SORT_OPTIONS: { value: SidebarSort; labelKey: string }[] = [
   { value: "alphabetical", labelKey: "sort_alphabetical" },
@@ -107,26 +111,36 @@ export function Sidebar() {
     switch (sortBy) {
       case "most_played":
         sorted.sort(
-          (a, b) => (b.playTimeInMilliseconds ?? 0) - (a.playTimeInMilliseconds ?? 0)
+          (a, b) =>
+            (b.playTimeInMilliseconds ?? 0) - (a.playTimeInMilliseconds ?? 0)
         );
         break;
       case "recently_played": {
         const aHasPlayed = (a: LibraryGame) => a.lastTimePlayed !== null;
         sorted.sort((a, b) => {
           if (aHasPlayed(a) && aHasPlayed(b)) {
-            return new Date(b.lastTimePlayed!).getTime() - new Date(a.lastTimePlayed!).getTime();
+            return (
+              new Date(b.lastTimePlayed!).getTime() -
+              new Date(a.lastTimePlayed!).getTime()
+            );
           }
           if (aHasPlayed(a) !== aHasPlayed(b)) return aHasPlayed(a) ? -1 : 1;
-          return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+          return a.title.localeCompare(b.title, undefined, {
+            sensitivity: "base",
+          });
         });
         break;
       }
       case "installed_first":
         sorted.sort((a, b) => {
-          const aInstalled = Boolean(a.executablePath) || a.installedSizeInBytes != null;
-          const bInstalled = Boolean(b.executablePath) || b.installedSizeInBytes != null;
+          const aInstalled =
+            Boolean(a.executablePath) || a.installedSizeInBytes != null;
+          const bInstalled =
+            Boolean(b.executablePath) || b.installedSizeInBytes != null;
           if (aInstalled !== bInstalled) return aInstalled ? -1 : 1;
-          return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+          return a.title.localeCompare(b.title, undefined, {
+            sensitivity: "base",
+          });
         });
         break;
       case "alphabetical":

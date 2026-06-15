@@ -51,8 +51,9 @@ export function SidebarSuggestions({
       if (game.isDeleted) continue;
 
       const playTime = game.playTimeInMilliseconds ?? 0;
-      const lastPlayed =
-        game.lastTimePlayed ? new Date(game.lastTimePlayed).getTime() : null;
+      const lastPlayed = game.lastTimePlayed
+        ? new Date(game.lastTimePlayed).getTime()
+        : null;
 
       if (playTime === 0) {
         unplayed.push({ game, reason: "new" });
@@ -127,9 +128,7 @@ export function SidebarSuggestions({
               "sidebar__section-toggle-chevron--expanded": !isCollapsed,
             })}
           />
-          <small className="sidebar__section-title">
-            {t("play_next")}
-          </small>
+          <small className="sidebar__section-title">{t("play_next")}</small>
         </button>
       </div>
 

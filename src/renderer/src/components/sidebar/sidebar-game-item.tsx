@@ -79,8 +79,7 @@ export function SidebarGameItem({
 
   const hasAchievements = (game.achievementCount ?? 0) > 0;
 
-  const showPlaytimeBadge =
-    userPreferences?.sidebarShowPlaytimeBadge ?? true;
+  const showPlaytimeBadge = userPreferences?.sidebarShowPlaytimeBadge ?? true;
   const showAchievementsBadge =
     userPreferences?.sidebarShowAchievementsBadge ?? true;
 
@@ -111,8 +110,7 @@ export function SidebarGameItem({
       0,
       MAX_TOOLTIP_FRIENDS
     );
-    const overflowCount =
-      friendOwnership.totalCount - MAX_TOOLTIP_FRIENDS;
+    const overflowCount = friendOwnership.totalCount - MAX_TOOLTIP_FRIENDS;
 
     return (
       <Tooltip
@@ -123,10 +121,7 @@ export function SidebarGameItem({
       >
         <div className="sidebar__friends-tooltip-content">
           {visibleFriends.map((friend) => (
-            <div
-              key={friend.id}
-              className="sidebar__friends-tooltip-row"
-            >
+            <div key={friend.id} className="sidebar__friends-tooltip-row">
               <Avatar
                 size={24}
                 src={friend.profileImageUrl}
@@ -198,8 +193,7 @@ export function SidebarGameItem({
                   <span className="sidebar__game-badge-item">
                     <ClockIcon size={11} />
                     <span>
-                      {formatPlayTimeShort(game.playTimeInMilliseconds) ||
-                        "0h"}
+                      {formatPlayTimeShort(game.playTimeInMilliseconds) || "0h"}
                     </span>
                   </span>
                 )}
@@ -219,43 +213,47 @@ export function SidebarGameItem({
                   </span>
                 )}
 
-              {showFriendsBadge && (
-                <span
-                  className={cn("sidebar__game-badge-item", "sidebar__game-badge-item--clickable", {
-                    "sidebar__game-badge-item--friends-online":
-                      (friendOwnership?.onlineCount ?? 0) > 0,
-                  })}
-                  data-tooltip-id={friendsTooltipId}
-                  onClick={handleFriendsBadgeClick}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      handleFriendsBadgeClick(
-                        event as unknown as React.MouseEvent
-                      );
+                {showFriendsBadge && (
+                  <span
+                    className={cn(
+                      "sidebar__game-badge-item",
+                      "sidebar__game-badge-item--clickable",
+                      {
+                        "sidebar__game-badge-item--friends-online":
+                          (friendOwnership?.onlineCount ?? 0) > 0,
+                      }
+                    )}
+                    data-tooltip-id={friendsTooltipId}
+                    onClick={handleFriendsBadgeClick}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        handleFriendsBadgeClick(
+                          event as unknown as React.MouseEvent
+                        );
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={
+                      friendOwnership
+                        ? `${friendOwnership.totalCount} ${friendOwnership.totalCount === 1 ? "friend" : "friends"}`
+                        : undefined
                     }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={
-                    friendOwnership
-                      ? `${friendOwnership.totalCount} ${friendOwnership.totalCount === 1 ? "friend" : "friends"}`
-                      : undefined
-                  }
-                >
-                  <PeopleIcon size={11} />
-                  <span>
-                    {friendOwnership
-                      ? `${friendOwnership.onlineCount}/${friendOwnership.totalCount}`
-                      : "0"}
+                  >
+                    <PeopleIcon size={11} />
+                    <span>
+                      {friendOwnership
+                        ? `${friendOwnership.onlineCount}/${friendOwnership.totalCount}`
+                        : "0"}
+                    </span>
                   </span>
-                </span>
-              )}
+                )}
 
-              {showDownloadOptionsBadge && (
-                <span className="sidebar__game-badge">
-                  +{game.newDownloadOptionsCount}
-                </span>
-              )}
+                {showDownloadOptionsBadge && (
+                  <span className="sidebar__game-badge">
+                    +{game.newDownloadOptionsCount}
+                  </span>
+                )}
               </div>
             )}
           </div>
