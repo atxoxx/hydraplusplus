@@ -1,4 +1,10 @@
 .library-category-filter {
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
   &__container {
     display: flex;
     gap: 2px;
@@ -34,6 +40,41 @@
       background-color: rgba(255, 255, 255, 0.04);
       border-color: rgba(255, 255, 255, 0.08);
       color: #fafafa;
+    }
+  }
+
+  &__platform-select {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 30px 6px 12px;
+    background-color: #0d0d0d;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: #e1e1e1;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 5L6 8L9 5' stroke='%238b8b8b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    min-width: 130px;
+    transition: border-color 0.15s ease;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent, #4a9eff);
+    }
+
+    option {
+      background-color: #1c1c1c;
+      color: #e1e1e1;
+      padding: 8px;
     }
   }
 }

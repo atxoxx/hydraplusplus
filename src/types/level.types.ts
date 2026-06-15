@@ -77,6 +77,14 @@ export interface Game {
   discs?: ClassicsDisc[];
   selectedDiscPath?: string | null;
   dontAskDiscSelection?: boolean;
+  /** Which platform source the game was imported from */
+  source?: GameShop | null;
+  /** Whether this game was auto-imported from a platform scan */
+  autoImported?: boolean;
+  /** SteamID64 of the family member who owns this game (Steam Family Share) */
+  steamFamilyOwnerId?: string | null;
+  /** Display name of the family member who owns this game (Steam Family Share) */
+  steamFamilyOwnerName?: string | null;
 }
 
 export interface Download {
@@ -171,6 +179,24 @@ export interface UserPreferences {
   autoRunGamemode?: boolean;
   hideClassicsBookmark?: boolean;
   classicsUseHeroLayout?: boolean;
+  /** Steam Web API key for fetching owned games and family share */
+  steamApiKey?: string | null;
+  /** SteamID64s of family sharing members to scan */
+  steamFamilyShareIds?: string[];
+  /** Per-platform scan configuration (keyed by GameShop) */
+  platformScanConfigs?: Record<
+    string,
+    {
+      enabled: boolean;
+      scanPaths: string[];
+      apiKey?: string | null;
+      scanInstalled: boolean;
+      fetchOwned: boolean;
+      familyShareIds?: string[];
+    }
+  >;
+  /** Import discovery preference: "wizard" to show modal, "auto" to auto-import */
+  importDiscoveryPreference?: "wizard" | "auto";
 }
 
 export interface ScreenState {

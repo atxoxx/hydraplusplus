@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Modal, Avatar, Button } from "@renderer/components";
 import { logger } from "@renderer/logger";
 import SteamLogo from "@renderer/assets/steam-logo.svg?react";
+import { MODERN_SHOPS } from "@types";
 import type { UserFriend } from "@types";
 import "./all-friends-modal.scss";
 
@@ -41,8 +42,9 @@ export function AllFriendsModal({
         const params = new URLSearchParams();
         params.append("take", String(PAGE_SIZE));
         params.append("skip", String(pageNum * PAGE_SIZE));
-        params.append("shop", "steam");
-        params.append("shop", "launchbox");
+        for (const shop of ["launchbox", ...MODERN_SHOPS]) {
+          params.append("shop", shop);
+        }
 
         const basePath = isMe ? "/profile/friends" : `/users/${userId}/friends`;
         const url = `${basePath}?${params.toString()}`;

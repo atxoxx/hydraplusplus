@@ -20,6 +20,7 @@ export default defineConfig({
       "@renderer": resolve(__dirname, "../../src/renderer/src"),
       "@shared": resolve(__dirname, "../../src/shared"),
       "@locales": resolve(__dirname, "../../src/locales"),
+      "@types": resolve(__dirname, "../../src/types"),
     },
   },
   plugins: [svgr(), react()],

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useUserDetails } from "@renderer/hooks";
+import type { GameShop } from "@types";
 import type {
   DailyPlaytimeEntry,
   PlaytimeSummary,
@@ -112,7 +113,7 @@ export default function Activity() {
     const fetchGameData = async () => {
       try {
         const entries = await window.electron.getDailyPlaytime(
-          selectedGame.shop as "steam" | "custom" | "launchbox",
+          selectedGame.shop as GameShop,
           selectedGame.objectId,
           startDate,
           endDate

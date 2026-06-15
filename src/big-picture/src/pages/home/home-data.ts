@@ -7,7 +7,20 @@ const isRecord = (value: unknown): value is UnknownRecord => {
 };
 
 const isGameShop = (value: unknown): value is GameShop => {
-  return value === "steam" || value === "custom";
+  return (
+    value === "steam" ||
+    value === "custom" ||
+    value === "launchbox" ||
+    value === "epic" ||
+    value === "gog" ||
+    value === "battle-net" ||
+    value === "amazon" ||
+    value === "ubisoft" ||
+    value === "xbox" ||
+    value === "rockstar" ||
+    value === "itch-io" ||
+    value === "humble"
+  );
 };
 
 const readString = (value: unknown): string | null => {

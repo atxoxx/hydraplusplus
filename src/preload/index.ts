@@ -32,6 +32,8 @@ import type {
   EmulationSavePlatform,
   MemcardRestoreResult,
   MemcardRestoreTarget,
+  SteamFamilyGame,
+  PlatformGame,
 } from "@types";
 import type { AuthPage } from "@shared";
 import type { AxiosProgressEvent } from "axios";
@@ -654,6 +656,12 @@ contextBridge.exposeInMainWorld("electron", {
       additionalDirectories,
       includeDefaultDirectories
     ),
+  scanSteamFamily: () => ipcRenderer.invoke("scanSteamFamily"),
+  importSteamFamilyGames: (games: SteamFamilyGame[]) =>
+    ipcRenderer.invoke("importSteamFamilyGames", games),
+  scanPlatforms: () => ipcRenderer.invoke("scanPlatforms"),
+  importPlatformGames: (games: PlatformGame[]) =>
+    ipcRenderer.invoke("importPlatformGames", games),
   getDefaultWinePrefixSelectionPath: () =>
     ipcRenderer.invoke("getDefaultWinePrefixSelectionPath"),
   createSteamShortcut: (

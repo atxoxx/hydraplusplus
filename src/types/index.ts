@@ -532,6 +532,90 @@ export type LibraryGame = Game &
     achievementCount?: number;
   };
 
+export interface PlatformScanConfig {
+  /** Whether this platform is enabled for scanning */
+  enabled: boolean;
+  /** Paths to scan for installed games */
+  scanPaths: string[];
+  /** API key if the platform requires one */
+  apiKey?: string | null;
+  /** Whether to scan for installed games */
+  scanInstalled: boolean;
+  /** Whether to fetch owned games via API */
+  fetchOwned: boolean;
+  /** SteamID64s of family members (Steam only) */
+  familyShareIds?: string[];
+}
+
+export interface SteamFamilyGame {
+  /** Steam App ID (used as objectId) */
+  appId: number;
+  /** Game title */
+  title: string;
+  /** Icon URL from Steam CDN */
+  iconUrl: string | null;
+  /** SteamID64 of the owner of this game */
+  ownerSteamId64: string;
+  /** Display name of the owner */
+  ownerName: string;
+  /** Total playtime in minutes (from API) */
+  playtimeMinutes: number;
+  /** Whether this game is owned by the current user (not a family member) */
+  isOwnGame: boolean;
+  /** Whether the game appears to be locally installed */
+  isInstalled: boolean;
+  /** Path to the game executable if found locally */
+  executablePath?: string | null;
+}
+
+export interface SteamFamilyScanResult {
+  ownGames: SteamFamilyGame[];
+  familyGames: SteamFamilyGame[];
+  /** Steam users detected on this machine */
+  localUsers: Array<{ steamId64: string; personaName: string }>;
+  /** Family members discovered from local config */
+  discoveredFamilyMembers: Array<{
+    steamId64: string;
+    personaName: string;
+  }>;
+  errors: string[];
+}
+
+/** Represents a game discovered by a platform file-system scanner */
+export interface PlatformGame {
+  /** Platform identifier (used as the game's objectId) */
+  objectId: string;
+  /** Human-readable game title */
+  title: string;
+  /** The platform shop value */
+  shop: GameShop;
+  /** Path to the game executable if found */
+  executablePath: string | null;
+  /** Path to the game's install folder */
+  installPath: string | null;
+  /** Icon URL if available from platform metadata */
+  iconUrl: string | null;
+}
+
+/** Result of scanning a single platform */
+export interface PlatformScanResult {
+  games: PlatformGame[];
+  errors: string[];
+}
+
+/** Combined result of scanning all platforms */
+export interface AllPlatformsScanResult {
+  epic: PlatformScanResult;
+  gog: PlatformScanResult;
+  "battle-net": PlatformScanResult;
+  amazon: PlatformScanResult;
+  ubisoft: PlatformScanResult;
+  xbox: PlatformScanResult;
+  rockstar: PlatformScanResult;
+  "itch-io": PlatformScanResult;
+  humble: PlatformScanResult;
+}
+
 export type UserGameDetails = ShopAssets & {
   id: string;
   playTimeInSeconds: number;

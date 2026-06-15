@@ -53,6 +53,7 @@ const addGameToLibrary = async (
 
     game.isDeleted = false;
     game.addedToLibraryAt ??= new Date();
+    game.source ??= shop;
     if (resolvedPlatform && !game.platform) game.platform = resolvedPlatform;
 
     await gamesSublevel.put(gameKey, game);

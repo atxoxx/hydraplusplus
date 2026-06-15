@@ -1,6 +1,7 @@
 import { darkenColor } from "@renderer/helpers";
 import { useAppSelector, useToast } from "@renderer/hooks";
 import type { Badge, UserProfile, UserStats, UserGame } from "@types";
+import { MODERN_SHOPS } from "@types";
 import { average } from "color.js";
 
 import { createContext, useCallback, useEffect, useState } from "react";
@@ -104,7 +105,12 @@ export function UserProfileContextProvider({
   const navigate = useNavigate();
 
   const getUserStats = useCallback(
-    async (shops = ["steam", "launchbox"]) => {
+    async (
+      shops = [
+        "launchbox",
+        ...MODERN_SHOPS,
+      ]
+    ) => {
       const params = new URLSearchParams();
       shops.forEach((shop) => params.append("shop", shop));
 
@@ -118,7 +124,14 @@ export function UserProfileContextProvider({
   );
 
   const getUserLibraryGames = useCallback(
-    async (sortBy?: string, reset = true, shops = ["steam", "launchbox"]) => {
+    async (
+      sortBy?: string,
+      reset = true,
+      shops = [
+        "launchbox",
+        ...MODERN_SHOPS,
+      ]
+    ) => {
       if (reset) {
         setLibraryPage(0);
         setHasMoreLibraryGames(true);
@@ -164,7 +177,10 @@ export function UserProfileContextProvider({
   const loadMoreLibraryGames = useCallback(
     async (
       sortBy?: string,
-      shops = ["steam", "launchbox"]
+      shops = [
+        "launchbox",
+        ...MODERN_SHOPS,
+      ]
     ): Promise<boolean> => {
       if (isLoadingLibraryGames || !hasMoreLibraryGames) {
         return false;
@@ -218,8 +234,9 @@ export function UserProfileContextProvider({
     getUserLibraryGames();
 
     const profileParams = new URLSearchParams();
-    profileParams.append("shop", "steam");
-    profileParams.append("shop", "launchbox");
+    for (const shop of ["launchbox", ...MODERN_SHOPS]) {
+      profileParams.append("shop", shop);
+    }
 
     return window.electron.hydraApi
       .get<UserProfile>(`/users/${userId}?${profileParams.toString()}`)

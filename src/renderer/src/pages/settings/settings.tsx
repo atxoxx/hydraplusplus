@@ -22,6 +22,7 @@ import { SettingsContextNotifications } from "./settings-context-notifications";
 import { SettingsContextContentGameplay } from "./settings-context-content-gameplay";
 import { SettingsContextIntegrations } from "./settings-context-integrations";
 import { SettingsContextCompatibility } from "./settings-context-compatibility";
+import { SettingsContextPlatformImport } from "./settings-context-platform-import";
 import { SettingsContextEmulation } from "./emulation/settings-context-emulation";
 
 export default function Settings() {
@@ -55,6 +56,11 @@ export default function Settings() {
         id: "integrations" as const,
         label: t("integrations"),
         icon: <CloudIcon size={16} />,
+      },
+      {
+        id: "platform_import" as const,
+        label: t("platform_import"),
+        icon: <Gamepad2 size={16} />,
       },
       {
         id: "compatibility" as const,
@@ -109,6 +115,10 @@ export default function Settings() {
 
             if (selectedCategoryId === "integrations") {
               return <SettingsContextIntegrations />;
+            }
+
+            if (selectedCategoryId === "platform_import") {
+              return <SettingsContextPlatformImport />;
             }
 
             if (selectedCategoryId === "compatibility") {

@@ -1,8 +1,25 @@
-import { StackIcon, DeviceDesktopIcon } from "@primer/octicons-react";
 import { useTranslation } from "react-i18next";
+import { StackIcon, DeviceDesktopIcon } from "@primer/octicons-react";
+import type { GameShop } from "@types";
+import { MODERN_SHOPS } from "@types";
 import "./category-filter.scss";
 
 export type LibraryCategory = "all" | "pc" | "classics";
+
+const PLATFORM_LABEL_KEYS: Record<GameShop, string> = {
+  steam: "platform_steam",
+  epic: "platform_epic",
+  gog: "platform_gog",
+  "battle-net": "platform_battle_net",
+  amazon: "platform_amazon",
+  ubisoft: "platform_ubisoft",
+  xbox: "platform_xbox",
+  rockstar: "platform_rockstar",
+  "itch-io": "platform_itch_io",
+  humble: "platform_humble",
+  custom: "",
+  launchbox: "",
+};
 
 export function ClassicsIcon({
   size = 14,
@@ -51,21 +68,29 @@ export function ClassicsIcon({
 
 interface CategoryFilterProps {
   category: LibraryCategory;
+  selectedPcPlatform: GameShop | null;
   onCategoryChange: (category: LibraryCategory) => void;
+  onPcPlatformChange: (platform: GameShop | null) => void;
 }
 
 export function CategoryFilter({
   category,
+  selectedPcPlatform,
   onCategoryChange,
+  onPcPlatformChange,
 }: Readonly<CategoryFilterProps>) {
-  const { t } = useTranslation("library");
+  const { t } = useTranslation(["library", "settings"]);
 
-  const options: {
+  const categoryOptions: {
     value: LibraryCategory;
     label: string;
     icon: JSX.Element;
   }[] = [
-    { value: "all", label: t("category_all"), icon: <StackIcon size={14} /> },
+    {
+      value: "all",
+      label: t("category_all"),
+      icon: <StackIcon size={14} />,
+    },
     {
       value: "pc",
       label: t("category_pc"),
@@ -79,18 +104,55 @@ export function CategoryFilter({
   ];
 
   return (
-    <div className="library-category-filter__container">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          className={`library-category-filter__option ${category === option.value ? "library-category-filter__option--active" : ""}`}
-          onClick={() => onCategoryChange(option.value)}
+    <div className="library-category-filter__row">
+      <div className="library-category-filter__container">
+        {categoryOptions.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            className={`library-category-filter__option ${
+              category === option.value
+                ? "library-category-filter__option--active"
+                : ""
+            }`}
+            onClick={() => {
+              onCategoryChange(option.value);
+              if (option.value !== "pc") {
+                onPcPlatformChange(null);
+              }
+            }}
+          >
+            {option.icon}
+            <span>{option.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Platform dropdown shown when PC category is active */}
+      {category === "pc" && (
+        <select
+          className="library-category-filter__platform-select"
+          value={selectedPcPlatform ?? "all_pc"}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === "all_pc") {
+              onPcPlatformChange(null);
+            } else {
+              onPcPlatformChange(val as GameShop);
+            }
+          }}
+          aria-label={t("filter_by_platform", { ns: "library" })}
         >
-          {option.icon}
-          <span>{option.label}</span>
-        </button>
-      ))}
+          <option value="all_pc">
+            {t("category_platform_all", { ns: "library" })}
+          </option>
+          {MODERN_SHOPS.map((shop) => (
+            <option key={shop} value={shop}>
+              {t(PLATFORM_LABEL_KEYS[shop] ?? shop, { ns: "settings" })}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   );
 }

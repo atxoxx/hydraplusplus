@@ -24,7 +24,7 @@ import {
   SyncIcon,
 } from "@primer/octicons-react";
 import { useTranslation } from "react-i18next";
-import { GameCollection, LibraryGame } from "@types";
+import { GameCollection, GameShop, LibraryGame } from "@types";
 import {
   Button,
   ConfirmationModal,
@@ -116,6 +116,7 @@ export default function Library() {
     return "all";
   });
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const [selectedPcPlatform, setSelectedPcPlatform] = useState<GameShop | null>(null);
   const [isImportingClassics, setIsImportingClassics] = useState(false);
 
   // The category switch and platform filter are always available, so the
@@ -141,6 +142,7 @@ export default function Library() {
     localStorage.setItem("library-category", next);
     if (next === "pc") {
       setSelectedPlatform(null);
+      setSelectedPcPlatform(null);
     }
   }, []);
 
@@ -501,7 +503,15 @@ export default function Library() {
     }
 
     if (effectiveCategory === "pc") {
+      // Filter out classics
       filtered = filtered.filter((game) => game.shop !== "launchbox");
+
+      // If a specific PC platform is selected, filter by shop
+      if (selectedPcPlatform) {
+        filtered = filtered.filter(
+          (game) => game.shop === selectedPcPlatform
+        );
+      }
     } else if (effectiveCategory === "classics") {
       filtered = filtered.filter((game) => game.shop === "launchbox");
       if (selectedPlatform) {
@@ -510,6 +520,7 @@ export default function Library() {
         );
       }
     } else if (selectedPlatform) {
+      // All category: filter by classics platform
       filtered = filtered.filter(
         (game) =>
           game.shop !== "launchbox" || game.platform === selectedPlatform
@@ -541,6 +552,7 @@ export default function Library() {
     selectedCollectionId,
     effectiveCategory,
     selectedPlatform,
+    selectedPcPlatform,
   ]);
 
   const uniquePlatforms = useMemo(() => {
@@ -595,7 +607,9 @@ export default function Library() {
             <div className="library__controls-left">
               <CategoryFilter
                 category={effectiveCategory}
+                selectedPcPlatform={selectedPcPlatform}
                 onCategoryChange={handleCategoryChange}
+                onPcPlatformChange={setSelectedPcPlatform}
               />
             </div>
 

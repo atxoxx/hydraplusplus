@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
       resolve: {
         alias: {
           "@main": resolve("src/main"),
+          "@types": resolve("src/types"),
           "@locales": resolve("src/locales"),
           "@resources": resolve("resources"),
           "@shared": resolve("src/shared"),
@@ -48,6 +49,7 @@ export default defineConfig(({ mode }) => {
           "@renderer": resolve("src/renderer/src"),
           "@locales": resolve("src/locales"),
           "@shared": resolve("src/shared"),
+          "@types": resolve("src/types"),
         },
       },
       plugins: [svgr(), react()],
@@ -71,6 +73,7 @@ export default defineConfig(({ mode }) => {
           "@renderer": resolve("src/renderer/src"),
           "@locales": resolve("src/locales"),
           "@shared": resolve("src/shared"),
+          "@types": resolve("src/types"),
         },
       },
       plugins: [svgr(), react()],

@@ -53,6 +53,10 @@ import type {
   SteamPlayerCount,
   SteamReviewSummary,
   SteamReviewAnalysis,
+  SteamFamilyGame,
+  SteamFamilyScanResult,
+  PlatformGame,
+  AllPlatformsScanResult,
 } from "@types";
 import type { AxiosProgressEvent } from "axios";
 
@@ -606,6 +610,14 @@ declare global {
       foundGames: { title: string; executablePath: string }[];
       total: number;
     }>;
+    scanSteamFamily: () => Promise<SteamFamilyScanResult>;
+    importSteamFamilyGames: (
+      games: SteamFamilyGame[]
+    ) => Promise<{ imported: number; errors: string[] }>;
+    scanPlatforms: () => Promise<AllPlatformsScanResult>;
+    importPlatformGames: (
+      games: PlatformGame[]
+    ) => Promise<{ imported: number; errors: string[] }>;
     onExtractionComplete: (
       cb: (shop: GameShop, objectId: string) => void
     ) => () => Electron.IpcRenderer;

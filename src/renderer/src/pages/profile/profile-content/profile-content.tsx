@@ -5,6 +5,7 @@ import { useAppDispatch, useFormat, useUserDetails } from "@renderer/hooks";
 import { setHeaderTitle } from "@renderer/features";
 import { useTranslation } from "react-i18next";
 import type { GameShop } from "@types";
+import { MODERN_SHOPS } from "@types";
 import { LockedProfile } from "./locked-profile";
 import { ReportProfile } from "../report-profile/report-profile";
 import { BadgesBox } from "./badges-box";
@@ -91,9 +92,9 @@ export function ProfileContent() {
   const [platform, setPlatform] = useState<ProfilePlatform>("all");
 
   const shops = useMemo<string[]>(() => {
-    if (platform === "pc") return ["steam"];
+    if (platform === "pc") return MODERN_SHOPS;
     if (platform === "classics") return ["launchbox"];
-    return ["steam", "launchbox"];
+    return ["launchbox", ...MODERN_SHOPS];
   }, [platform]);
 
   const [activeTab, setActiveTab] = useState<ProfileTabType>("library");

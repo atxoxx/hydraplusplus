@@ -28,6 +28,7 @@ import type {
   UserProfile,
   UserStats,
 } from "@types";
+import { MODERN_SHOPS } from "@types";
 import {
   useEffect,
   useMemo,
@@ -785,8 +786,9 @@ export default function Profile() {
         sortBy: "achievementCount",
       });
 
-      searchParams.append("shop", "steam");
-      searchParams.append("shop", "launchbox");
+      for (const shop of ["launchbox", ...MODERN_SHOPS]) {
+        searchParams.append("shop", shop);
+      }
 
       const response =
         await globalThis.window.electron.hydraApi.get<UserLibraryResponse>(
