@@ -1,7 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { CheckboxField, TextField, Button, SelectField, DiscoveryWizardModal } from "@renderer/components";
+import {
+  CheckboxField,
+  TextField,
+  Button,
+  SelectField,
+  DiscoveryWizardModal,
+} from "@renderer/components";
 import { settingsContext } from "@renderer/context";
 import { useAppSelector } from "@renderer/hooks";
 import type { GameShop, PlatformScanConfig, PlatformGame } from "@types";
@@ -18,7 +24,14 @@ interface PlatformInfo {
 }
 
 const IMPORT_PLATFORMS: PlatformInfo[] = [
-  { shop: "steam", labelKey: "platform_steam", needsApiKey: true, apiKeyLabel: "steam_web_api_key", apiKeyPlaceholder: "steam_web_api_key_placeholder", setupUrl: "https://steamcommunity.com/dev/apikey" },
+  {
+    shop: "steam",
+    labelKey: "platform_steam",
+    needsApiKey: true,
+    apiKeyLabel: "steam_web_api_key",
+    apiKeyPlaceholder: "steam_web_api_key_placeholder",
+    setupUrl: "https://steamcommunity.com/dev/apikey",
+  },
   { shop: "epic", labelKey: "platform_epic", needsApiKey: false },
   { shop: "gog", labelKey: "platform_gog", needsApiKey: false },
   { shop: "battle-net", labelKey: "platform_battle_net", needsApiKey: false },
@@ -41,9 +54,13 @@ export function SettingsContextPlatformImport() {
   const [enablePlatformImport, setEnablePlatformImport] = useState(false);
   const [steamApiKey, setSteamApiKey] = useState("");
   const [steamFamilyShareIds, setSteamFamilyShareIds] = useState("");
-  const [scanInstalled, setScanInstalled] = useState<Record<string, boolean>>({});
+  const [scanInstalled, setScanInstalled] = useState<Record<string, boolean>>(
+    {}
+  );
   const [fetchOwned, setFetchOwned] = useState<Record<string, boolean>>({});
-  const [importPreference, setImportPreference] = useState<"wizard" | "auto">("wizard");
+  const [importPreference, setImportPreference] = useState<"wizard" | "auto">(
+    "wizard"
+  );
   const [scanningStatus, setScanningStatus] = useState<string | null>(null);
   const [discoveredGames, setDiscoveredGames] = useState<PlatformGame[]>([]);
   const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
@@ -62,9 +79,7 @@ export function SettingsContextPlatformImport() {
     setSteamFamilyShareIds(
       (userPreferences.steamFamilyShareIds ?? []).join(", ")
     );
-    setImportPreference(
-      userPreferences.importDiscoveryPreference ?? "wizard"
-    );
+    setImportPreference(userPreferences.importDiscoveryPreference ?? "wizard");
 
     const scanInstalledMap: Record<string, boolean> = {};
     const fetchOwnedMap: Record<string, boolean> = {};
@@ -94,7 +109,7 @@ export function SettingsContextPlatformImport() {
         scanPaths: [],
         scanInstalled: newScanInstalled[platform.shop] ?? true,
         fetchOwned: newFetchOwned[platform.shop] ?? false,
-        apiKey: platform.shop === "steam" ? (steamApiKey || null) : null,
+        apiKey: platform.shop === "steam" ? steamApiKey || null : null,
         familyShareIds:
           platform.shop === "steam"
             ? parseSteamIds(steamFamilyShareIds)
@@ -136,9 +151,7 @@ export function SettingsContextPlatformImport() {
     await updateUserPreferences({ steamFamilyShareIds: ids });
   };
 
-  const handleImportPreferenceChange = async (
-    value: "wizard" | "auto"
-  ) => {
+  const handleImportPreferenceChange = async (value: "wizard" | "auto") => {
     setImportPreference(value);
     await updateUserPreferences({ importDiscoveryPreference: value });
   };
@@ -178,7 +191,9 @@ export function SettingsContextPlatformImport() {
           setShowDiscoveryModal(true);
         }
       } else {
-        setScanningStatus(t("scan_games_no_results_description", { ns: "notifications" }));
+        setScanningStatus(
+          t("scan_games_no_results_description", { ns: "notifications" })
+        );
       }
     } catch (err) {
       setScanningStatus(t("scan_failed"));
@@ -246,9 +261,7 @@ export function SettingsContextPlatformImport() {
                       <CheckboxField
                         label={t("fetch_owned_games")}
                         checked={fetchOwned[platform.shop] ?? false}
-                        onChange={() =>
-                          handleToggleFetchOwned(platform.shop)
-                        }
+                        onChange={() => handleToggleFetchOwned(platform.shop)}
                       />
 
                       {fetchOwned[platform.shop] && (
@@ -257,7 +270,8 @@ export function SettingsContextPlatformImport() {
                             label={t(platform.apiKeyLabel ?? "api_key")}
                             value={steamApiKey}
                             placeholder={t(
-                              platform.apiKeyPlaceholder ?? "api_key_placeholder"
+                              platform.apiKeyPlaceholder ??
+                                "api_key_placeholder"
                             )}
                             onChange={(e) =>
                               handleSteamApiKeyChange(e.target.value)
@@ -373,9 +387,7 @@ export function SettingsContextPlatformImport() {
                   }
                   setTimeout(() => setScanningStatus(null), 5000);
                 }}
-                disabled={
-                  scanningStatus !== null || !steamApiKey
-                }
+                disabled={scanningStatus !== null || !steamApiKey}
               >
                 {t("scan_steam_family")}
               </Button>

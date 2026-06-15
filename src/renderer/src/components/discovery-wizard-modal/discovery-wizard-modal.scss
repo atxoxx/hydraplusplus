@@ -244,7 +244,8 @@
     transition: all 0.15s ease;
   }
 
-  .discovery-wizard__auto-import-checkbox:checked + &__auto-import-checkbox-custom {
+  .discovery-wizard__auto-import-checkbox:checked
+    + &__auto-import-checkbox-custom {
     background: var(--accent, #4a9eff);
     border-color: var(--accent, #4a9eff);
 

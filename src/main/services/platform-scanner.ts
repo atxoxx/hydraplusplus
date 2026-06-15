@@ -10,11 +10,7 @@ import { scanXboxGames } from "./platform-scanners/xbox-scanner";
 import { scanRockstarGames } from "./platform-scanners/rockstar-scanner";
 import { scanItchIoGames } from "./platform-scanners/itchio-scanner";
 import { scanHumbleGames } from "./platform-scanners/humble-scanner";
-import type {
-  Game,
-  PlatformGame,
-  AllPlatformsScanResult,
-} from "@types";
+import type { Game, PlatformGame, AllPlatformsScanResult } from "@types";
 import { logger } from "./logger";
 
 export class PlatformScanner {
@@ -51,8 +47,7 @@ export class PlatformScanner {
         isDeleted: false,
         source: game.shop,
         autoImported: true,
-        executablePath:
-          game.executablePath ?? existingGame.executablePath,
+        executablePath: game.executablePath ?? existingGame.executablePath,
       };
 
       await gamesSublevel.put(gameKey, updated);

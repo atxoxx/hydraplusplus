@@ -150,9 +150,7 @@ export interface SteamUserInfo {
 }
 
 /** Extracts Steam user accounts from loginusers.vdf */
-export function getSteamUsersFromConfig(
-  steamPath: string
-): SteamUserInfo[] {
+export function getSteamUsersFromConfig(steamPath: string): SteamUserInfo[] {
   const vdf = parseVdfFile(`${steamPath}/config/loginusers.vdf`);
   if (!vdf?.users || typeof vdf.users !== "object") return [];
 

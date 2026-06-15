@@ -154,9 +154,10 @@ export function DiscoveryWizardModal({
     }
   }, [indexedGames, selectedKeys, autoImportFuture, onImport, onClose]);
 
-  const renderPlatformGroup = (
-    group: { shop: GameShop; games: DiscoveryGame[] }
-  ) => {
+  const renderPlatformGroup = (group: {
+    shop: GameShop;
+    games: DiscoveryGame[];
+  }) => {
     const groupKeys = group.games.map((g) => g._key);
     const allSelected = groupKeys.every((k) => selectedKeys.has(k));
     const partialSelected =
@@ -190,14 +191,44 @@ export function DiscoveryWizardModal({
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               {allSelected ? (
-                <rect x="0.5" y="0.5" width="13" height="13" rx="2.5" fill="var(--accent, #4a9eff)" stroke="var(--accent, #4a9eff)" />
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="13"
+                  height="13"
+                  rx="2.5"
+                  fill="var(--accent, #4a9eff)"
+                  stroke="var(--accent, #4a9eff)"
+                />
               ) : partialSelected ? (
-                <rect x="0.5" y="0.5" width="13" height="13" rx="2.5" fill="none" stroke="var(--accent, #4a9eff)" />
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="13"
+                  height="13"
+                  rx="2.5"
+                  fill="none"
+                  stroke="var(--accent, #4a9eff)"
+                />
               ) : (
-                <rect x="0.5" y="0.5" width="13" height="13" rx="2.5" fill="none" stroke="var(--border-default, #444)" />
+                <rect
+                  x="0.5"
+                  y="0.5"
+                  width="13"
+                  height="13"
+                  rx="2.5"
+                  fill="none"
+                  stroke="var(--border-default, #444)"
+                />
               )}
               {allSelected && (
-                <path d="M3.5 7L6 9.5L10.5 4.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M3.5 7L6 9.5L10.5 4.5"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               )}
             </svg>
           </button>
@@ -220,9 +251,7 @@ export function DiscoveryWizardModal({
                 onChange={() => toggleGame(game._key)}
               />
               <span className="discovery-wizard__checkbox-custom" />
-              <span className="discovery-wizard__game-title">
-                {game.title}
-              </span>
+              <span className="discovery-wizard__game-title">{game.title}</span>
               {game.executablePath && (
                 <span className="discovery-wizard__game-path">
                   {game.executablePath}
@@ -290,11 +319,7 @@ export function DiscoveryWizardModal({
           </label>
 
           <div className="discovery-wizard__bottom-actions">
-            <Button
-              theme="outline"
-              onClick={onClose}
-              disabled={isImporting}
-            >
+            <Button theme="outline" onClick={onClose} disabled={isImporting}>
               {t("discovery_skip")}
             </Button>
             <Button

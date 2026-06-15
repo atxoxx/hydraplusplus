@@ -49,7 +49,7 @@ export function scanAmazonGames(): PlatformScanResult {
       // The library.json may have a "games" array or be an object with game info
       const gamesArray = Array.isArray(library)
         ? library
-        : library.games ?? library.installed ?? [];
+        : (library.games ?? library.installed ?? []);
 
       for (const entry of gamesArray) {
         try {

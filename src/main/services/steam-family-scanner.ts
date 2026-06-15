@@ -44,14 +44,11 @@ export class SteamFamilyScanner {
     }
 
     const localUsers = getSteamUsersFromConfig(steamPath);
-    const libraryFolders = getSteamLibraryFolders(steamPath).map(
-      (f) => f.path
-    );
+    const libraryFolders = getSteamLibraryFolders(steamPath).map((f) => f.path);
     const discoveredFamily = getSteamFamilyMembers(steamPath);
 
     // Determine the primary user
-    const primaryUser =
-      localUsers.find((u) => u.mostRecent) ?? localUsers[0];
+    const primaryUser = localUsers.find((u) => u.mostRecent) ?? localUsers[0];
 
     // Collect all SteamIDs to fetch
     const allSteamIds = new Set<string>();
@@ -145,9 +142,7 @@ export class SteamFamilyScanner {
         source: "steam",
         autoImported: true,
         steamFamilyOwnerId: game.isOwnGame ? null : game.ownerSteamId64,
-        steamFamilyOwnerName: game.isOwnGame
-          ? null
-          : game.ownerName,
+        steamFamilyOwnerName: game.isOwnGame ? null : game.ownerName,
         executablePath: game.isInstalled
           ? (game.executablePath ?? existingGame.executablePath)
           : existingGame.executablePath,
@@ -169,12 +164,8 @@ export class SteamFamilyScanner {
         source: "steam",
         autoImported: true,
         steamFamilyOwnerId: game.isOwnGame ? null : game.ownerSteamId64,
-        steamFamilyOwnerName: game.isOwnGame
-          ? null
-          : game.ownerName,
-        executablePath: game.isInstalled
-          ? (game.executablePath ?? null)
-          : null,
+        steamFamilyOwnerName: game.isOwnGame ? null : game.ownerName,
+        executablePath: game.isInstalled ? (game.executablePath ?? null) : null,
       };
 
       await gamesSublevel.put(gameKey, newGame);
@@ -200,8 +191,7 @@ function resolveOwnerName(
 ): string {
   return (
     localUsers.find((u) => u.steamId64 === steamId64)?.personaName ??
-    discoveredFamily.find((m) => m.steamId64 === steamId64)
-      ?.personaName ??
+    discoveredFamily.find((m) => m.steamId64 === steamId64)?.personaName ??
     `Steam User ${steamId64.slice(-4)}`
   );
 }
@@ -240,12 +230,7 @@ function findInstalledGame(
 
     if (!installDir) continue;
 
-    const gamePath = path.join(
-      libFolder,
-      "steamapps",
-      "common",
-      installDir
-    );
+    const gamePath = path.join(libFolder, "steamapps", "common", installDir);
 
     if (fs.existsSync(gamePath)) {
       const exePath = findExecutable(gamePath, MAX_RECURSION_DEPTH);
@@ -255,5 +240,3 @@ function findInstalledGame(
 
   return { installed: false, exePath: null };
 }
-
-

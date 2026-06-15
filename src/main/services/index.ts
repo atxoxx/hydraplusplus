@@ -2,7 +2,11 @@ export * from "./logger";
 export * from "./steam";
 export * from "./steam-250";
 export * from "./steam-web-api";
-export { getSteamUsersFromConfig, getSteamLibraryFolders, getSteamFamilyMembers } from "./steam-vdf-parser";
+export {
+  getSteamUsersFromConfig,
+  getSteamLibraryFolders,
+  getSteamFamilyMembers,
+} from "./steam-vdf-parser";
 export * from "./steam-family-scanner";
 export * from "./platform-scanner";
 export * from "./window-manager";

@@ -30,18 +30,15 @@ export function scanEpicGames(): PlatformScanResult {
         const content = fs.readFileSync(filePath, "utf-8");
         const manifest = JSON.parse(content);
 
-        const installLocation: string | undefined =
-          manifest.InstallLocation;
+        const installLocation: string | undefined = manifest.InstallLocation;
         const displayName: string | undefined =
           manifest.DisplayName ?? manifest.AppName;
-        const catalogItemId: string | undefined =
-          manifest.CatalogItemId;
+        const catalogItemId: string | undefined = manifest.CatalogItemId;
 
         if (!installLocation || !fs.existsSync(installLocation)) continue;
         if (!displayName) continue;
 
-        const objectId =
-          catalogItemId ?? path.basename(file, ".item");
+        const objectId = catalogItemId ?? path.basename(file, ".item");
 
         const exePath = findExecutable(installLocation, 3);
 

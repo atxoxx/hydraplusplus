@@ -90,10 +90,7 @@ export function scanBattleNetGames(): PlatformScanResult {
           }
         }
       } catch (err) {
-        logger.error(
-          `[BattleNetScanner] Failed to scan ${known.folder}:`,
-          err
-        );
+        logger.error(`[BattleNetScanner] Failed to scan ${known.folder}:`, err);
       }
     }
 

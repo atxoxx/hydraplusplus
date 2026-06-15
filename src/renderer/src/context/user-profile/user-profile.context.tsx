@@ -105,12 +105,7 @@ export function UserProfileContextProvider({
   const navigate = useNavigate();
 
   const getUserStats = useCallback(
-    async (
-      shops = [
-        "launchbox",
-        ...MODERN_SHOPS,
-      ]
-    ) => {
+    async (shops = ["launchbox", ...MODERN_SHOPS]) => {
       const params = new URLSearchParams();
       shops.forEach((shop) => params.append("shop", shop));
 
@@ -127,10 +122,7 @@ export function UserProfileContextProvider({
     async (
       sortBy?: string,
       reset = true,
-      shops = [
-        "launchbox",
-        ...MODERN_SHOPS,
-      ]
+      shops = ["launchbox", ...MODERN_SHOPS]
     ) => {
       if (reset) {
         setLibraryPage(0);
@@ -177,10 +169,7 @@ export function UserProfileContextProvider({
   const loadMoreLibraryGames = useCallback(
     async (
       sortBy?: string,
-      shops = [
-        "launchbox",
-        ...MODERN_SHOPS,
-      ]
+      shops = ["launchbox", ...MODERN_SHOPS]
     ): Promise<boolean> => {
       if (isLoadingLibraryGames || !hasMoreLibraryGames) {
         return false;

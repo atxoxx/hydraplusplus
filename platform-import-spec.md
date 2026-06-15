@@ -16,18 +16,18 @@ Add the ability for Hydra to detect, import, and display games from other gaming
 
 All 10 platforms from the PlayniteExtensions Libraries suite will be supported:
 
-| Platform | GameShop value | Detection method |
-|---|---|---|
-| Steam | `steam` (already exists; enhanced) | File scan (`steamapps/common`) + Steam Web API |
-| Epic Games | `epic` | File scan (Epic manifest `.item` files) |
-| GOG Galaxy | `gog` | File scan (registry + GOG folders) + GOG API |
-| Battle.net | `battle-net` | File scan (Battle.net game folders) |
-| Amazon Games | `amazon` | File scan (Amazon Games library folders) |
-| Ubisoft Connect | `ubisoft` | File scan (Ubisoft registry + folders) |
-| Xbox / Game Pass | `xbox` | File scan (WindowsApps / XboxGames folders) |
-| Rockstar Games | `rockstar` | File scan (Rockstar Games Launcher folders) |
-| Itch.io | `itch-io` | File scan (Itch.io app folders) |
-| Humble Games | `humble` | File scan (Humble app folders) |
+| Platform         | GameShop value                     | Detection method                               |
+| ---------------- | ---------------------------------- | ---------------------------------------------- |
+| Steam            | `steam` (already exists; enhanced) | File scan (`steamapps/common`) + Steam Web API |
+| Epic Games       | `epic`                             | File scan (Epic manifest `.item` files)        |
+| GOG Galaxy       | `gog`                              | File scan (registry + GOG folders) + GOG API   |
+| Battle.net       | `battle-net`                       | File scan (Battle.net game folders)            |
+| Amazon Games     | `amazon`                           | File scan (Amazon Games library folders)       |
+| Ubisoft Connect  | `ubisoft`                          | File scan (Ubisoft registry + folders)         |
+| Xbox / Game Pass | `xbox`                             | File scan (WindowsApps / XboxGames folders)    |
+| Rockstar Games   | `rockstar`                         | File scan (Rockstar Games Launcher folders)    |
+| Itch.io          | `itch-io`                          | File scan (Itch.io app folders)                |
+| Humble Games     | `humble`                           | File scan (Humble app folders)                 |
 
 ---
 
@@ -36,10 +36,13 @@ All 10 platforms from the PlayniteExtensions Libraries suite will be supported:
 ### 3.1 GameShop Extension
 
 Extend the `GameShop` union type from:
+
 ```ts
 type GameShop = "steam" | "custom" | "launchbox";
 ```
+
 to:
+
 ```ts
 type GameShop =
   | "steam"
@@ -106,27 +109,27 @@ For each platform, scan known installation directories. The scanner runs on app 
 
 **Platform-specific scan locations (Windows — need macOS/Linux equivalents):**
 
-| Platform | Scan locations |
-|---|---|
-| Steam | `C:\Program Files (x86)\Steam\steamapps\common`, `D:\SteamLibrary\steamapps\common`, plus all Steam Library Folders from `libraryfolders.vdf` |
-| Epic | `C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\*.item` — parse JSON manifest for install location |
-| GOG | Registry: `HKLM\Software\GOG.com\Games\*`, `HKLM\Software\WOW6432Node\GOG.com\Games\*` — each has `path` and `gameName` |
-| Battle.net | `C:\Program Files (x86)\Battle.net\Games\*`, `C:\Program Files (x86)\World of Warcraft\*` etc. — scan for `.exe` and `.build.info` files |
-| Amazon Games | `C:\Program Files\WindowsApps\AmazonGames\*`, `%LOCALAPPDATA%\Amazon Games\*` |
-| Ubisoft Connect | Registry: `HKLM\Software\Ubisoft\Launcher\Installs\*` — each has `InstallDir` |
-| Xbox | `C:\XboxGames\*`, `C:\Program Files\WindowsApps\*` (limited access — may need special handling) |
-| Rockstar | `C:\Program Files\Rockstar Games\*`, `%PROGRAMDATA%\Rockstar Games\Launcher\*` |
-| Itch.io | `%APPDATA%\itch\apps\*` — each folder is a game |
-| Humble | `%APPDATA%\Humble Bundle\*`, `C:\Program Files (x86)\Humble Bundle\*` |
+| Platform        | Scan locations                                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Steam           | `C:\Program Files (x86)\Steam\steamapps\common`, `D:\SteamLibrary\steamapps\common`, plus all Steam Library Folders from `libraryfolders.vdf` |
+| Epic            | `C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests\*.item` — parse JSON manifest for install location                                      |
+| GOG             | Registry: `HKLM\Software\GOG.com\Games\*`, `HKLM\Software\WOW6432Node\GOG.com\Games\*` — each has `path` and `gameName`                       |
+| Battle.net      | `C:\Program Files (x86)\Battle.net\Games\*`, `C:\Program Files (x86)\World of Warcraft\*` etc. — scan for `.exe` and `.build.info` files      |
+| Amazon Games    | `C:\Program Files\WindowsApps\AmazonGames\*`, `%LOCALAPPDATA%\Amazon Games\*`                                                                 |
+| Ubisoft Connect | Registry: `HKLM\Software\Ubisoft\Launcher\Installs\*` — each has `InstallDir`                                                                 |
+| Xbox            | `C:\XboxGames\*`, `C:\Program Files\WindowsApps\*` (limited access — may need special handling)                                               |
+| Rockstar        | `C:\Program Files\Rockstar Games\*`, `%PROGRAMDATA%\Rockstar Games\Launcher\*`                                                                |
+| Itch.io         | `%APPDATA%\itch\apps\*` — each folder is a game                                                                                               |
+| Humble          | `%APPDATA%\Humble Bundle\*`, `C:\Program Files (x86)\Humble Bundle\*`                                                                         |
 
 ### 4.2 API-Based (Owned but Not Installed)
 
-| Platform | API | Notes |
-|---|---|---|
-| Steam | `IPlayerService/GetOwnedGames` | Requires Steam Web API key + user's SteamID64. Returns all owned games with playtime |
-| GOG | GOG API (via token from GOG Galaxy) | Read token from local GOG Galaxy data |
-| Epic | Epic Games Launcher local data | Parse local manifest data for owned game entitlements |
-| Others | Primarily file-scan based | Most other launchers don't expose easy APIs for owned games |
+| Platform | API                                 | Notes                                                                                |
+| -------- | ----------------------------------- | ------------------------------------------------------------------------------------ |
+| Steam    | `IPlayerService/GetOwnedGames`      | Requires Steam Web API key + user's SteamID64. Returns all owned games with playtime |
+| GOG      | GOG API (via token from GOG Galaxy) | Read token from local GOG Galaxy data                                                |
+| Epic     | Epic Games Launcher local data      | Parse local manifest data for owned game entitlements                                |
+| Others   | Primarily file-scan based           | Most other launchers don't expose easy APIs for owned games                          |
 
 ### 4.3 Steam Family Share Detection
 
@@ -185,20 +188,20 @@ The existing `PlatformFilter` (dropdown for PS1, PS2, etc.) continues to work fo
 
 Each `LibraryGameCard` and `LibraryGameCardLarge` gets a thin colored left border (3-4px) based on platform:
 
-| Platform | Color | 
-|---|---|
-| Steam | `#1b2838` (Steam dark blue) |
-| Epic | `#313131` (Epic dark) |
-| GOG | `#8a3ab9` (GOG purple) |
-| Battle.net | `#009ae4` (Battle.net blue) |
-| Amazon Games | `#ff9900` (Amazon orange) |
-| Ubisoft Connect | `#3d1d6a` (Ubisoft purple) |
-| Xbox | `#107c10` (Xbox green) |
-| Rockstar | `#f7b500` (Rockstar yellow) |
-| Itch.io | `#fa5c5c` (Itch.io red) |
-| Humble | `#cb277e` (Humble pink) |
-| lauchbox/Classics | Keep existing gradient style |
-| custom | No border (default) |
+| Platform           | Color                                     |
+| ------------------ | ----------------------------------------- |
+| Steam              | `#1b2838` (Steam dark blue)               |
+| Epic               | `#313131` (Epic dark)                     |
+| GOG                | `#8a3ab9` (GOG purple)                    |
+| Battle.net         | `#009ae4` (Battle.net blue)               |
+| Amazon Games       | `#ff9900` (Amazon orange)                 |
+| Ubisoft Connect    | `#3d1d6a` (Ubisoft purple)                |
+| Xbox               | `#107c10` (Xbox green)                    |
+| Rockstar           | `#f7b500` (Rockstar yellow)               |
+| Itch.io            | `#fa5c5c` (Itch.io red)                   |
+| Humble             | `#cb277e` (Humble pink)                   |
+| lauchbox/Classics  | Keep existing gradient style              |
+| custom             | No border (default)                       |
 | Steam Family Share | Steam blue + subtle "shared" icon overlay |
 
 ### 5.5 Platform Badge on Cards
@@ -242,17 +245,18 @@ When a game has a valid `executablePath`, launch it directly (current behavior f
 
 If direct launch fails OR the game requires the launcher for DRM, use platform-specific protocols:
 
-| Platform | Protocol |
-|---|---|
-| Steam | `steam://rungameid/{appId}` |
-| Epic | `com.epicgames.launcher://apps/{appName}?action=launch` |
-| GOG | `goggalaxy://openGameView/{gameId}` |
+| Platform   | Protocol                                                            |
+| ---------- | ------------------------------------------------------------------- |
+| Steam      | `steam://rungameid/{appId}`                                         |
+| Epic       | `com.epicgames.launcher://apps/{appName}?action=launch`             |
+| GOG        | `goggalaxy://openGameView/{gameId}`                                 |
 | Battle.net | `battlenet://{gameCode}` (e.g., `battlenet://WTCG` for Hearthstone) |
-| Ubisoft | `uplay://launch/{gameId}` |
-| Xbox | `xbox://` or `msxbox://` protocol |
-| Others | Fall back to direct `.exe` launch |
+| Ubisoft    | `uplay://launch/{gameId}`                                           |
+| Xbox       | `xbox://` or `msxbox://` protocol                                   |
+| Others     | Fall back to direct `.exe` launch                                   |
 
 The launch logic should:
+
 1. Check if `executablePath` exists and is valid
 2. Try direct launch
 3. If direct launch fails (exit code non-zero, or process exits immediately), show an error and offer to launch via platform protocol
@@ -274,6 +278,7 @@ For each imported game, fetch metadata from the platform's API/store:
 ### 8.2 Generic Fallback
 
 If platform API is unavailable, use a generic placeholder:
+
 - Show the game title centered on a dark background as the cover
 - Use a generic "gamepad" or platform logo as the icon
 - Store assets using the existing `gamesShopAssetsSublevel` pattern
@@ -316,6 +321,7 @@ Add a new "Platform Import" section in the Hydra settings page:
 ### 9.2 API Key Setup Prompt
 
 When a user enables a platform that requires an API key (Steam), show an inline prompt:
+
 - "A Steam Web API key is required. Get yours at: https://steamcommunity.com/dev/apikey"
 - Text field to paste the key
 - "Skip for now" button that keeps file scanning enabled but disables API features
@@ -338,12 +344,14 @@ This avoids complex merge logic and gives the user control.
 ## 11. Implementation Phases
 
 ### Phase 1: Foundation
+
 - [ ] Extend `GameShop` type with all new platform values
 - [ ] Add new fields to `Game` interface (`source`, `autoImported`, `steamFamilyOwnerId`, `steamFamilyOwnerName`)
 - [ ] Create `PlatformScanConfig` type and storage
 - [ ] Update all existing type usages to handle new `GameShop` values gracefully
 
 ### Phase 2: Steam Enhancement
+
 - [ ] Extract Steam Family Share detection from local Steam config
 - [ ] Integrate `IPlayerService/GetOwnedGames` API for owned games
 - [ ] Integrate family member game fetching
@@ -351,6 +359,7 @@ This avoids complex merge logic and gives the user control.
 - [ ] Update scan-installed-games to support Steam specifically (already partially exists)
 
 ### Phase 3: Platform Scanners
+
 - [ ] Implement Epic manifest scanner
 - [ ] Implement GOG registry/scanner
 - [ ] Implement Battle.net scanner
@@ -362,11 +371,13 @@ This avoids complex merge logic and gives the user control.
 - [ ] Implement Humble scanner
 
 ### Phase 4: API Integration
+
 - [ ] GOG API integration for owned games
 - [ ] Epic local entitlement data parsing
 - [ ] Platform protocol launch handlers
 
 ### Phase 5: UI
+
 - [ ] Category filter redesign (platform dropdown)
 - [ ] Installation status tabs (All / Installed / Not Installed)
 - [ ] Platform-colored borders on game cards
@@ -377,6 +388,7 @@ This avoids complex merge logic and gives the user control.
 - [ ] i18n for all new strings
 
 ### Phase 6: Polish
+
 - [ ] Metadata fetching from platform APIs
 - [ ] Generic fallback assets
 - [ ] "Scan for games" manual trigger button
@@ -387,27 +399,27 @@ This avoids complex merge logic and gives the user control.
 
 ## 12. File Change Map
 
-| File | Changes |
-|---|---|
-| `src/types/game.types.ts` | Extend `GameShop` union |
-| `src/types/level.types.ts` | Add `source`, `autoImported`, `steamFamilyOwnerId`, `steamFamilyOwnerName` to `Game` |
-| `src/types/index.ts` | Add `PlatformScanConfig` type |
-| `src/main/events/library/scan-installed-games.ts` | Major rework — multi-platform scanning |
-| `src/main/services/` | New files: `platform-scanner.ts` (main orchestrator), per-platform scanner files |
-| `src/main/level/sublevels/` | New sublevel for platform scan config |
-| `src/renderer/src/pages/library/category-filter.tsx` | Redesign — replace PC tab with platform dropdown |
-| `src/renderer/src/pages/library/library.tsx` | Add installation status tabs, update filter logic |
-| `src/renderer/src/pages/library/library-game-card.tsx` | Add platform border + badge |
-| `src/renderer/src/pages/library/library-game-card-large.tsx` | Add platform border + badge |
-| `src/renderer/src/pages/catalogue/` | Add platform filter section |
-| `src/renderer/src/features/catalogue-search.ts` | Add platform filter state |
-| `src/main/events/catalogue/` | Add catalogue platform filtering |
-| `src/renderer/src/components/` | New: `platform-icon.tsx`, `discovery-wizard-modal.tsx` |
-| `src/renderer/src/pages/settings/` | New section for platform import config |
-| `src/main/services/steam.ts` | Add family share detection |
-| `src/locales/en/translation.json` | New translation keys |
-| `src/preload/index.ts` | New IPC methods for platform scanning |
-| `src/renderer/src/declaration.d.ts` | New type declarations |
+| File                                                         | Changes                                                                              |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `src/types/game.types.ts`                                    | Extend `GameShop` union                                                              |
+| `src/types/level.types.ts`                                   | Add `source`, `autoImported`, `steamFamilyOwnerId`, `steamFamilyOwnerName` to `Game` |
+| `src/types/index.ts`                                         | Add `PlatformScanConfig` type                                                        |
+| `src/main/events/library/scan-installed-games.ts`            | Major rework — multi-platform scanning                                               |
+| `src/main/services/`                                         | New files: `platform-scanner.ts` (main orchestrator), per-platform scanner files     |
+| `src/main/level/sublevels/`                                  | New sublevel for platform scan config                                                |
+| `src/renderer/src/pages/library/category-filter.tsx`         | Redesign — replace PC tab with platform dropdown                                     |
+| `src/renderer/src/pages/library/library.tsx`                 | Add installation status tabs, update filter logic                                    |
+| `src/renderer/src/pages/library/library-game-card.tsx`       | Add platform border + badge                                                          |
+| `src/renderer/src/pages/library/library-game-card-large.tsx` | Add platform border + badge                                                          |
+| `src/renderer/src/pages/catalogue/`                          | Add platform filter section                                                          |
+| `src/renderer/src/features/catalogue-search.ts`              | Add platform filter state                                                            |
+| `src/main/events/catalogue/`                                 | Add catalogue platform filtering                                                     |
+| `src/renderer/src/components/`                               | New: `platform-icon.tsx`, `discovery-wizard-modal.tsx`                               |
+| `src/renderer/src/pages/settings/`                           | New section for platform import config                                               |
+| `src/main/services/steam.ts`                                 | Add family share detection                                                           |
+| `src/locales/en/translation.json`                            | New translation keys                                                                 |
+| `src/preload/index.ts`                                       | New IPC methods for platform scanning                                                |
+| `src/renderer/src/declaration.d.ts`                          | New type declarations                                                                |
 
 ---
 

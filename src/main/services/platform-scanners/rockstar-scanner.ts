@@ -63,10 +63,7 @@ export function scanRockstarGames(): PlatformScanResult {
           });
         }
       } catch (err) {
-        logger.error(
-          `[RockstarScanner] Failed to scan ${known.folder}:`,
-          err
-        );
+        logger.error(`[RockstarScanner] Failed to scan ${known.folder}:`, err);
       }
     }
 

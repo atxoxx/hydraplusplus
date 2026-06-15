@@ -18,11 +18,7 @@ const HUMBLE_APPDATA_DIR = path.join(
 );
 
 /** Known Humble library file that may list installed games */
-const HUMBLE_LIBRARY_FILES = [
-  "library.json",
-  "installed.json",
-  "games.json",
-];
+const HUMBLE_LIBRARY_FILES = ["library.json", "installed.json", "games.json"];
 
 export function scanHumbleGames(): PlatformScanResult {
   const games: PlatformGame[] = [];
@@ -46,7 +42,7 @@ export function scanHumbleGames(): PlatformScanResult {
         // Humble library can be an array or object with games
         const gamesList = Array.isArray(data)
           ? data
-          : data.games ?? data.installed ?? data.items ?? [];
+          : (data.games ?? data.installed ?? data.items ?? []);
 
         for (const entry of gamesList) {
           try {
