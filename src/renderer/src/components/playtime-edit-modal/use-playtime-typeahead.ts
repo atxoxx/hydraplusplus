@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type {
-  Game,
-  PlaytimeProviderId,
-  PlaytimeSearchResult,
-} from "@types";
+import type { Game, PlaytimeProviderId, PlaytimeSearchResult } from "@types";
 
 export interface UsePlaytimeTypeaheadArgs {
   provider: PlaytimeProviderId;
@@ -140,8 +136,7 @@ function rememberSelection(
   if (results.length === 0) return;
   const top = results[0];
   const exists = localSelectionCache.some(
-    (r) =>
-      r.provider === provider && r.providerGameId === top.providerGameId
+    (r) => r.provider === provider && r.providerGameId === top.providerGameId
   );
   if (exists) return;
   localSelectionCache.push({

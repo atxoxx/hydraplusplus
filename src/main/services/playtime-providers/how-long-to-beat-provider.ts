@@ -44,9 +44,7 @@ class SlidingRateLimiter {
     const now = Date.now();
     const diff = now - this.lastCall;
     if (diff < RATE_LIMIT_MS) {
-      await new Promise((resolve) =>
-        setTimeout(resolve, RATE_LIMIT_MS - diff)
-      );
+      await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_MS - diff));
     }
     this.lastCall = Date.now();
   }
@@ -389,7 +387,8 @@ export class HowLongToBeatProvider implements PlaytimeProvider {
         (entry) =>
           entry !== null &&
           typeof entry === "object" &&
-          ((entry as RawEntry).game_id ?? (entry as RawEntry).id) !== undefined &&
+          ((entry as RawEntry).game_id ?? (entry as RawEntry).id) !==
+            undefined &&
           ((entry as RawEntry).game_name ?? (entry as RawEntry).name)
       )
       .map((entry) => {
@@ -515,7 +514,11 @@ function findCategoryDuration(
 
 function extractGameList(data: unknown): RawEntry[] {
   if (Array.isArray(data)) return data as RawEntry[];
-  if (data && typeof data === "object" && "data" in (data as Record<string, unknown>)) {
+  if (
+    data &&
+    typeof data === "object" &&
+    "data" in (data as Record<string, unknown>)
+  ) {
     const inner = (data as { data: unknown }).data;
     if (Array.isArray(inner)) return inner as RawEntry[];
   }
@@ -540,7 +543,8 @@ function stripEditionNoise(q: string): string {
 }
 
 function pickPrimarySeconds(entry: RawEntry): number | null {
-  const v = entry.comp_main ?? entry.comp_plus ?? entry.comp_100 ?? entry.comp_all;
+  const v =
+    entry.comp_main ?? entry.comp_plus ?? entry.comp_100 ?? entry.comp_all;
   return typeof v === "number" ? v : null;
 }
 

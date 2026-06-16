@@ -1,17 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  SearchIcon,
-  SyncIcon,
-  ClockIcon,
-} from "@primer/octicons-react";
+import { SearchIcon, SyncIcon, ClockIcon } from "@primer/octicons-react";
 import { Modal, Button, TextField } from "@renderer/components";
 import { useToast } from "@renderer/hooks";
-import type {
-  Game,
-  PlaytimeProviderId,
-  PlaytimeSearchResult,
-} from "@types";
+import type { Game, PlaytimeProviderId, PlaytimeSearchResult } from "@types";
 import { PROVIDER_ORDER, RENDERABLE_PROVIDER_META } from "@shared";
 
 import { usePlaytimeTypeahead } from "./use-playtime-typeahead";
@@ -41,8 +33,7 @@ export function PlaytimeEditModal({
     initialProvider ?? "howlongtobeat"
   );
   const [query, setQuery] = useState(game.title);
-  const [selected, setSelected] =
-    useState<PlaytimeSearchResult | null>(null);
+  const [selected, setSelected] = useState<PlaytimeSearchResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const { liveResults, libraryResults, isSearching, searchError } =
@@ -64,12 +55,7 @@ export function PlaytimeEditModal({
   // If the modal opens with an existing mapping, render the currently
   // selected row by reusing the existing search result via `selected`.
   useEffect(() => {
-    if (
-      visible &&
-      initialExternalId &&
-      !selected &&
-      liveResults.length > 0
-    ) {
+    if (visible && initialExternalId && !selected && liveResults.length > 0) {
       const match = liveResults.find(
         (r) => r.providerGameId === initialExternalId
       );
@@ -107,9 +93,7 @@ export function PlaytimeEditModal({
       onSaved?.(selected.provider, selected.providerGameId);
       onClose();
     } catch (err) {
-      showErrorToast(
-        err instanceof Error ? err.message : "Save failed"
-      );
+      showErrorToast(err instanceof Error ? err.message : "Save failed");
     } finally {
       setIsSaving(false);
     }
@@ -151,9 +135,7 @@ export function PlaytimeEditModal({
             className="playtime-edit-modal__select"
             value={provider}
             disabled={isSaving}
-            onChange={(e) =>
-              setProvider(e.target.value as PlaytimeProviderId)
-            }
+            onChange={(e) => setProvider(e.target.value as PlaytimeProviderId)}
           >
             {providerLabel.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -180,7 +162,10 @@ export function PlaytimeEditModal({
                 disabled={query.trim().length < 2 || isSearching}
               >
                 {isSearching ? (
-                  <SyncIcon size={14} className="playtime-edit-modal__spinner" />
+                  <SyncIcon
+                    size={14}
+                    className="playtime-edit-modal__spinner"
+                  />
                 ) : (
                   <SearchIcon size={14} />
                 )}

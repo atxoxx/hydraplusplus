@@ -56,10 +56,7 @@ export type PlaytimeState =
  *   3. Persist the best hit as an `auto` mapping on the Game record so
  *      subsequent visits don't repeat the roundtrip.
  */
-export function usePlaytimeData({
-  game,
-  disabled,
-}: UsePlaytimeDataArgs): {
+export function usePlaytimeData({ game, disabled }: UsePlaytimeDataArgs): {
   state: PlaytimeState;
   refetch: () => Promise<void>;
 } {

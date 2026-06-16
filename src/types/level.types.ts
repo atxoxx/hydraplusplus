@@ -35,7 +35,6 @@ export interface User {
 }
 
 export interface Game {
-
   title: string;
   iconUrl: string | null;
   libraryHeroImageUrl: string | null;

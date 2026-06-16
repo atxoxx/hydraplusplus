@@ -51,8 +51,7 @@ export function registerSaveGamePlaytimeMapping() {
           provider,
           externalId,
           source: "manual",
-          matchedSimilarityScore:
-            args.matchedSimilarityScore ?? undefined,
+          matchedSimilarityScore: args.matchedSimilarityScore ?? undefined,
           updatedAt: new Date().toISOString(),
         };
 

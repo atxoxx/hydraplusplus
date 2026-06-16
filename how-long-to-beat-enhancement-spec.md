@@ -34,15 +34,15 @@ Overview dashboard.
 
 | Feature                  | Description                                                                                                                  |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| Multi-provider fetch     | Hydra API + new Radar → HowLongToBeat, Radar → Backlogged, Radar → IGDB/Steam stats. Routed through Electron main-process.  |
-| On-load auto-fetch       | When the game page mounts and no acknowledgement is stored, the card immediately attempts a fetch across providers.         |
-| Modern compact layout    | Hero-style header with provider logo + chip, dominant "Main Story" duration, and a tidy action row.                         |
-| Inline Extend toggle     | Expand the card to reveal Solo / Main + Sides / Completionist / 100%, accuracy bars, platform splits, submit status.        |
-| Edit picker modal        | Reassign provider + game: search box with typeahead, provider dropdown, list of matches, confidence chip, Save button.      |
+| Multi-provider fetch     | Hydra API + new Radar → HowLongToBeat, Radar → Backlogged, Radar → IGDB/Steam stats. Routed through Electron main-process.   |
+| On-load auto-fetch       | When the game page mounts and no acknowledgement is stored, the card immediately attempts a fetch across providers.          |
+| Modern compact layout    | Hero-style header with provider logo + chip, dominant "Main Story" duration, and a tidy action row.                          |
+| Inline Extend toggle     | Expand the card to reveal Solo / Main + Sides / Completionist / 100%, accuracy bars, platform splits, submit status.         |
+| Edit picker modal        | Reassign provider + game: search box with typeahead, provider dropdown, list of matches, confidence chip, Save button.       |
 | Manual-add empty state   | When nothing matches, the card renders "No playtime data found" + "Search manually" CTA that opens the Edit picker.          |
-| Persisted manual mapping | Storing `{provider, externalId}` on the `Game` record lets future page visits skip matching and fetch directly from the API.  |
+| Persisted manual mapping | Storing `{provider, externalId}` on the `Game` record lets future page visits skip matching and fetch directly from the API. |
 | Provider-aware Submit    | "Submit my playtime" only shows when the linked provider offers submission (today: HLTB); hidden for Backlogged, etc.        |
-| Local library cache      | The Edit picker's typeahead surfaces previously chosen entries from the user's library above the live provider results.    |
+| Local library cache      | The Edit picker's typeahead surfaces previously chosen entries from the user's library above the live provider results.      |
 | Best-match selection     | Auto-match picks the highest similarity if present; always exposes a "Not the right game?" hint to open the Edit picker.     |
 
 ---
@@ -51,11 +51,11 @@ Overview dashboard.
 
 Three providers are wired up initially:
 
-| Provider            | Source                                                | Data shape                          | Submit support | Search method                    |
-| ------------------- | ----------------------------------------------------- | ----------------------------------- | -------------- | -------------------------------- |
-| **HowLongToBeat**   | `howlongtobeat.com/api` (proxy via new service)       | `Main / Main+Extras / Completionist / 100%` plus Solo | ✅ Yes (existing) | Text search + game id          |
-| **Backlogged**      | `backloggd.com` scraping/lookup (proxy via service)   | `Main / Completionist / Co-op` with community counts   | ❌ No           | Text search returning slugs    |
-| **IGDB / Steam**    | IGDB time-to-beat + Steam playtime forever field      | Average / Median playtime           | ❌ No           | Catalogue lookup by appId       |
+| Provider          | Source                                              | Data shape                                            | Submit support    | Search method               |
+| ----------------- | --------------------------------------------------- | ----------------------------------------------------- | ----------------- | --------------------------- |
+| **HowLongToBeat** | `howlongtobeat.com/api` (proxy via new service)     | `Main / Main+Extras / Completionist / 100%` plus Solo | ✅ Yes (existing) | Text search + game id       |
+| **Backlogged**    | `backloggd.com` scraping/lookup (proxy via service) | `Main / Completionist / Co-op` with community counts  | ❌ No             | Text search returning slugs |
+| **IGDB / Steam**  | IGDB time-to-beat + Steam playtime forever field    | Average / Median playtime                             | ❌ No             | Catalogue lookup by appId   |
 
 > **Out of scope this change:** RetroAchievements, PCGamingWiki, raw Steam
 > review-derived hours. They are not providers in this round.
@@ -69,42 +69,42 @@ treats them uniformly.
 
 ### 4.1 New files
 
-| File                                                                                  | Purpose                                                |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `src/main/services/playtime-providers/types.ts`                                       | Common provider interface (`search`, `fetchById`)      |
-| `src/main/services/playtime-providers/how-long-to-beat-provider.ts`                   | HLTB API adapter (replaces direct Hydra cloud call)    |
-| `src/main/services/playtime-providers/backlogged-provider.ts`                         | Backlogged search + slugs                              |
-| `src/main/services/playtime-providers/igdb-steam-provider.ts`                         | IGDB + Steam stats aggregator                          |
-| `src/main/services/playtime-providers/playtime-aggregator.ts`                         | Multi-provider fan-out, similarity ranking, dedup      |
-| `src/main/services/playtime-providers/cache.ts`                                       | Provider response cache (TTL 24h per query)            |
-| `src/main/events/playtime/search-playtime-games.ts`                                   | IPC handler: typeahead search across selected provider |
-| `src/main/events/playtime/fetch-playtime-data.ts`                                     | IPC handler: full fetch by `{provider, externalId}`    |
-| `src/main/events/playtime/auto-match-playtime.ts`                                     | IPC handler: best-match across providers              |
-| `src/main/events/playtime/save-game-playtime-mapping.ts`                             | IPC handler: persist `{provider, externalId}` on Game  |
-| `src/shared/playtime/provider-meta.ts`                                                | Provider logos, display names, slug → logo mapping     |
-| `src/renderer/src/pages/game-details/dashboard-cards/how-long-to-beat-card-v2.tsx`    | New compact card (default)                             |
-| `src/renderer/src/pages/game-details/dashboard-cards/how-long-to-beat-card-v2.scss`   | Styles                                                  |
-| `src/renderer/src/components/playtime-edit-modal/playtime-edit-modal.tsx`             | Edit picker modal w/ typeahead search                  |
-| `src/renderer/src/components/playtime-edit-modal/playtime-edit-modal.scss`            | Edit picker styles                                     |
-| `src/renderer/src/components/playtime-edit-modal/use-playtime-typeahead.ts`           | Debounced typeahead hook (live provider + library cache) |
-| `src/renderer/src/hooks/use-playtime-data.ts`                                          | Renderer hook orchestrating auto-fetch + state          |
+| File                                                                                | Purpose                                                  |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `src/main/services/playtime-providers/types.ts`                                     | Common provider interface (`search`, `fetchById`)        |
+| `src/main/services/playtime-providers/how-long-to-beat-provider.ts`                 | HLTB API adapter (replaces direct Hydra cloud call)      |
+| `src/main/services/playtime-providers/backlogged-provider.ts`                       | Backlogged search + slugs                                |
+| `src/main/services/playtime-providers/igdb-steam-provider.ts`                       | IGDB + Steam stats aggregator                            |
+| `src/main/services/playtime-providers/playtime-aggregator.ts`                       | Multi-provider fan-out, similarity ranking, dedup        |
+| `src/main/services/playtime-providers/cache.ts`                                     | Provider response cache (TTL 24h per query)              |
+| `src/main/events/playtime/search-playtime-games.ts`                                 | IPC handler: typeahead search across selected provider   |
+| `src/main/events/playtime/fetch-playtime-data.ts`                                   | IPC handler: full fetch by `{provider, externalId}`      |
+| `src/main/events/playtime/auto-match-playtime.ts`                                   | IPC handler: best-match across providers                 |
+| `src/main/events/playtime/save-game-playtime-mapping.ts`                            | IPC handler: persist `{provider, externalId}` on Game    |
+| `src/shared/playtime/provider-meta.ts`                                              | Provider logos, display names, slug → logo mapping       |
+| `src/renderer/src/pages/game-details/dashboard-cards/how-long-to-beat-card-v2.tsx`  | New compact card (default)                               |
+| `src/renderer/src/pages/game-details/dashboard-cards/how-long-to-beat-card-v2.scss` | Styles                                                   |
+| `src/renderer/src/components/playtime-edit-modal/playtime-edit-modal.tsx`           | Edit picker modal w/ typeahead search                    |
+| `src/renderer/src/components/playtime-edit-modal/playtime-edit-modal.scss`          | Edit picker styles                                       |
+| `src/renderer/src/components/playtime-edit-modal/use-playtime-typeahead.ts`         | Debounced typeahead hook (live provider + library cache) |
+| `src/renderer/src/hooks/use-playtime-data.ts`                                       | Renderer hook orchestrating auto-fetch + state           |
 
 ### 4.2 Modified files
 
-| File                                                                            | Change                                                       |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `src/types/how-long-to-beat.types.ts`                                           | Add `PlaytimeProvider`, `PlaytimeGameData`, `PlaytimeMapping` |
-| `src/types/level.types.ts`                                                      | Add `playtimeMapping?: PlaytimeMapping` to `Game`            |
-| `src/types/index.ts`                                                            | Re-export new types                                          |
-| `src/main/level/sublevels/index.ts`                                             | (no change)                                                  |
-| `src/main/events/index.ts`                                                      | Register new IPC handlers                                    |
-| `src/preload/index.ts`                                                          | Expose new IPC bridges                                       |
-| `src/renderer/src/declaration.d.ts`                                             | Declare new preload methods                                  |
-| `src/renderer/src/pages/game-details/tabs/overview-tab.tsx`                     | Use new `usePlaytimeData` hook + new card component         |
-| `src/renderer/src/pages/game-details/sidebar/sidebar.tsx`                        | Use new compact card in sidebar OR keep sidebar unchanged per wireframe |
-| `src/renderer/src/pages/game-details/dashboard-cards/how-long-to-beat-card.tsx` | Replace internals -> thin wrapper that delegates to the new component |
-| `src/renderer/src/pages/game-details/game-details-skeleton.tsx`                 | Update HLTB skeleton to match new layout                    |
-| `src/locales/en/translation.json`                                               | Add the new translation keys below                           |
+| File                                                                            | Change                                                                  |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `src/types/how-long-to-beat.types.ts`                                           | Add `PlaytimeProvider`, `PlaytimeGameData`, `PlaytimeMapping`           |
+| `src/types/level.types.ts`                                                      | Add `playtimeMapping?: PlaytimeMapping` to `Game`                       |
+| `src/types/index.ts`                                                            | Re-export new types                                                     |
+| `src/main/level/sublevels/index.ts`                                             | (no change)                                                             |
+| `src/main/events/index.ts`                                                      | Register new IPC handlers                                               |
+| `src/preload/index.ts`                                                          | Expose new IPC bridges                                                  |
+| `src/renderer/src/declaration.d.ts`                                             | Declare new preload methods                                             |
+| `src/renderer/src/pages/game-details/tabs/overview-tab.tsx`                     | Use new `usePlaytimeData` hook + new card component                     |
+| `src/renderer/src/pages/game-details/sidebar/sidebar.tsx`                       | Use new compact card in sidebar OR keep sidebar unchanged per wireframe |
+| `src/renderer/src/pages/game-details/dashboard-cards/how-long-to-beat-card.tsx` | Replace internals -> thin wrapper that delegates to the new component   |
+| `src/renderer/src/pages/game-details/game-details-skeleton.tsx`                 | Update HLTB skeleton to match new layout                                |
+| `src/locales/en/translation.json`                                               | Add the new translation keys below                                      |
 
 ### 4.3 Untouched (Big Picture)
 
@@ -118,15 +118,12 @@ treats them uniformly.
 ### 5.1 Common provider interface (`src/main/services/playtime-providers/types.ts`)
 
 ```ts
-export type PlaytimeProviderId =
-  | "howlongtobeat"
-  | "backlogged"
-  | "igdb_steam";
+export type PlaytimeProviderId = "howlongtobeat" | "backlogged" | "igdb_steam";
 
 export interface PlaytimeProvider {
   id: PlaytimeProviderId;
   displayName: string;
-  logoUrl: string;             // local asset shared from src/shared/playtime/provider-meta.ts
+  logoUrl: string; // local asset shared from src/shared/playtime/provider-meta.ts
   supportsSubmit: boolean;
   search(query: string, signal?: AbortSignal): Promise<PlaytimeSearchResult[]>;
   fetchById(providerGameId: string): Promise<PlaytimeGameData>;
@@ -134,21 +131,21 @@ export interface PlaytimeProvider {
 
 export interface PlaytimeSearchResult {
   provider: PlaytimeProviderId;
-  providerGameId: string;        // HLTB numeric id, Backlogged slug, IGDB slug
+  providerGameId: string; // HLTB numeric id, Backlogged slug, IGDB slug
   title: string;
   releaseYear: number | null;
   platforms: string[];
   imageUrl: string | null;
-  similarityScore: number;       // 0-1 (also used in auto-match ranking)
+  similarityScore: number; // 0-1 (also used in auto-match ranking)
   // Already-collated fastest fields for "guess" scenarios:
   estimatedSeconds: number | null;
 }
 
 export interface PlaytimeCategory {
-  title: string;                 // "Main Story", "Main + Sides", "Completionist", "100%", "Solo", "Speedrun", "Co-op"
-  duration: string;              // "40 Hours"
-  accuracy: string;              // "00" through "05"
-  durationSeconds: number;       // parsed convenience
+  title: string; // "Main Story", "Main + Sides", "Completionist", "100%", "Solo", "Speedrun", "Co-op"
+  duration: string; // "40 Hours"
+  accuracy: string; // "00" through "05"
+  durationSeconds: number; // parsed convenience
 }
 
 export interface PlaytimeGameData {
@@ -167,9 +164,9 @@ export interface PlaytimeGameData {
 export interface PlaytimeMapping {
   provider: PlaytimeProviderId;
   externalId: string;
-  source: "manual" | "auto";     // manual wins over auto on display
+  source: "manual" | "auto"; // manual wins over auto on display
   matchedSimilarityScore?: number;
-  updatedAt: string;             // ISO
+  updatedAt: string; // ISO
 }
 
 export interface Game {
@@ -200,13 +197,13 @@ export interface Game {
 
 ## 7. IPC surface
 
-| Method                          | Args                                                          | Returns                                |
-| ------------------------------- | ------------------------------------------------------------- | -------------------------------------- |
-| `searchPlaytimeGames`           | `{ provider, query, signal }`                                 | `PlaytimeSearchResult[]`               |
-| `fetchPlaytimeData`             | `{ provider, externalId, signal }`                            | `PlaytimeGameData`                     |
-| `autoMatchPlaytime`             | `{ title, releaseYear?, appid? }`                             | `PlaytimeSearchResult` (best pick)     |
-| `saveGamePlaytimeMapping`       | `{ shop, objectId, provider, externalId, source }`            | `PlaytimeMapping` (persisted)          |
-| (existing) `submitHltbPlaytime` | `{ shop, objectId, seconds }`                                 | unchanged                              |
+| Method                          | Args                                               | Returns                            |
+| ------------------------------- | -------------------------------------------------- | ---------------------------------- |
+| `searchPlaytimeGames`           | `{ provider, query, signal }`                      | `PlaytimeSearchResult[]`           |
+| `fetchPlaytimeData`             | `{ provider, externalId, signal }`                 | `PlaytimeGameData`                 |
+| `autoMatchPlaytime`             | `{ title, releaseYear?, appid? }`                  | `PlaytimeSearchResult` (best pick) |
+| `saveGamePlaytimeMapping`       | `{ shop, objectId, provider, externalId, source }` | `PlaytimeMapping` (persisted)      |
+| (existing) `submitHltbPlaytime` | `{ shop, objectId, seconds }`                      | unchanged                          |
 
 All are registered in `src/main/events/playtime/index.ts` and exposed in
 `src/preload/index.ts` via `window.electron.playtimeApi.{...}`.
@@ -307,16 +304,16 @@ All are registered in `src/main/events/playtime/index.ts` and exposed in
 
 ### 8.4 States
 
-| State              | Card rendering                                                   |
-| ------------------ | ---------------------------------------------------------------- |
-| Loading            | Skeleton (same shape as compact)                                 |
-| Loaded (default)   | Compact rows + actions                                          |
-| Loaded (extended)  | Above + hidden categories + accuracy badges + platform split     |
-| Submitted today    | "Submitted to HLTB X days ago" small chip below submit button   |
-| Empty / no match   | "No playtime data found" + "Search manually" CTA                |
-| Error              | "Couldn't load playtime data" + "Retry" button                 |
-| Provider disabled  | Show provider-specific empty state (e.g. "Backlogged offline")  |
-| Manual mapping     | Same as Loaded — confidence chip color varies by similarity      |
+| State             | Card rendering                                                 |
+| ----------------- | -------------------------------------------------------------- |
+| Loading           | Skeleton (same shape as compact)                               |
+| Loaded (default)  | Compact rows + actions                                         |
+| Loaded (extended) | Above + hidden categories + accuracy badges + platform split   |
+| Submitted today   | "Submitted to HLTB X days ago" small chip below submit button  |
+| Empty / no match  | "No playtime data found" + "Search manually" CTA               |
+| Error             | "Couldn't load playtime data" + "Retry" button                 |
+| Provider disabled | Show provider-specific empty state (e.g. "Backlogged offline") |
+| Manual mapping    | Same as Loaded — confidence chip color varies by similarity    |
 
 ---
 
@@ -397,22 +394,22 @@ Other locales inherit gracefully (existing fallback behaviour).
 
 ## 11. Edge cases
 
-| Scenario                                                       | Behavior                                                                                                  |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Auto-match returns no provider above 0.65                      | Render empty state with "Search manually" CTA                                                              |
-| Provider call fails during auto-match                          | Other providers continue; if all fail, render error state with Retry button                                |
-| User manually picks a low-similarity match (< 0.85)            | Confidence chip turns red + "Not the right game?" hint next to it                                          |
-| Game has a stored manual mapping but the provider returns 404  | Evict the mapping + drop into empty state with "Search manually" CTA                                       |
-| User picks a provider they have no key for (none required today) | N/A — none of the three providers require user keys                                                       |
-| User submits playtime to HLTB and provider switches to Backlogged later | Old HLTB submission stays untouched; new submit button does not show for Backlogged                  |
-| Same game exists in two providers with different numbers       | We only show one provider at a time. Confidence chip + Edit picker make switching easy                     |
-| Big Picture mode (out of scope)                                | Continues to show the existing HLTB list from the v1 component. No regressions                           |
-| Typeahead returns > 50 matches                                 | Virtualize the list (`react-window`) — already present in `react` deps via other features                 |
-| Search query has special characters                            | URL-encode on the wire; escape on display                                                                  |
-| Provider-side rate limiting                                    | Cached responses from the prior 24h cache layer absorb the second wave; toast the user on persistence      |
-| Game title contains edition suffix ("Game of the Year")        | `playtime-aggregator` cleans the title before searching (strip "Edition", "GOTY", etc.) using existing helpers in `src/shared/formatName.ts` |
-| Rapidly switching tabs while auto-fetch is in flight           | AbortController cancels the in-flight requests (matches existing pattern)                                 |
-| First confirmation (no prior mapping)                          | Persist as `source: "auto"`; subsequent manual re-pick downgrades the old entry's display weight         |
+| Scenario                                                                | Behavior                                                                                                                                     |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auto-match returns no provider above 0.65                               | Render empty state with "Search manually" CTA                                                                                                |
+| Provider call fails during auto-match                                   | Other providers continue; if all fail, render error state with Retry button                                                                  |
+| User manually picks a low-similarity match (< 0.85)                     | Confidence chip turns red + "Not the right game?" hint next to it                                                                            |
+| Game has a stored manual mapping but the provider returns 404           | Evict the mapping + drop into empty state with "Search manually" CTA                                                                         |
+| User picks a provider they have no key for (none required today)        | N/A — none of the three providers require user keys                                                                                          |
+| User submits playtime to HLTB and provider switches to Backlogged later | Old HLTB submission stays untouched; new submit button does not show for Backlogged                                                          |
+| Same game exists in two providers with different numbers                | We only show one provider at a time. Confidence chip + Edit picker make switching easy                                                       |
+| Big Picture mode (out of scope)                                         | Continues to show the existing HLTB list from the v1 component. No regressions                                                               |
+| Typeahead returns > 50 matches                                          | Virtualize the list (`react-window`) — already present in `react` deps via other features                                                    |
+| Search query has special characters                                     | URL-encode on the wire; escape on display                                                                                                    |
+| Provider-side rate limiting                                             | Cached responses from the prior 24h cache layer absorb the second wave; toast the user on persistence                                        |
+| Game title contains edition suffix ("Game of the Year")                 | `playtime-aggregator` cleans the title before searching (strip "Edition", "GOTY", etc.) using existing helpers in `src/shared/formatName.ts` |
+| Rapidly switching tabs while auto-fetch is in flight                    | AbortController cancels the in-flight requests (matches existing pattern)                                                                    |
+| First confirmation (no prior mapping)                                   | Persist as `source: "auto"`; subsequent manual re-pick downgrades the old entry's display weight                                             |
 
 ---
 

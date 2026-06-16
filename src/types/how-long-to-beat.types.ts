@@ -26,10 +26,7 @@ export interface HowLongToBeatProgress {
 
 /* ---------- Multi-provider playtime model (new) ---------- */
 
-export type PlaytimeProviderId =
-  | "howlongtobeat"
-  | "backlogged"
-  | "igdb_steam";
+export type PlaytimeProviderId = "howlongtobeat" | "backlogged" | "igdb_steam";
 
 export type PlaytimeMappingSource = "manual" | "auto";
 

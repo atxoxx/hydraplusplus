@@ -12,20 +12,14 @@ interface CacheEntry<T> {
 const SEARCH_TTL_MS = 1000 * 60 * 60 * 24; // 24 hours
 const FETCH_TTL_MS = 1000 * 60 * 60 * 6; // 6 hours
 
-const searchCache = new Map<
-  string,
-  CacheEntry<PlaytimeSearchResult[]>
->();
+const searchCache = new Map<string, CacheEntry<PlaytimeSearchResult[]>>();
 const fetchCache = new Map<string, CacheEntry<PlaytimeGameData>>();
 
 function searchKey(provider: PlaytimeProviderId, query: string): string {
   return `${provider}::${query.trim().toLowerCase()}`;
 }
 
-function fetchKey(
-  provider: PlaytimeProviderId,
-  externalId: string
-): string {
+function fetchKey(provider: PlaytimeProviderId, externalId: string): string {
   return `${provider}::${externalId.trim()}`;
 }
 

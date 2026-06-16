@@ -1,10 +1,5 @@
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import {
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ClockIcon,
@@ -73,10 +68,7 @@ export function HowLongToBeatCard({
   const getProgressPercent = (duration: string): number => {
     const estimated = parseDurationToSeconds(duration);
     if (estimated <= 0) return 0;
-    return Math.min(
-      Math.round((userPlaytimeSeconds / estimated) * 100),
-      100
-    );
+    return Math.min(Math.round((userPlaytimeSeconds / estimated) * 100), 100);
   };
 
   const handleSubmitPlaytime = async () => {
@@ -113,9 +105,7 @@ export function HowLongToBeatCard({
               key={category.title}
               className="hltb-card__item hltb-card__item--compact"
             >
-              <span className="hltb-card__item-title">
-                {category.title}
-              </span>
+              <span className="hltb-card__item-title">{category.title}</span>
               <span className="hltb-card__item-duration">
                 {formatDuration(category.duration)}
               </span>
@@ -158,9 +148,7 @@ export function HowLongToBeatCard({
               <h4 className="hltb-card__empty-title">
                 {t("hltb_empty_title")}
               </h4>
-              <p className="hltb-card__empty-body">
-                {t("hltb_empty_body")}
-              </p>
+              <p className="hltb-card__empty-body">{t("hltb_empty_body")}</p>
               <button
                 type="button"
                 className="hltb-card__empty-action"
@@ -271,10 +259,11 @@ export function HowLongToBeatCard({
     state.similarityScore < LOW_CONFIDENCE_THRESHOLD;
   const isManual = state.manual;
 
-  const primaryCategories: HowLongToBeatCategory[] =
-    state.categories.slice(0, 4);
-  const extendedCategories: HowLongToBeatCategory[] =
-    state.categories.slice(4);
+  const primaryCategories: HowLongToBeatCategory[] = state.categories.slice(
+    0,
+    4
+  );
+  const extendedCategories: HowLongToBeatCategory[] = state.categories.slice(4);
 
   return (
     <SkeletonTheme baseColor="#1c1c1c" highlightColor="#444">

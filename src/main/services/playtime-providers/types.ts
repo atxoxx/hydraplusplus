@@ -1,7 +1,4 @@
-export type PlaytimeProviderId =
-  | "howlongtobeat"
-  | "backlogged"
-  | "igdb_steam";
+export type PlaytimeProviderId = "howlongtobeat" | "backlogged" | "igdb_steam";
 
 export interface PlaytimeProviderMeta {
   id: PlaytimeProviderId;
@@ -40,37 +37,33 @@ export interface PlaytimeGameData {
 
 export interface PlaytimeProvider {
   id: PlaytimeProviderId;
-  search(
-    query: string,
-    signal?: AbortSignal
-  ): Promise<PlaytimeSearchResult[]>;
+  search(query: string, signal?: AbortSignal): Promise<PlaytimeSearchResult[]>;
   fetchById(
     externalId: string,
     signal?: AbortSignal
   ): Promise<PlaytimeGameData | null>;
 }
 
-export const PROVIDER_META: Record<PlaytimeProviderId, PlaytimeProviderMeta> =
-  {
-    howlongtobeat: {
-      id: "howlongtobeat",
-      displayName: "HowLongToBeat",
-      supportsSubmit: true,
-      logoUrl: null,
-    },
-    backlogged: {
-      id: "backlogged",
-      displayName: "Backlogged",
-      supportsSubmit: false,
-      logoUrl: null,
-    },
-    igdb_steam: {
-      id: "igdb_steam",
-      displayName: "IGDB / Steam",
-      supportsSubmit: false,
-      logoUrl: null,
-    },
-  };
+export const PROVIDER_META: Record<PlaytimeProviderId, PlaytimeProviderMeta> = {
+  howlongtobeat: {
+    id: "howlongtobeat",
+    displayName: "HowLongToBeat",
+    supportsSubmit: true,
+    logoUrl: null,
+  },
+  backlogged: {
+    id: "backlogged",
+    displayName: "Backlogged",
+    supportsSubmit: false,
+    logoUrl: null,
+  },
+  igdb_steam: {
+    id: "igdb_steam",
+    displayName: "IGDB / Steam",
+    supportsSubmit: false,
+    logoUrl: null,
+  },
+};
 
 /** Best-match threshold below which we render the empty state. */
 export const AUTO_MATCH_THRESHOLD = 0.65;

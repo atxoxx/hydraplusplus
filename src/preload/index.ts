@@ -1408,17 +1408,19 @@ contextBridge.exposeInMainWorld("electron", {
     provider: PlaytimeProviderId;
     externalId: string;
   }) =>
-    ipcRenderer.invoke("fetchPlaytimeData", params) as Promise<
-      PlaytimeGameData | null
-    >,
+    ipcRenderer.invoke(
+      "fetchPlaytimeData",
+      params
+    ) as Promise<PlaytimeGameData | null>,
   autoMatchPlaytime: (params: {
     title: string;
     releaseYear?: number | null;
     appId?: number | null;
   }) =>
-    ipcRenderer.invoke("autoMatchPlaytime", params) as Promise<
-      PlaytimeSearchResult | null
-    >,
+    ipcRenderer.invoke(
+      "autoMatchPlaytime",
+      params
+    ) as Promise<PlaytimeSearchResult | null>,
   saveGamePlaytimeMapping: (params: {
     shop: string;
     objectId: string;

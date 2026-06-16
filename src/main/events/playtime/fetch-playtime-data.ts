@@ -4,10 +4,7 @@ import {
   getCachedFetch,
   setCachedFetch,
 } from "@main/services/playtime-providers/cache";
-import type {
-  PlaytimeGameData,
-  PlaytimeProviderId,
-} from "@types";
+import type { PlaytimeGameData, PlaytimeProviderId } from "@types";
 
 export interface FetchPlaytimeDataArgs {
   provider: PlaytimeProviderId;

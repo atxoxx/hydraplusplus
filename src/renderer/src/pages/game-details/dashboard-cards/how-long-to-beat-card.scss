@@ -73,7 +73,9 @@
     border-radius: 6px;
     padding: 6px;
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -98,7 +100,9 @@
     overflow: hidden;
     max-height: 0;
     opacity: 0;
-    transition: max-height 0.4s ease, opacity 0.3s ease;
+    transition:
+      max-height 0.4s ease,
+      opacity 0.3s ease;
     display: flex;
     flex-direction: column;
     gap: calc(globals.$spacing-unit * 1.25);
@@ -115,12 +119,13 @@
     grid-template-rows: auto auto;
     column-gap: calc(globals.$spacing-unit);
     row-gap: 4px;
-    padding: calc(globals.$spacing-unit * 0.75)
-      calc(globals.$spacing-unit);
+    padding: calc(globals.$spacing-unit * 0.75) calc(globals.$spacing-unit);
     background-color: rgba(255, 255, 255, 0.02);
     border: 1px solid transparent;
     border-radius: 6px;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
 
     &:hover {
       border-color: globals.$border-color;
@@ -200,7 +205,9 @@
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
     align-self: flex-start;
 
     &:hover {

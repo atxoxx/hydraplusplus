@@ -23,11 +23,12 @@
     color: globals.$body-color;
     border: 1px solid globals.$border-color;
     border-radius: 6px;
-    padding: calc(globals.$spacing-unit * 1)
-      calc(globals.$spacing-unit * 1.5);
+    padding: calc(globals.$spacing-unit * 1) calc(globals.$spacing-unit * 1.5);
     font-size: globals.$body-font-size;
     outline: none;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
 
     &:focus {
       border-color: globals.$brand-blue;
@@ -71,12 +72,13 @@
     background-color: rgba(255, 255, 255, 0.03);
     border: 1px solid transparent;
     border-radius: 8px;
-    padding: calc(globals.$spacing-unit)
-      calc(globals.$spacing-unit * 1.5);
+    padding: calc(globals.$spacing-unit) calc(globals.$spacing-unit * 1.5);
     cursor: pointer;
     text-align: left;
     color: globals.$body-color;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.06);
