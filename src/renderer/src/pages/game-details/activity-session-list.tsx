@@ -19,9 +19,7 @@ export function ActivitySessionList({
   if (loading) {
     return (
       <div className="activity-session-list">
-        <h4 className="activity-session-list__title">
-          {t("session_history")}
-        </h4>
+        <h4 className="activity-session-list__title">{t("session_history")}</h4>
         <div className="activity-session-list__empty">{t("loading")}</div>
       </div>
     );
@@ -30,9 +28,7 @@ export function ActivitySessionList({
   if (sessions.length === 0) {
     return (
       <div className="activity-session-list">
-        <h4 className="activity-session-list__title">
-          {t("session_history")}
-        </h4>
+        <h4 className="activity-session-list__title">{t("session_history")}</h4>
         <div className="activity-session-list__empty">
           {t("no_sessions_yet")}
         </div>
@@ -47,9 +43,7 @@ export function ActivitySessionList({
     <div className="activity-session-list">
       <h4 className="activity-session-list__title">
         {t("session_history")}
-        <span className="activity-session-list__count">
-          {sessions.length}
-        </span>
+        <span className="activity-session-list__count">{sessions.length}</span>
       </h4>
 
       <div className="activity-session-list__items">

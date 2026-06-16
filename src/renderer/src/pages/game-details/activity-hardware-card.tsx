@@ -1,6 +1,9 @@
 import { useTranslation } from "react-i18next";
 import type { HardwareMetricsSnapshot } from "../../declaration";
-import { ActivitySparkline, samplesToSparklineData } from "./activity-sparkline";
+import {
+  ActivitySparkline,
+  samplesToSparklineData,
+} from "./activity-sparkline";
 import "./activity-hardware-card.scss";
 
 export interface ActivityHardwareCardProps {
@@ -15,7 +18,9 @@ export function ActivityHardwareCard({
   if (!metrics || metrics.samples.length === 0) {
     return (
       <div className="activity-hardware-card activity-hardware-card--empty">
-        <h4 className="activity-hardware-card__title">{t("hardware_summary")}</h4>
+        <h4 className="activity-hardware-card__title">
+          {t("hardware_summary")}
+        </h4>
         <p className="activity-hardware-card__empty">{t("no_hardware_data")}</p>
       </div>
     );
@@ -33,9 +38,7 @@ export function ActivityHardwareCard({
         <h4 className="activity-hardware-card__title">
           {t("hardware_summary")}
         </h4>
-        <p className="activity-hardware-card__empty">
-          {t("no_hardware_data")}
-        </p>
+        <p className="activity-hardware-card__empty">{t("no_hardware_data")}</p>
       </div>
     );
   }
@@ -44,9 +47,7 @@ export function ActivityHardwareCard({
 
   return (
     <div className="activity-hardware-card">
-      <h4 className="activity-hardware-card__title">
-        {t("hardware_summary")}
-      </h4>
+      <h4 className="activity-hardware-card__title">{t("hardware_summary")}</h4>
 
       <div className="activity-hardware-card__metrics">
         {metrics.avgCpuUsage > 0 && (

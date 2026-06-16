@@ -38,8 +38,7 @@ export function ActivityStatsGrid({
 }: Readonly<ActivityStatsGridProps>) {
   const { t } = useTranslation("activity");
 
-  const TrendIcon =
-    trend.direction === "up" ? ArrowUpIcon : ArrowDownIcon;
+  const TrendIcon = trend.direction === "up" ? ArrowUpIcon : ArrowDownIcon;
   const trendColor =
     trend.direction === "up"
       ? "#16b195"
@@ -62,9 +61,7 @@ export function ActivityStatsGrid({
         <span className="activity-stats-grid__stat-label">
           {t("session_count")}
         </span>
-        <span className="activity-stats-grid__stat-value">
-          {sessionCount}
-        </span>
+        <span className="activity-stats-grid__stat-value">{sessionCount}</span>
       </div>
 
       <div className="activity-stats-grid__stat">
@@ -90,9 +87,7 @@ export function ActivityStatsGrid({
           {t("current_streak")}
         </span>
         <span className="activity-stats-grid__stat-value">
-          {currentStreak > 0
-            ? t("streak_days", { count: currentStreak })
-            : "—"}
+          {currentStreak > 0 ? t("streak_days", { count: currentStreak }) : "—"}
         </span>
       </div>
 
@@ -118,9 +113,7 @@ export function ActivityStatsGrid({
               <TrendIcon size={14} />
             </span>
           )}
-          {trend.direction === "flat"
-            ? "—"
-            : `${trend.percent}%`}
+          {trend.direction === "flat" ? "—" : `${trend.percent}%`}
         </span>
       </div>
 
@@ -137,9 +130,7 @@ export function ActivityStatsGrid({
         <span className="activity-stats-grid__stat-label">
           {t("active_days")}
         </span>
-        <span className="activity-stats-grid__stat-value">
-          {dayCount}
-        </span>
+        <span className="activity-stats-grid__stat-value">{dayCount}</span>
       </div>
     </div>
   );
@@ -183,8 +174,7 @@ export function computeStreaks(sessions: GameSession[]): {
   for (let i = 1; i < sortedDays.length; i++) {
     const prev = new Date(sortedDays[i - 1]);
     const curr = new Date(sortedDays[i]);
-    const diffDays =
-      (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24);
+    const diffDays = (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24);
 
     if (Math.abs(diffDays - 1) < 0.01) {
       run++;

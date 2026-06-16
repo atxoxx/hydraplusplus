@@ -33,13 +33,16 @@ export function SettingsContextContentGameplay() {
   });
 
   useEffect(() => {
-    window.electron.getHardwareMonitorConfig().then((config) => {
-      setHwConfig({
-        enabled: config.enabled,
-        pollingIntervalMs: config.pollingIntervalMs,
-        alertsEnabled: config.alertsEnabled,
-      });
-    }).catch(() => {});
+    window.electron
+      .getHardwareMonitorConfig()
+      .then((config) => {
+        setHwConfig({
+          enabled: config.enabled,
+          pollingIntervalMs: config.pollingIntervalMs,
+          alertsEnabled: config.alertsEnabled,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const updateHwConfig = useCallback(
@@ -147,9 +150,7 @@ export function SettingsContextContentGameplay() {
         <CheckboxField
           label={t("enable_hardware_monitoring")}
           checked={hwConfig.enabled}
-          onChange={() =>
-            updateHwConfig({ enabled: !hwConfig.enabled })
-          }
+          onChange={() => updateHwConfig({ enabled: !hwConfig.enabled })}
         />
 
         <div style={{ marginLeft: 28 }}>

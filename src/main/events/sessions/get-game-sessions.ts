@@ -20,8 +20,7 @@ const getGameSessions = async (
 
   // Sort by start time descending (most recent first)
   sessions.sort(
-    (a, b) =>
-      new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+    (a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
   );
 
   const start = offset ?? 0;

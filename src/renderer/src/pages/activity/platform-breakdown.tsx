@@ -1,12 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import type { TopPlayedGame } from "./top-played-games";
 
 export interface PlatformBreakdownProps {
@@ -74,9 +68,7 @@ export function PlatformBreakdown({
   if (loading) {
     return (
       <div className="section-panel">
-        <h3 className="section-panel__title">
-          {t("platform_breakdown")}
-        </h3>
+        <h3 className="section-panel__title">{t("platform_breakdown")}</h3>
         <div className="section-panel__empty">{t("loading")}</div>
       </div>
     );
@@ -85,9 +77,7 @@ export function PlatformBreakdown({
   if (chartData.length === 0) {
     return (
       <div className="section-panel">
-        <h3 className="section-panel__title">
-          {t("platform_breakdown")}
-        </h3>
+        <h3 className="section-panel__title">{t("platform_breakdown")}</h3>
         <div className="section-panel__empty">{t("no_activity_yet")}</div>
       </div>
     );
@@ -125,10 +115,7 @@ export function PlatformBreakdown({
                 borderRadius: 6,
                 fontSize: 12,
               }}
-              formatter={(value) => [
-                `${Number(value)}h`,
-                t("total_hours"),
-              ]}
+              formatter={(value) => [`${Number(value)}h`, t("total_hours")]}
             />
           </PieChart>
         </ResponsiveContainer>

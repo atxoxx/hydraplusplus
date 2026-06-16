@@ -5,7 +5,12 @@ import type { GameSession } from "../../declaration";
 import { ActivityHardwareCard } from "../game-details/activity-hardware-card";
 
 export interface GlobalSessionListProps {
-  topGames: { objectId: string; shop: string; title: string; iconUrl: string | null }[];
+  topGames: {
+    objectId: string;
+    shop: string;
+    title: string;
+    iconUrl: string | null;
+  }[];
   loading: boolean;
 }
 

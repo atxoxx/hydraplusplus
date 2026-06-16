@@ -29,7 +29,10 @@ const DEFAULT_CONFIG: HardwareMonitorConfig = {
 
 export class HardwareMonitor {
   private static activeSamples = new Map<string, HardwareSample[]>();
-  private static pollingIntervals = new Map<string, ReturnType<typeof setInterval>>();
+  private static pollingIntervals = new Map<
+    string,
+    ReturnType<typeof setInterval>
+  >();
   private static config: HardwareMonitorConfig = { ...DEFAULT_CONFIG };
 
   static getConfig(): HardwareMonitorConfig {
@@ -186,9 +189,13 @@ export class HardwareMonitor {
     const ramValues = samples.map((s) => s.ramUsageMB);
 
     const avg = (arr: number[]): number =>
-      arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
-    const min = (arr: number[]): number => (arr.length > 0 ? Math.min(...arr) : 0);
-    const max = (arr: number[]): number => (arr.length > 0 ? Math.max(...arr) : 0);
+      arr.length > 0
+        ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
+        : 0;
+    const min = (arr: number[]): number =>
+      arr.length > 0 ? Math.min(...arr) : 0;
+    const max = (arr: number[]): number =>
+      arr.length > 0 ? Math.max(...arr) : 0;
 
     return {
       avgFps: avg(fpsValues),

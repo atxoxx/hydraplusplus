@@ -28,15 +28,16 @@ function computeTrend(dailyEntries: DailyPlaytimeEntry[]): {
   const firstAvg =
     firstHalf.reduce((s, e) => s + e.totalMilliseconds, 0) / firstHalf.length;
   const secondAvg =
-    secondHalf.reduce((s, e) => s + e.totalMilliseconds, 0) /
-    secondHalf.length;
+    secondHalf.reduce((s, e) => s + e.totalMilliseconds, 0) / secondHalf.length;
 
-  if (firstAvg === 0 && secondAvg === 0) return { direction: "flat", percent: 0 };
+  if (firstAvg === 0 && secondAvg === 0)
+    return { direction: "flat", percent: 0 };
   if (firstAvg === 0) return { direction: "up", percent: 100 };
 
   const change = ((secondAvg - firstAvg) / firstAvg) * 100;
   if (change > 10) return { direction: "up", percent: Math.round(change) };
-  if (change < -10) return { direction: "down", percent: Math.round(Math.abs(change)) };
+  if (change < -10)
+    return { direction: "down", percent: Math.round(Math.abs(change)) };
   return { direction: "flat", percent: Math.round(Math.abs(change)) };
 }
 
@@ -165,11 +166,7 @@ export function GameActivityPanel({ shop, objectId }: GameActivityPanelProps) {
   );
 
   const longestSessionMs = useMemo(
-    () =>
-      sessions.reduce(
-        (max, s) => Math.max(max, s.durationMs),
-        0
-      ),
+    () => sessions.reduce((max, s) => Math.max(max, s.durationMs), 0),
     [sessions]
   );
 
@@ -249,10 +246,7 @@ export function GameActivityPanel({ shop, objectId }: GameActivityPanelProps) {
       />
 
       <div className="game-activity-panel__sessions">
-        <ActivitySessionList
-          sessions={sessions}
-          loading={sessionsLoading}
-        />
+        <ActivitySessionList sessions={sessions} loading={sessionsLoading} />
       </div>
     </div>
   );

@@ -9,10 +9,7 @@ export function ActivityTab() {
   return (
     <div className="activity-panel-tab">
       {shop && objectId && (
-        <GameActivityPanel
-          shop={effectiveShop}
-          objectId={effectiveObjectId}
-        />
+        <GameActivityPanel shop={effectiveShop} objectId={effectiveObjectId} />
       )}
     </div>
   );
