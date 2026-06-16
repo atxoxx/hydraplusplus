@@ -53,6 +53,8 @@ import type {
   SteamPlayerCount,
   SteamReviewSummary,
   SteamReviewAnalysis,
+  SteamReviewsPage,
+  SteamReviewFilters,
   SteamFamilyGame,
   SteamFamilyScanResult,
   PlatformGame,
@@ -237,6 +239,12 @@ declare global {
       objectId: string,
       gameTitle: string
     ) => Promise<SteamReviewAnalysis | null>;
+    getSteamReviews: (
+      shop: GameShop,
+      objectId: string,
+      gameTitle: string,
+      filters: SteamReviewFilters
+    ) => Promise<SteamReviewsPage | null>;
     getGameAssets: (
       objectId: string,
       shop: GameShop

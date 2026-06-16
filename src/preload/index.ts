@@ -4,6 +4,7 @@ import { contextBridge, ipcRenderer } from "electron";
 
 import type {
   GameShop,
+  SteamReviewFilters,
   DownloadProgress,
   UserPreferences,
   AppUpdaterEvent,
@@ -149,6 +150,13 @@ contextBridge.exposeInMainWorld("electron", {
     objectId: string,
     gameTitle: string
   ) => ipcRenderer.invoke("getSteamReviewAnalysis", shop, objectId, gameTitle),
+  getSteamReviews: (
+    shop: GameShop,
+    objectId: string,
+    gameTitle: string,
+    filters: SteamReviewFilters
+  ) =>
+    ipcRenderer.invoke("getSteamReviews", shop, objectId, gameTitle, filters),
   getGameAssets: (objectId: string, shop: GameShop) =>
     ipcRenderer.invoke("getGameAssets", objectId, shop),
   searchGameAssets: (gameTitle: string, assetType: "icon" | "logo" | "hero") =>

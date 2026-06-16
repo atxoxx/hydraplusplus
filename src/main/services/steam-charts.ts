@@ -2,8 +2,11 @@ import axios from "axios";
 import { logger } from "./logger";
 import type {
   SteamPlayerCount,
+  SteamReview,
   SteamReviewSummary,
   SteamReviewAnalysis,
+  SteamReviewsPage,
+  SteamReviewFilters,
 } from "@types";
 
 const STEAM_API_BASE = "https://api.steampowered.com";
@@ -21,6 +24,10 @@ const playerCountCache = new Map<
 const reviewSummaryCache = new Map<
   string,
   { data: SteamReviewSummary; timestamp: number }
+>();
+const reviewsPageCache = new Map<
+  string,
+  { data: SteamReviewsPage; timestamp: number }
 >();
 
 function getCached<T>(
@@ -185,11 +192,11 @@ interface SteamReviewsResponse {
     total_negative: number;
     total_reviews: number;
   };
-  reviews: SteamReview[];
+  reviews: SteamReviewRaw[];
   cursor: string;
 }
 
-interface SteamReview {
+interface SteamReviewRaw {
   recommendationid: number;
   author: {
     steamid: string;
@@ -215,6 +222,47 @@ interface SteamReview {
   written_during_early_access: boolean;
 }
 
+/**
+ * Strip Steam's BBCode tags and normalize line breaks so the renderer can show
+ * the body as plain text.
+ *
+ * Supported in Steam reviews: `[b]`, `[i]`, `[u]`, `[s]`, `[strike]`,
+ * `[code]`, `[spoiler]`, `[url]…[/url]`, `[list]`, `[*]`, `[h1]`, etc.
+ * We strip them all and assign `\\n` to closing list items.
+ */
+function stripSteamBbCode(input: string): string {
+  if (!input) return "";
+  let text = input;
+
+  // Convert list items to a newline so multi-item lists stay readable.
+  text = text.replace(/\[\*\]/g, "\n• ");
+  text = text.replace(/\[\/list\]/gi, "\n");
+  text = text.replace(/\[list(?:=[^\]]+)?\]/gi, "");
+
+  // Convert heading markers to plain newlines.
+  text = text.replace(/\[\/?h[1-6]\]/gi, "\n");
+
+  // Strip all remaining tags (opening/closing/self-closing).
+  text = text.replace(/\[[^\]]*\]/g, "");
+
+  // Collapse multiple blank lines.
+  text = text.replace(/\n{2,}/g, "\n\n");
+
+  return text.trim();
+}
+
+/** Adapt a raw Steam review to the public SteamReview type. */
+function adaptSteamReview(raw: SteamReviewRaw): SteamReview {
+  return {
+    ...raw,
+    author: {
+      ...raw.author,
+      profileUrl: `https://steamcommunity.com/profiles/${raw.author.steamid}`,
+    },
+    review: stripSteamBbCode(raw.review),
+  };
+}
+
 interface SteamReviewSummaryRaw {
   totalPositive: number;
   totalNegative: number;
@@ -237,6 +285,8 @@ function buildSteamReviewsUrl(
     purchaseType?: "all" | "steam" | "non_steam_purchase";
     language?: string;
     dayRange?: number;
+    playtimeMinMinutes?: number;
+    playtimeMaxMinutes?: number;
     numPerPage?: number;
   } = {}
 ): string {
@@ -247,6 +297,8 @@ function buildSteamReviewsUrl(
     purchaseType = "all",
     language = "all",
     dayRange,
+    playtimeMinMinutes,
+    playtimeMaxMinutes,
     numPerPage = 20,
   } = options;
 
@@ -275,9 +327,9 @@ function buildSteamReviewsUrl(
     params.set("end_date", "-1");
   }
 
-  // No playtime filter
-  params.set("playtime_filter_min", "0");
-  params.set("playtime_filter_max", "0");
+  // Optional playtime filter — the Steam API expects 0 / 0 to mean "no bound"
+  params.set("playtime_filter_min", String(playtimeMinMinutes ?? 0));
+  params.set("playtime_filter_max", String(playtimeMaxMinutes ?? 0));
 
   // All device types
   params.set("playtime_type", "all");
@@ -432,7 +484,9 @@ async function collectReviewData(
 
       // Monthly history aggregation
       const date = new Date(review.timestamp_created * 1000);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const monthKey = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
 
       const bucket = monthlyBuckets.get(monthKey) || {
         positive: 0,
@@ -488,6 +542,93 @@ export async function getSteamReviewAnalysisData(
   };
 
   return result;
+}
+
+/**
+ * Build a cache key for a Steam reviews page request.
+ * Distinct cursors earn distinct cache entries, so a back-scroll loads the
+ * same page quickly while each next page still forces a fresh HTTP call.
+ */
+function buildReviewsPageCacheKey(
+  appId: number,
+  filters: SteamReviewFilters
+): string {
+  return [
+    `reviews:${appId}`,
+    filters.filter,
+    filters.reviewType,
+    filters.purchaseType,
+    filters.language,
+    filters.dayRange ?? "-",
+    filters.playtimeMinMinutes,
+    filters.playtimeMaxMinutes,
+    filters.numPerPage ?? 20,
+    filters.cursor ?? "*",
+  ].join(":");
+}
+
+/**
+ * Fetch a single page of Steam reviews using the same cursor-based pagination
+ * that the Playnite ReviewViewer plugin exposes. Returns adapted reviews
+ * (BBCode stripped + author.profileUrl populated) so the renderer can use
+ * them as-is.
+ */
+export async function fetchSteamReviewsPage(
+  appId: number,
+  filters: SteamReviewFilters,
+  signal?: AbortSignal
+): Promise<SteamReviewsPage | null> {
+  const cacheKey = buildReviewsPageCacheKey(appId, filters);
+  const cached = getCached(reviewsPageCache, cacheKey);
+  if (cached) return cached;
+
+  try {
+    const url = buildSteamReviewsUrl(appId, {
+      cursor: filters.cursor,
+      filter: filters.filter,
+      reviewType: filters.reviewType,
+      purchaseType: filters.purchaseType,
+      language: filters.language,
+      dayRange: filters.dayRange,
+      playtimeMinMinutes: filters.playtimeMinMinutes,
+      playtimeMaxMinutes: filters.playtimeMaxMinutes,
+      numPerPage: filters.numPerPage,
+    });
+
+    const response = await axios.get<SteamReviewsResponse>(url, {
+      timeout: 12000,
+      signal,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Accept: "application/json",
+      },
+    });
+
+    if (response.data?.success !== 1) {
+      return null;
+    }
+
+    const page: SteamReviewsPage = {
+      reviews: response.data.reviews.map(adaptSteamReview),
+      cursor: response.data.cursor ?? "",
+      query_summary: {
+        num_reviews: response.data.query_summary.num_reviews,
+        review_score: response.data.query_summary.review_score,
+        review_score_desc: response.data.query_summary.review_score_desc,
+        total_positive: response.data.query_summary.total_positive,
+        total_negative: response.data.query_summary.total_negative,
+        total_reviews: response.data.query_summary.total_reviews,
+      },
+    };
+
+    setCache(reviewsPageCache, cacheKey, page);
+    return page;
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.code === "ERR_CANCELED") return null;
+    logger.error("Failed to fetch Steam reviews page", err);
+    return null;
+  }
 }
 
 /**
