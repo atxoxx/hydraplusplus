@@ -1,0 +1,64 @@
+.activity-sparkline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+
+  &__label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    min-width: 36px;
+    font-weight: 500;
+  }
+
+  &__chart {
+    flex: 1;
+    height: 28px;
+    min-width: 40px;
+  }
+
+  &__value {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 48px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+
+    &--good {
+      color: #16b195;
+    }
+
+    &--warn {
+      color: #d4a853;
+    }
+
+    &--danger {
+      color: #e74c3c;
+    }
+  }
+
+  &__tooltip {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+
+    &-label {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    &-value {
+      color: #16b195;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    &-time {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 10px;
+    }
+  }
+}

@@ -224,6 +224,17 @@ export interface UserPreferences {
   sidebarShowAchievementsBadge?: boolean;
   /** Show friends badge on sidebar game items */
   sidebarShowFriendsBadge?: boolean;
+  /** Hardware monitoring configuration */
+  hardwareMonitorConfig?: {
+    enabled: boolean;
+    pollingIntervalMs: number;
+    alertsEnabled: boolean;
+    fpsAlertThreshold: number;
+    cpuTempAlertThreshold: number;
+    gpuTempAlertThreshold: number;
+    cpuUsageAlertThreshold: number;
+    ramUsageAlertThresholdMB: number;
+  };
 }
 
 export interface ScreenState {

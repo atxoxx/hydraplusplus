@@ -1,0 +1,48 @@
+@use "../../scss/globals.scss";
+
+.activity-session-item {
+  padding: calc(globals.$spacing-unit * 1.5) calc(globals.$spacing-unit * 2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.015);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__date {
+    color: globals.$muted-color;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  &__time {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
+  }
+
+  &__duration {
+    color: globals.$brand-teal;
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__hardware {
+    margin-top: calc(globals.$spacing-unit * 1);
+  }
+}

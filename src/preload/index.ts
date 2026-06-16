@@ -729,6 +729,26 @@ contextBridge.exposeInMainWorld("electron", {
     endDate: string
   ) =>
     ipcRenderer.invoke("getDailyPlaytime", shop, objectId, startDate, endDate),
+  getGameSessions: (
+    shop: GameShop,
+    objectId: string,
+    limit?: number,
+    offset?: number
+  ) => ipcRenderer.invoke("getGameSessions", shop, objectId, limit, offset),
+  clearActivityData: (shop: GameShop, objectId: string) =>
+    ipcRenderer.invoke("clearActivityData", shop, objectId),
+  getHardwareMonitorConfig: () =>
+    ipcRenderer.invoke("getHardwareMonitorConfig"),
+  updateHardwareMonitorConfig: (config: {
+    enabled?: boolean;
+    pollingIntervalMs?: number;
+    alertsEnabled?: boolean;
+    fpsAlertThreshold?: number;
+    cpuTempAlertThreshold?: number;
+    gpuTempAlertThreshold?: number;
+    cpuUsageAlertThreshold?: number;
+    ramUsageAlertThresholdMB?: number;
+  }) => ipcRenderer.invoke("updateHardwareMonitorConfig", config),
   getPlaytimeSummary: (startDate: string, endDate: string) =>
     ipcRenderer.invoke("getPlaytimeSummary", startDate, endDate),
   getFriendsStats: () => ipcRenderer.invoke("getFriendsStats"),

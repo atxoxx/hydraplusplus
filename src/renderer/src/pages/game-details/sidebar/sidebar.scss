@@ -3,21 +3,25 @@
 .content-sidebar {
   height: 100%;
   flex-shrink: 0;
-  width: 280px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   gap: calc(globals.$spacing-unit * 1.5);
 
   @media (min-width: 1024px) {
-    width: 320px;
+    width: 340px;
   }
 
   @media (min-width: 1280px) {
-    width: 380px;
+    width: 400px;
   }
 
   @media (min-width: 1440px) {
-    width: 420px;
+    width: 460px;
+  }
+
+  @media (min-width: 1600px) {
+    width: 520px;
   }
 
   @media (max-width: 768px) {

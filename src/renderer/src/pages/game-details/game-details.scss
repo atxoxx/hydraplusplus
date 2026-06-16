@@ -32,8 +32,8 @@
       globals.$background-color 50%,
       globals.$dark-background-color 100%
     );
-    padding: calc(globals.$spacing-unit * 1.5);
-    gap: calc(globals.$spacing-unit * 1.5);
+    padding: calc(globals.$spacing-unit * 1.5) calc(globals.$spacing-unit * 2);
+    gap: calc(globals.$spacing-unit * 2);
   }
 
   &__description-content {

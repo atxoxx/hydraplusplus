@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { CheckboxField } from "@renderer/components";
+import { CheckboxField, SelectField } from "@renderer/components";
 import { settingsContext } from "@renderer/context";
 import { useAppSelector } from "@renderer/hooks";
 import { QuestionIcon } from "@primer/octicons-react";
@@ -25,6 +25,31 @@ export function SettingsContextContentGameplay() {
     hideClassicsBookmark: false,
     classicsUseHeroLayout: false,
   });
+
+  const [hwConfig, setHwConfig] = useState({
+    enabled: false,
+    pollingIntervalMs: 5000,
+    alertsEnabled: false,
+  });
+
+  useEffect(() => {
+    window.electron.getHardwareMonitorConfig().then((config) => {
+      setHwConfig({
+        enabled: config.enabled,
+        pollingIntervalMs: config.pollingIntervalMs,
+        alertsEnabled: config.alertsEnabled,
+      });
+    }).catch(() => {});
+  }, []);
+
+  const updateHwConfig = useCallback(
+    (patch: Partial<typeof hwConfig>) => {
+      const updated = { ...hwConfig, ...patch };
+      setHwConfig(updated);
+      window.electron.updateHardwareMonitorConfig(updated).catch(() => {});
+    },
+    [hwConfig]
+  );
 
   useEffect(() => {
     if (!userPreferences) return;
@@ -112,6 +137,44 @@ export function SettingsContextContentGameplay() {
               enableNewDownloadOptionsBadges:
                 !form.enableNewDownloadOptionsBadges,
             })
+          }
+        />
+      </div>
+
+      <div className="settings-context-panel__group">
+        <h3>{t("game_activity")}</h3>
+
+        <CheckboxField
+          label={t("enable_hardware_monitoring")}
+          checked={hwConfig.enabled}
+          onChange={() =>
+            updateHwConfig({ enabled: !hwConfig.enabled })
+          }
+        />
+
+        <div style={{ marginLeft: 28 }}>
+          <SelectField
+            label={t("polling_interval")}
+            value={String(hwConfig.pollingIntervalMs)}
+            onChange={(e) =>
+              updateHwConfig({
+                pollingIntervalMs: Number(e.target.value),
+              })
+            }
+            options={[
+              { key: "1000", value: "1000", label: "1s" },
+              { key: "5000", value: "5000", label: "5s" },
+              { key: "10000", value: "10000", label: "10s" },
+              { key: "30000", value: "30000", label: "30s" },
+            ]}
+          />
+        </div>
+
+        <CheckboxField
+          label={t("enable_performance_alerts")}
+          checked={hwConfig.alertsEnabled}
+          onChange={() =>
+            updateHwConfig({ alertsEnabled: !hwConfig.alertsEnabled })
           }
         />
       </div>

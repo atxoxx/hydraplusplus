@@ -91,6 +91,45 @@ export interface DailyPlaytimeEntry {
   totalMilliseconds: number;
 }
 
+export interface HardwareSample {
+  timestamp: number;
+  fps: number;
+  cpuUsage: number;
+  gpuUsage: number;
+  cpuTemp: number;
+  gpuTemp: number;
+  ramUsageMB: number;
+}
+
+export interface HardwareMetricsSnapshot {
+  avgFps: number;
+  minFps: number;
+  maxFps: number;
+  avgCpuUsage: number;
+  maxCpuUsage: number;
+  avgGpuUsage: number;
+  maxGpuUsage: number;
+  avgCpuTemp: number;
+  maxCpuTemp: number;
+  avgGpuTemp: number;
+  maxGpuTemp: number;
+  avgRamUsageMB: number;
+  maxRamUsageMB: number;
+  gpuPowerWatts?: number;
+  cpuPowerWatts?: number;
+  samples: HardwareSample[];
+}
+
+export interface GameSession {
+  id: string;
+  shop: GameShop;
+  objectId: string;
+  startTime: string;
+  endTime: string;
+  durationMs: number;
+  hardwareMetrics?: HardwareMetricsSnapshot;
+}
+
 export interface FriendPlaytimeStats {
   userId: string;
   displayName: string;
@@ -436,6 +475,36 @@ declare global {
       startDate: string,
       endDate: string
     ) => Promise<DailyPlaytimeEntry[]>;
+    getGameSessions: (
+      shop: GameShop,
+      objectId: string,
+      limit?: number,
+      offset?: number
+    ) => Promise<GameSession[]>;
+    clearActivityData: (
+      shop: GameShop,
+      objectId: string
+    ) => Promise<{ success: boolean; error?: string }>;
+    getHardwareMonitorConfig: () => Promise<{
+      enabled: boolean;
+      pollingIntervalMs: number;
+      alertsEnabled: boolean;
+      fpsAlertThreshold: number;
+      cpuTempAlertThreshold: number;
+      gpuTempAlertThreshold: number;
+      cpuUsageAlertThreshold: number;
+      ramUsageAlertThresholdMB: number;
+    }>;
+    updateHardwareMonitorConfig: (config: {
+      enabled?: boolean;
+      pollingIntervalMs?: number;
+      alertsEnabled?: boolean;
+      fpsAlertThreshold?: number;
+      cpuTempAlertThreshold?: number;
+      gpuTempAlertThreshold?: number;
+      cpuUsageAlertThreshold?: number;
+      ramUsageAlertThresholdMB?: number;
+    }) => Promise<{ success: boolean; error?: string }>;
     getPlaytimeSummary: (
       startDate: string,
       endDate: string

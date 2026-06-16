@@ -8,7 +8,9 @@ import {
   gamesSublevel,
   levelKeys,
   dailyPlaytimeSublevel,
+  sessionsSublevel,
 } from "@main/level";
+import type { GameSession } from "@main/level";
 import { CloudSync } from "./cloud-sync";
 import { logger, networkLogger } from "./logger";
 import { PowerSaveBlockerManager } from "./power-save-blocker";
@@ -18,12 +20,18 @@ import { INTERVALS } from "@main/constants";
 import { envConfig } from "@main/env-config";
 import { Wine } from "./wine";
 import { NativeAddon } from "./native-addon";
+import { HardwareMonitor } from "./hardware-monitor";
 import { emulatorSessions } from "./emulators/emulator-session-tracker";
 
 export const gamesPlaytime = new Map<
   string,
   { lastTick: number; firstTick: number; lastSyncTick: number }
 >();
+
+const activeSessions = new Map<string, { id: string; startTime: number }>();
+
+const generateSessionId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export const getGamesRunning = () => {
   const now = performance.now();
@@ -314,6 +322,13 @@ function onOpenGame(game: Game) {
     lastSyncTick: now,
   });
 
+  // Create new session record
+  const sessionId = generateSessionId();
+  activeSessions.set(gameKey, { id: sessionId, startTime: now });
+
+  // Start hardware monitoring if enabled
+  HardwareMonitor.start(gameKey);
+
   logPlaytimeTrace("session-open", game, {
     performanceNow: now,
   });
@@ -483,6 +498,34 @@ const onCloseGame = (game: Game) => {
   const delta = now - gamePlaytime.lastTick;
 
   updateDailyPlaytime(game.shop, game.objectId, delta);
+
+  // Finalize hardware monitoring and attach metrics to session
+  const hardwareMetrics = HardwareMonitor.stop(gameKey);
+
+  // Finalize and persist session
+  const activeSession = activeSessions.get(gameKey);
+  if (activeSession) {
+    const sessionDurationMs = now - activeSession.startTime;
+    const session: GameSession = {
+      id: activeSession.id,
+      shop: game.shop,
+      objectId: game.objectId,
+      startTime: new Date(activeSession.startTime).toISOString(),
+      endTime: new Date(now).toISOString(),
+      durationMs: sessionDurationMs,
+      hardwareMetrics,
+    };
+
+    const sessionId = activeSession.id;
+    sessionsSublevel
+      .put(levelKeys.session(game.shop, game.objectId, sessionId), session)
+      .then(() => {
+        activeSessions.delete(gameKey);
+      })
+      .catch((error) => {
+        logger.error("Failed to persist game session", error);
+      });
+  }
 
   logPlaytimeTrace("session-close", game, {
     performanceNow: now,

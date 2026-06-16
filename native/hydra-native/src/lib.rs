@@ -20,6 +20,16 @@ pub struct ProcessedImageData {
 }
 
 #[napi(object)]
+pub struct HardwareMetrics {
+    pub fps: f64,
+    pub cpu_usage: f64,
+    pub gpu_usage: f64,
+    pub cpu_temp: f64,
+    pub gpu_temp: f64,
+    pub ram_usage_mb: f64,
+}
+
+#[napi(object)]
 pub struct ProcessedFriendImageData {
     pub image_path: String,
     pub mime_type: String,
@@ -406,5 +416,254 @@ fn mime_type_from_image_format(format: Option<ImageFormat>) -> Option<&'static s
         Some(ImageFormat::Tiff) => Some("image/tiff"),
         Some(ImageFormat::Avif) => Some("image/avif"),
         _ => None,
+    }
+}
+
+// ── Hardware monitoring via MSI Afterburner / RTSS shared memory ──
+
+#[cfg(windows)]
+mod hardware {
+    use windows::Win32::Foundation::{CloseHandle, HANDLE};
+    use windows::Win32::System::Memory::{
+        MapViewOfFile, OpenFileMappingW, UnmapViewOfFile, FILE_MAP_READ,
+    };
+
+    const MAHM_SIGNATURE: u32 = 0x4D41484D; // 'MAHM'
+    const RTSS_SIGNATURE: u32 = 0x52545353; // 'RTSS'
+
+    #[repr(C)]
+    struct MahmHeader {
+        signature: u32,
+        version: u32,
+        header_size: u32,
+        num_entries: u32,
+        entry_size: u32,
+        time: u32,
+        num_gpu_entries: u32,
+        gpu_entry_size: u32,
+    }
+
+    #[repr(C)]
+    struct MahmEntry {
+        source_name: [u8; 260],
+        source_units: [u8; 260],
+        localized_source_name: [u8; 260],
+        localized_source_units: [u8; 260],
+        recommended_format: [u8; 260],
+        data: f32,
+        min_limit: f32,
+        max_limit: f32,
+        flags: u32,
+        gpu: u32,
+        src_id: u32,
+    }
+
+    #[repr(C)]
+    struct RtssHeader {
+        signature: u32,
+        version: u32,
+        app_entry_size: u32,
+        app_arr_offset: u32,
+        app_arr_size: u32,
+        osd_entry_size: u32,
+        osd_arr_offset: u32,
+        osd_arr_size: u32,
+        osd_frame: u32,
+        busy: i32,
+    }
+
+    #[repr(C)]
+    struct RtssOsdEntry {
+        osd_owner: [u8; 256],
+        osd_slot: [u32; 4],
+        osd_text: [u8; 1024],
+        osd_data: [f32; 4],
+        osd_flags: u32,
+    }
+
+    fn wide_from_str(s: &str) -> Vec<u16> {
+        s.encode_utf16().chain(std::iter::once(0)).collect()
+    }
+
+    fn read_utf8(buf: &[u8]) -> String {
+        let end = buf.iter().position(|&b| b == 0).unwrap_or(buf.len());
+        String::from_utf8_lossy(&buf[..end]).into_owned()
+    }
+
+    unsafe fn open_shared_memory(name: &str) -> Option<(HANDLE, *mut u8, usize)> {
+        let wide = wide_from_str(name);
+        let handle = OpenFileMappingW(FILE_MAP_READ.0, false, windows::core::PCWSTR::from_raw(wide.as_ptr()))
+            .ok()?;
+
+        if handle.is_invalid() {
+            return None;
+        }
+
+        let view = MapViewOfFile(handle, FILE_MAP_READ, 0, 0, 0);
+        if view.Value.is_null() {
+            let _ = CloseHandle(handle);
+            return None;
+        }
+
+        Some((handle, view.Value as *mut u8, 0))
+    }
+
+    unsafe fn close_shared_memory(handle: HANDLE, view: *mut u8) {
+        let _ = UnmapViewOfFile(windows::Win32::System::Memory::MEMORY_MAPPED_VIEW_ADDRESS {
+            Value: view as *mut std::ffi::c_void,
+        });
+        let _ = CloseHandle(handle);
+    }
+
+    pub fn read_mahm_metrics() -> Option<(f32, f32, f32)> {
+        unsafe {
+            let (handle, view, _) = open_shared_memory("MAHMSharedMemory")?;
+
+            let header = &*(view as *const MahmHeader);
+            if header.signature != MAHM_SIGNATURE {
+                close_shared_memory(handle, view);
+                return None;
+            }
+
+            let header_size = header.header_size as usize;
+            let entry_size = header.entry_size as usize;
+            let min_entry_size = std::mem::size_of::<MahmEntry>();
+
+            // Validate entry size to avoid reading garbage
+            if entry_size < min_entry_size {
+                close_shared_memory(handle, view);
+                return None;
+            }
+
+            let entry_base = view.add(header_size);
+            let num = header.num_entries as usize;
+
+            let mut gpu_temp: f32 = 0.0;
+            let mut gpu_usage: f32 = 0.0;
+            let mut cpu_temp: f32 = 0.0;
+
+            for i in 0..num {
+                let entry_ptr = entry_base.add(i * entry_size) as *const MahmEntry;
+                let entry = &*entry_ptr;
+                let name = read_utf8(&entry.source_name);
+                let name_lower = name.to_lowercase();
+
+                if entry.data <= 0.0 {
+                    continue;
+                }
+
+                if name_lower.contains("gpu") && name_lower.contains("temperature") {
+                    gpu_temp = entry.data;
+                } else if name_lower.contains("gpu") && name_lower.contains("usage") {
+                    gpu_usage = entry.data;
+                } else if name_lower.contains("cpu") && name_lower.contains("temperature") {
+                    cpu_temp = entry.data;
+                }
+            }
+
+            close_shared_memory(handle, view);
+            Some((gpu_temp, gpu_usage, cpu_temp))
+        }
+    }
+
+    pub fn read_rtss_fps() -> Option<f32> {
+        unsafe {
+            // Try V2 first, then fall back to V1
+            let names = ["RTSSSharedMemoryV2", "RTSSSharedMemory"];
+
+            for name in &names {
+                let (handle, view, _) = open_shared_memory(name)?;
+
+                let header = &*(view as *const RtssHeader);
+                if header.signature != RTSS_SIGNATURE {
+                    close_shared_memory(handle, view);
+                    continue;
+                }
+
+                // Check busy flag to avoid torn reads
+                if header.busy & 1 != 0 {
+                    close_shared_memory(handle, view);
+                    continue;
+                }
+
+                // Guard against division by zero
+                if header.osd_entry_size == 0 {
+                    close_shared_memory(handle, view);
+                    continue;
+                }
+
+                // Read OSD entries to find the framerate
+                let osd_arr = view.add(header.osd_arr_offset as usize);
+                let num_osd = header.osd_arr_size / header.osd_entry_size;
+
+                for i in 0..num_osd as usize {
+                    let entry_ptr =
+                        osd_arr.add(i * header.osd_entry_size as usize) as *const RtssOsdEntry;
+                    let entry = &*entry_ptr;
+
+                    let osd_text = read_utf8(&entry.osd_text);
+                    let osd_data0 = entry.osd_data[0];
+
+                    // Framerate is typically stored in osd_data[0] for the framerate OSD slot
+                    if osd_text.contains("Framerate") || osd_text.contains("fps") || osd_text.is_empty() {
+                        if osd_data0 > 0.0 {
+                            close_shared_memory(handle, view);
+                            return Some(osd_data0);
+                        }
+                    }
+                }
+
+                close_shared_memory(handle, view);
+            }
+
+            None
+        }
+    }
+}
+
+#[napi]
+pub fn read_hardware_metrics() -> HardwareMetrics {
+    #[cfg(windows)]
+    {
+        let (gpu_temp, gpu_usage, cpu_temp) =
+            hardware::read_mahm_metrics().unwrap_or((0.0, 0.0, 0.0));
+
+        let fps = hardware::read_rtss_fps().unwrap_or(0.0);
+
+        // CPU usage and RAM are not reliably available from shared memory.
+        // Return 0 for those — the TypeScript layer will fall back to systeminformation.
+        return HardwareMetrics {
+            fps: fps as f64,
+            cpu_usage: 0.0,
+            gpu_usage: gpu_usage as f64,
+            cpu_temp: cpu_temp as f64,
+            gpu_temp: gpu_temp as f64,
+            ram_usage_mb: 0.0,
+        };
+    }
+
+    #[cfg(not(windows))]
+    {
+        let mut system = System::new_all();
+        system.refresh_cpu_all();
+        system.refresh_memory();
+
+        let cpu_usage = system.global_cpu_usage();
+        let total_ram = system.total_memory();
+        let used_ram = system.used_memory();
+        let ram_usage_mb = if total_ram > 0 {
+            (used_ram as f64) / (1024.0 * 1024.0)
+        } else {
+            0.0
+        };
+
+        HardwareMetrics {
+            fps: 0.0,
+            cpu_usage: cpu_usage as f64,
+            gpu_usage: 0.0,
+            cpu_temp: 0.0,
+            gpu_temp: 0.0,
+            ram_usage_mb,
+        }
     }
 }

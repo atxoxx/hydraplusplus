@@ -35,4 +35,5 @@ export * from "./notifications/local-notifications";
 export * from "./power-save-blocker";
 export * from "./google-image-scraper";
 export * from "./native-addon";
+export * from "./hardware-monitor";
 export * as emulators from "./emulators";

@@ -20,6 +20,15 @@ type NativeProcessFriendImageResponse = NativeProcessProfileImageResponse & {
   is_animated?: boolean;
 };
 
+export type HardwareMetricsPayload = {
+  fps: number;
+  cpu_usage: number;
+  gpu_usage: number;
+  cpu_temp: number;
+  gpu_temp: number;
+  ram_usage_mb: number;
+};
+
 type HydraNativeModule = {
   processProfileImage: (
     imagePath: string,
@@ -33,6 +42,7 @@ type HydraNativeModule = {
     preserveAnimation: boolean
   ) => Promise<NativeProcessFriendImageResponse>;
   listProcesses: () => ProcessPayload[];
+  readHardwareMetrics: () => HardwareMetricsPayload;
 };
 
 export type SystemProcessMap = {
@@ -290,6 +300,20 @@ export class NativeAddon {
         resolve([]);
       }
     });
+  }
+
+  public static readHardwareMetrics(): HardwareMetricsPayload | null {
+    try {
+      const mod = this.load();
+      if (typeof mod.readHardwareMetrics !== "function") {
+        return null;
+      }
+      const metrics = mod.readHardwareMetrics();
+      return metrics;
+    } catch (error) {
+      logger.error("Failed to read hardware metrics via native addon", error);
+      return null;
+    }
   }
 
   public static getSystemProcessMap(): Promise<SystemProcessMap> {

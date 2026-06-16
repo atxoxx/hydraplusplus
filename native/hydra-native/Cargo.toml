@@ -15,5 +15,8 @@ sysinfo = "0.37.2"
 tokio = { version = "1.50.0", features = ["rt"] }
 uuid = { version = "1.11.0", features = ["v4"] }
 
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.61.0", features = ["Win32_System_Memory", "Win32_System_Threading", "Win32_Foundation"] }
+
 [build-dependencies]
 napi-build = "2.3.1"

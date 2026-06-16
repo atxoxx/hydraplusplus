@@ -1,13 +1,19 @@
 import { useTranslation } from "react-i18next";
 import {
-  BookIcon,
+  CommentDiscussionIcon,
+  GraphIcon,
   InfoIcon,
   LinkExternalIcon,
   TrophyIcon,
 } from "@primer/octicons-react";
 import "./tab-bar.scss";
 
-export type GameTabId = "overview" | "details" | "achievements" | "weblinks";
+export type GameTabId =
+  | "overview"
+  | "reviews"
+  | "activity"
+  | "achievements"
+  | "weblinks";
 
 export interface GameTab {
   id: GameTabId;
@@ -30,9 +36,14 @@ export function TabBar({ activeTab, onTabChange }: Readonly<TabBarProps>) {
       icon: <InfoIcon size={14} />,
     },
     {
-      id: "details",
-      label: t("tab_details"),
-      icon: <BookIcon size={14} />,
+      id: "reviews",
+      label: t("tab_reviews"),
+      icon: <CommentDiscussionIcon size={14} />,
+    },
+    {
+      id: "activity",
+      label: t("tab_activity"),
+      icon: <GraphIcon size={14} />,
     },
     {
       id: "achievements",

@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { GameReviews } from "../game-reviews";
-import { GameActivityPanel } from "../game-activity-panel";
 import { useUserDetails, useLibrary } from "@renderer/hooks";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { gameDetailsContext } from "@renderer/context";
@@ -35,19 +34,6 @@ export function DetailsTab() {
     }
   }, [searchParams, objectId]);
 
-  if (effectiveShop === "custom") {
-    return (
-      <div className="details-tab">
-        {shop && objectId && (
-          <GameActivityPanel
-            shop={effectiveShop}
-            objectId={effectiveObjectId}
-          />
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="details-tab">
       {shop && objectId && (
@@ -62,10 +48,6 @@ export function DetailsTab() {
             onUserReviewedChange={setHasUserReviewed}
           />
         </div>
-      )}
-
-      {shop && objectId && (
-        <GameActivityPanel shop={effectiveShop} objectId={effectiveObjectId} />
       )}
     </div>
   );

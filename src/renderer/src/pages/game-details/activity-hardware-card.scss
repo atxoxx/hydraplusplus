@@ -1,0 +1,37 @@
+@use "../../scss/globals.scss";
+
+.activity-hardware-card {
+  padding: calc(globals.$spacing-unit * 2);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+
+  &--empty {
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__title {
+    color: globals.$body-color;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 calc(globals.$spacing-unit * 1.5);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  &__empty {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    margin: 0;
+  }
+
+  &__metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}

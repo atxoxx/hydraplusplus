@@ -129,8 +129,8 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
 
   return (
     <aside className="content-sidebar">
-      {/* Sections shared across Overview & Details */}
-      {(activeTab === "overview" || activeTab === "details") && (
+      {/* Overview tab: all sidebar sections */}
+      {activeTab === "overview" && (
         <>
           {shouldShowProtonFeatures && (
             <Suspense fallback={null}>
@@ -142,7 +142,7 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
             </Suspense>
           )}
 
-          {stats && activeTab === "details" && (
+          {stats && (
             <SidebarSection
               title={t("stats")}
               collapseStorageKey="sidebar_stats"
@@ -182,70 +182,11 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
             </SidebarSection>
           )}
 
-          {shop === "launchbox" && (
-            <LaunchboxDetailsSection
-              platform={shopDetails?.platform}
-              genres={shopDetails?.genres?.map((g) => g.name)}
-              skus={shopDetails?.skus}
-            />
-          )}
+          <HowLongToBeatSection
+            howLongToBeatData={howLongToBeat.data}
+            isLoading={howLongToBeat.isLoading}
+          />
 
-          {/* System requirements on Overview */}
-          {activeTab === "overview" && shop !== "launchbox" && (
-            <SidebarSection
-              title={t("requirements")}
-              collapseStorageKey="sidebar_requirements"
-            >
-              <div className="requirement__button-container">
-                <Button
-                  className="requirement__button"
-                  onClick={() => setActiveRequirement("minimum")}
-                  theme={
-                    activeRequirement === "minimum" ? "primary" : "outline"
-                  }
-                >
-                  {t("minimum")}
-                </Button>
-
-                <Button
-                  className="requirement__button"
-                  onClick={() => setActiveRequirement("recommended")}
-                  theme={
-                    activeRequirement === "recommended" ? "primary" : "outline"
-                  }
-                >
-                  {t("recommended")}
-                </Button>
-              </div>
-
-              <div
-                className="requirement__details"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    shopDetails?.pc_requirements?.[activeRequirement] ??
-                    t(`no_${activeRequirement}_requirements`, {
-                      gameTitle,
-                    }),
-                }}
-              />
-            </SidebarSection>
-          )}
-
-          {activeTab === "overview" && <ControllerSupportSection />}
-
-          {/* HLTB on Details */}
-          {activeTab === "details" && (
-            <HowLongToBeatSection
-              howLongToBeatData={howLongToBeat.data}
-              isLoading={howLongToBeat.isLoading}
-            />
-          )}
-        </>
-      )}
-
-      {/* Details-only sections */}
-      {activeTab === "details" && (
-        <>
           {shop !== "launchbox" && (
             <SidebarSection
               title={t("requirements")}
@@ -286,6 +227,16 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
             </SidebarSection>
           )}
 
+          <ControllerSupportSection />
+
+          {shop === "launchbox" && (
+            <LaunchboxDetailsSection
+              platform={shopDetails?.platform}
+              genres={shopDetails?.genres?.map((g) => g.name)}
+              skus={shopDetails?.skus}
+            />
+          )}
+
           <SteamRatingSection
             onOpenDetails={() => setShowSteamReviewModal(true)}
           />
@@ -294,7 +245,7 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
         </>
       )}
 
-      {(activeTab === "overview" || activeTab === "details") && (
+      {activeTab === "overview" && (
         <SteamReviewModal
           visible={showSteamReviewModal}
           onClose={() => setShowSteamReviewModal(false)}

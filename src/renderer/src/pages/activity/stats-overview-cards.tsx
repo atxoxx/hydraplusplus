@@ -4,6 +4,8 @@ import type { PlaytimeSummary } from "../../declaration";
 export interface StatsOverviewCardsProps {
   summary: PlaytimeSummary | null;
   loading: boolean;
+  totalSessions: number;
+  longestStreak: number;
 }
 
 function formatHours(hours: number): string {
@@ -23,13 +25,15 @@ function formatDate(dateStr: string | null): string {
 export function StatsOverviewCards({
   summary,
   loading,
+  totalSessions,
+  longestStreak,
 }: StatsOverviewCardsProps) {
   const { t } = useTranslation("activity");
 
   if (loading) {
     return (
       <div className="stats-overview">
-        {Array.from({ length: 4 }).map((_, i) => (
+        {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="stats-overview__card">
             <div className="stats-overview__card-label">&nbsp;</div>
             <div className="stats-overview__card-value">—</div>
@@ -79,6 +83,22 @@ export function StatsOverviewCards({
           {formatHours(avgPerDay)}
         </span>
         <span className="stats-overview__card-sub">{t("avg_per_day")}</span>
+      </div>
+
+      <div className="stats-overview__card">
+        <span className="stats-overview__card-label">
+          {t("total_sessions")}
+        </span>
+        <span className="stats-overview__card-value">{totalSessions}</span>
+      </div>
+
+      <div className="stats-overview__card">
+        <span className="stats-overview__card-label">
+          {t("longest_streak")}
+        </span>
+        <span className="stats-overview__card-value">
+          {longestStreak > 0 ? `${longestStreak}d` : "—"}
+        </span>
       </div>
     </div>
   );

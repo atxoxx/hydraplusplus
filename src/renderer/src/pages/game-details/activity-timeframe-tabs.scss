@@ -1,0 +1,31 @@
+.activity-timeframe-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  width: fit-content;
+
+  &__tab {
+    border: none;
+    background: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    &--active {
+      color: #fff;
+      background-color: rgba(22, 177, 149, 0.2);
+    }
+  }
+}

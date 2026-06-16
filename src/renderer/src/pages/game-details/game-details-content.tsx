@@ -9,6 +9,7 @@ import { TabBar } from "./tabs/tab-bar";
 import type { GameTabId } from "./tabs/tab-bar";
 import { OverviewTab } from "./tabs/overview-tab";
 import { DetailsTab } from "./tabs/details-tab";
+import { ActivityTab } from "./tabs/activity-tab";
 import { AchievementsTab } from "./tabs/achievements-tab";
 import { WeblinksTab } from "./tabs/weblinks-tab";
 
@@ -126,8 +127,10 @@ export function GameDetailsContent() {
     switch (activeTab) {
       case "overview":
         return <OverviewTab />;
-      case "details":
+      case "reviews":
         return <DetailsTab />;
+      case "activity":
+        return <ActivityTab />;
       case "achievements":
         return <AchievementsTab />;
       case "weblinks":
@@ -325,7 +328,9 @@ export function GameDetailsContent() {
 
           {effectiveShop !== "custom" &&
             activeTab !== "weblinks" &&
-            activeTab !== "achievements" && <Sidebar activeTab={activeTab} />}
+            activeTab !== "achievements" &&
+            activeTab !== "reviews" &&
+            activeTab !== "activity" && <Sidebar activeTab={activeTab} />}
         </div>
       </section>
     </div>

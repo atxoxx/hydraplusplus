@@ -33,6 +33,9 @@ export const levelKeys = {
   dailyPlaytime: "dailyPlaytime",
   dailyPlaytimeEntry: (shop: GameShop, objectId: string, date: string) =>
     `${shop}:${objectId}:${date}`,
+  sessions: "sessions",
+  session: (shop: GameShop, objectId: string, sessionId: string) =>
+    `${shop}:${objectId}:${sessionId}`,
   watchlist: "watchlist",
   watchlistEntry: (shop: GameShop, objectId: string) => `${shop}:${objectId}`,
 };

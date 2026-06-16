@@ -10,12 +10,13 @@ import type {
 import { DateRangeFilter, type DateRange } from "./date-range-filter";
 import { StatsOverviewCards } from "./stats-overview-cards";
 import { TopPlayedGames } from "./top-played-games";
-import { GenreBreakdown } from "./genre-breakdown";
 import { WeeklyHeatmap, type HeatmapDay } from "./weekly-heatmap";
 import { MonthlyTrend } from "./monthly-trend";
 import { RecentTimeline } from "./recent-timeline";
 import { FriendsComparison } from "./friends-comparison";
 import { PerGameDetails } from "./per-game-details";
+import { PlatformBreakdown } from "./platform-breakdown";
+import { GlobalSessionList } from "./global-session-list";
 import "./activity.scss";
 
 const DATE_RANGE_PRESETS: Record<
@@ -161,6 +162,20 @@ export default function Activity() {
     );
   };
 
+  const totalSessions = useMemo(() => {
+    // TODO: Requires new backend aggregation across all games' session data.
+    // Currently not available in the PlaytimeSummary response.
+    if (!summary) return 0;
+    return 0;
+  }, [summary]);
+
+  const longestStreak = useMemo(() => {
+    // TODO: Requires all-games daily playtime entries to compute consecutive days.
+    // Currently not available without per-game daily playtime fetch for every game.
+    if (!summary) return 0;
+    return 0;
+  }, [summary]);
+
   return (
     <section className="activity__container">
       <div className="activity__content">
@@ -169,7 +184,12 @@ export default function Activity() {
           <DateRangeFilter value={dateRange} onChange={setDateRange} />
         </header>
 
-        <StatsOverviewCards summary={summary} loading={loading} />
+        <StatsOverviewCards
+          summary={summary}
+          loading={loading}
+          totalSessions={totalSessions}
+          longestStreak={longestStreak}
+        />
 
         <div className="activity__two-column">
           <TopPlayedGames
@@ -178,7 +198,7 @@ export default function Activity() {
             onGameSelect={handleGameSelect}
             selectedGameId={selectedGame?.objectId ?? null}
           />
-          <GenreBreakdown
+          <PlatformBreakdown
             topGames={summary?.topGames ?? []}
             loading={loading}
           />
@@ -194,6 +214,11 @@ export default function Activity() {
         />
 
         <RecentTimeline topGames={summary?.topGames ?? []} loading={loading} />
+
+        <GlobalSessionList
+          topGames={summary?.topGames ?? []}
+          loading={loading}
+        />
 
         <div className="activity__two-column">
           <FriendsComparison
