@@ -11,10 +11,6 @@
   );
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid globals.$border-color;
-  position: sticky;
-  top: 0;
-  z-index: 2;
 
   &__tab {
     display: flex;

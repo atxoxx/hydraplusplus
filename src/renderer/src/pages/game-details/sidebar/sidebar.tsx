@@ -1,18 +1,14 @@
 import { lazy, Suspense, useContext, useEffect, useState } from "react";
 import type {
   CrackWatchStatus,
-  HowLongToBeatCategory,
   ProtonDBData,
-  SteamAppDetails,
 } from "@types";
 import { useTranslation } from "react-i18next";
-import { Button } from "@renderer/components/button/button";
 import { StarRating } from "@renderer/components/star-rating/star-rating";
 
 import { gameDetailsContext } from "@renderer/context";
 import { useFormat } from "@renderer/hooks";
 import { DownloadIcon, PeopleIcon, StarIcon } from "@primer/octicons-react";
-import { HowLongToBeatSection } from "./how-long-to-beat-section";
 import { CrackWatchSection } from "./crackwatch-section";
 import { LaunchboxDetailsSection } from "./launchbox-details-section";
 import { SidebarSection } from "../sidebar-section/sidebar-section";
@@ -65,10 +61,6 @@ const getProtonDBData = (shop: string, objectId: string) => {
 
 export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
   const shouldShowProtonFeatures = window.electron.platform === "linux";
-  const [howLongToBeat, setHowLongToBeat] = useState<{
-    isLoading: boolean;
-    data: HowLongToBeatCategory[] | null;
-  }>({ isLoading: true, data: null });
   const [protonDB, setProtonDB] = useState<{
     isLoading: boolean;
     data: ProtonDBData | null;
@@ -77,9 +69,6 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
     isLoading: boolean;
     data: CrackWatchStatus | null;
   }>({ isLoading: true, data: null });
-
-  const [activeRequirement, setActiveRequirement] =
-    useState<keyof SteamAppDetails["pc_requirements"]>("minimum");
 
   const {
     gameTitle,
@@ -95,26 +84,6 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
   const { numberFormatter } = useFormat();
 
   const [showSteamReviewModal, setShowSteamReviewModal] = useState(false);
-
-  useEffect(() => {
-    if (objectId) {
-      setHowLongToBeat({ isLoading: true, data: null });
-
-      window.electron.hydraApi
-        .get<HowLongToBeatCategory[] | null>(
-          `/games/${effectiveShop}/${effectiveObjectId}/how-long-to-beat`,
-          {
-            needsAuth: false,
-          }
-        )
-        .then((howLongToBeatData) => {
-          setHowLongToBeat({ isLoading: false, data: howLongToBeatData });
-        })
-        .catch(() => {
-          setHowLongToBeat({ isLoading: false, data: null });
-        });
-    }
-  }, [effectiveObjectId, effectiveShop]);
 
   useEffect(() => {
     if (!shouldShowProtonFeatures || !effectiveObjectId) {
@@ -206,55 +175,10 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
             </SidebarSection>
           )}
 
-          <HowLongToBeatSection
-            howLongToBeatData={howLongToBeat.data}
-            isLoading={howLongToBeat.isLoading}
-          />
-
           <CrackWatchSection
             data={crackwatch.data}
             isLoading={crackwatch.isLoading}
           />
-
-          {shop !== "launchbox" && (
-            <SidebarSection
-              title={t("requirements")}
-              collapseStorageKey="sidebar_requirements"
-            >
-              <div className="requirement__button-container">
-                <Button
-                  className="requirement__button"
-                  onClick={() => setActiveRequirement("minimum")}
-                  theme={
-                    activeRequirement === "minimum" ? "primary" : "outline"
-                  }
-                >
-                  {t("minimum")}
-                </Button>
-
-                <Button
-                  className="requirement__button"
-                  onClick={() => setActiveRequirement("recommended")}
-                  theme={
-                    activeRequirement === "recommended" ? "primary" : "outline"
-                  }
-                >
-                  {t("recommended")}
-                </Button>
-              </div>
-
-              <div
-                className="requirement__details"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    shopDetails?.pc_requirements?.[activeRequirement] ??
-                    t(`no_${activeRequirement}_requirements`, {
-                      gameTitle,
-                    }),
-                }}
-              />
-            </SidebarSection>
-          )}
 
           <ControllerSupportSection />
 

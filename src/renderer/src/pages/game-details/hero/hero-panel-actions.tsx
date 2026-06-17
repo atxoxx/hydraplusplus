@@ -1,4 +1,5 @@
 import {
+  ChevronDownIcon,
   DownloadIcon,
   GearIcon,
   HeartFillIcon,
@@ -9,6 +10,9 @@ import {
   PinSlashIcon,
   PlayIcon,
   PlusCircleIcon,
+  TrashIcon,
+  FileDirectoryIcon,
+  DesktopDownloadIcon,
 } from "@primer/octicons-react";
 import {
   Button,
@@ -23,7 +27,7 @@ import {
   useUserDetails,
   useWatchlist,
 } from "@renderer/hooks";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { gameDetailsContext } from "@renderer/context";
@@ -71,6 +75,8 @@ export function HeroPanelActions() {
 
   const [showWatchlistModal, setShowWatchlistModal] = useState(false);
   const [showDiscSelectionModal, setShowDiscSelectionModal] = useState(false);
+  const [showManageMenu, setShowManageMenu] = useState(false);
+  const manageRef = useRef<HTMLDivElement>(null);
   const [pendingClassicsLaunch, setPendingClassicsLaunch] = useState<{
     discPath: string | undefined;
   } | null>(null);
@@ -148,6 +154,20 @@ export function HeroPanelActions() {
       );
     };
   }, [updateLibrary, updateGame]);
+
+  // Close manage menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        manageRef.current &&
+        !manageRef.current.contains(event.target as Node)
+      ) {
+        setShowManageMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const addGameToLibrary = async () => {
     setToggleLibraryGameDisabled(true);
@@ -308,6 +328,38 @@ export function HeroPanelActions() {
       );
   };
 
+  const openInstallDirectory = async () => {
+    if (!game) return;
+    try {
+      await window.electron.openGameInstallerPath(game.shop, game.objectId);
+    } catch {
+      // silently fail if folder doesn't exist
+    }
+  };
+
+  const createDesktopShortcut = async () => {
+    if (!game) return;
+    try {
+      await window.electron.createGameShortcut(game.shop, game.objectId, "desktop");
+      showSuccessToast(t("shortcut_created", "Shortcut created"));
+    } catch {
+      showErrorToast(t("shortcut_failed", "Failed to create shortcut"));
+    }
+  };
+
+  const handleUninstall = async () => {
+    if (!game) return;
+    try {
+      await window.electron.deleteGameFolder(game.shop, game.objectId);
+      await updateGame();
+      await updateLibrary();
+      showSuccessToast(t("game_uninstalled", "Game files removed"));
+    } catch {
+      showErrorToast(t("uninstall_failed", "Failed to uninstall"));
+    }
+  };
+
+
   const closeGame = () => {
     if (game) window.electron.closeGame(game.shop, game.objectId);
   };
@@ -397,12 +449,25 @@ export function HeroPanelActions() {
       return (
         <Button
           theme="outline"
-          className="hero-panel-actions__action"
+          className="hero-panel-actions__action hero-panel-actions__cta"
           onClick={() => {
             setGameOptionsInitialCategory("locations");
             setShowGameOptionsModal(true);
           }}
         >
+          <div className="hero-panel-actions__cta-progress-ring">
+            <svg viewBox="0 0 36 36" className="hero-panel-actions__progress-svg">
+              <path
+                className="hero-panel-actions__progress-track"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path
+                className="hero-panel-actions__progress-fill"
+                strokeDasharray={`${transferProgress * 100}, 100`}
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+            </svg>
+          </div>
           Transferring {percent}%
         </Button>
       );
@@ -414,7 +479,7 @@ export function HeroPanelActions() {
           onClick={closeGame}
           theme="outline"
           disabled={deleting}
-          className="hero-panel-actions__action"
+          className="hero-panel-actions__action hero-panel-actions__cta hero-panel-actions__cta--close"
         >
           <XCircle size={18} />
           {t("close")}
@@ -431,7 +496,7 @@ export function HeroPanelActions() {
           onClick={openGame}
           theme="outline"
           disabled={deleting || isGameRunning}
-          className="hero-panel-actions__action"
+          className="hero-panel-actions__action hero-panel-actions__cta"
         >
           <PlayIcon />
           {t("play")}
@@ -443,7 +508,7 @@ export function HeroPanelActions() {
       <Button
         onClick={() => setShowRepacksModal(true)}
         theme="outline"
-        className="hero-panel-actions__action"
+        className="hero-panel-actions__action hero-panel-actions__cta"
       >
         <DownloadIcon />
         {t("download")}
@@ -489,7 +554,60 @@ export function HeroPanelActions() {
 
     return (
       <div className="hero-panel-actions__container">
-        {gameActionButton()}
+        <div className="hero-panel-actions__cta-group">
+          {gameActionButton()}
+
+          {/* Manage dropdown */}
+          <div className="hero-panel-actions__manage-wrapper" ref={manageRef}>
+            <button
+              type="button"
+              className="hero-panel-actions__manage-trigger"
+              onClick={() => setShowManageMenu((v) => !v)}
+              title={t("manage_game")}
+            >
+              <ChevronDownIcon size={12} />
+            </button>
+
+            {showManageMenu && (
+              <div className="hero-panel-actions__manage-menu">
+                <button
+                  type="button"
+                  className="hero-panel-actions__manage-item"
+                  onClick={() => {
+                    setShowManageMenu(false);
+                    createDesktopShortcut();
+                  }}
+                >
+                  <DesktopDownloadIcon size={14} />
+                  <span>{t("create_desktop_shortcut")}</span>
+                </button>
+                <button
+                  type="button"
+                  className="hero-panel-actions__manage-item"
+                  onClick={() => {
+                    setShowManageMenu(false);
+                    openInstallDirectory();
+                  }}
+                >
+                  <FileDirectoryIcon size={14} />
+                  <span>{t("open_install_directory", "Open Install Directory")}</span>
+                </button>
+                <div className="hero-panel-actions__manage-separator" />
+                <button
+                  type="button"
+                  className="hero-panel-actions__manage-item hero-panel-actions__manage-item--danger"
+                  onClick={() => {
+                    setShowManageMenu(false);
+                    handleUninstall();
+                  }}
+                >
+                  <TrashIcon size={14} />
+                  <span>{t("uninstall")}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {showSteamPlay && (
           <Button

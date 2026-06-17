@@ -1,6 +1,13 @@
 @use "../../scss/globals.scss";
 
 .game-details {
+  /* --- CSS Custom Properties --- */
+  --card-bg: rgba(20, 20, 20, 0.6);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-radius: 12px;
+  --accent-glow: 0 0 15px rgba(var(--dominant-color-rgb, 74, 158, 255), 0.3);
+  --transition-standard: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+
   &__wrapper {
     display: flex;
     flex-direction: column;
@@ -27,12 +34,8 @@
     width: 100%;
     flex: 1;
     min-width: 0;
-    background: linear-gradient(
-      0deg,
-      globals.$background-color 50%,
-      globals.$dark-background-color 100%
-    );
-    padding: calc(globals.$spacing-unit * 1.5) calc(globals.$spacing-unit * 2);
+    background: globals.$background-color;
+    padding: 0 calc(globals.$spacing-unit * 2);
     gap: calc(globals.$spacing-unit * 2);
   }
 
@@ -45,6 +48,7 @@
     display: flex;
     flex-direction: column;
     gap: calc(globals.$spacing-unit * 1.5);
+    padding-top: calc(globals.$spacing-unit * 1.5);
   }
 
   &__description {
@@ -167,6 +171,49 @@
     // Sidebar section spacing
     .sidebar-section-skeleton {
       margin-bottom: calc(globals.$spacing-unit * 1.5);
+    }
+  }
+}
+
+/* --- Global card hover effects (matches sidebar section style) --- */
+.game-details__description-content .dashboard-card {
+  transition: var(--transition-standard);
+  background: var(--card-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  &:hover {
+    box-shadow: var(--accent-glow);
+    transform: translateY(-1px);
+  }
+}
+
+/* --- Hover scale on screenshot thumbnails --- */
+.game-details__description-content {
+  .gallery-slider__preview-button {
+    transition: var(--transition-standard);
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(74, 158, 255, 0.25);
+    }
+  }
+
+  .similar-games__item {
+    transition: var(--transition-standard);
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  .metadata-chip {
+    transition: var(--transition-standard);
+
+    &:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.2);
     }
   }
 }

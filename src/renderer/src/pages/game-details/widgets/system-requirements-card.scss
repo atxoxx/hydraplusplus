@@ -1,0 +1,100 @@
+@use "../../../scss/globals.scss";
+
+.sysreq-card {
+  &__tab-bar {
+    display: flex;
+    gap: calc(globals.$spacing-unit * 0.5);
+    margin-bottom: calc(globals.$spacing-unit * 1.5);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  &__tab {
+    flex: 1;
+    padding: calc(globals.$spacing-unit * 0.75) calc(globals.$spacing-unit * 1.5);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: rgba(globals.$muted-color, 0.6);
+    font-size: globals.$small-font-size;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      color: globals.$body-color;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    &--active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  &__content {
+    position: relative;
+  }
+
+  &__html {
+    line-height: 22px;
+    font-size: globals.$body-font-size;
+    color: globals.$body-color;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: calc(globals.$spacing-unit * 0.75);
+    }
+
+    li {
+      padding: calc(globals.$spacing-unit * 0.75);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      strong {
+        color: globals.$muted-color;
+        font-weight: 600;
+        display: inline-block;
+        min-width: 80px;
+        margin-right: calc(globals.$spacing-unit * 0.5);
+      }
+
+      br {
+        display: none;
+      }
+    }
+
+    p {
+      margin: 0 0 calc(globals.$spacing-unit * 0.75) 0;
+      padding: calc(globals.$spacing-unit * 0.75);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    a {
+      color: globals.$primary-color;
+    }
+  }
+
+  &__empty {
+    color: rgba(globals.$muted-color, 0.5);
+    font-size: globals.$small-font-size;
+    text-align: center;
+    padding: calc(globals.$spacing-unit * 2);
+  }
+}
