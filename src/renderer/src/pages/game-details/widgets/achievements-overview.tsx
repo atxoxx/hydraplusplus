@@ -15,7 +15,8 @@ export function AchievementsOverview() {
     const total = achievements.length;
     const unlocked = achievements.filter((a) => a.unlocked);
     const unlockedCount = unlocked.length;
-    const percentage = total > 0 ? Math.round((unlockedCount / total) * 100) : 0;
+    const percentage =
+      total > 0 ? Math.round((unlockedCount / total) * 100) : 0;
 
     // "Rarest" unlocked = highest points, or fallback to just unlocked
     const sortedUnlocked = [...unlocked].sort(
@@ -26,10 +27,7 @@ export function AchievementsOverview() {
       (acc, a) => acc + (a.points ?? 0),
       0
     );
-    const pointsEarned = unlocked.reduce(
-      (acc, a) => acc + (a.points ?? 0),
-      0
-    );
+    const pointsEarned = unlocked.reduce((acc, a) => acc + (a.points ?? 0), 0);
 
     // Locked achievements (preview up to 3)
     const locked = achievements.filter((a) => !a.unlocked);

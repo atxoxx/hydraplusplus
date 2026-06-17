@@ -12,7 +12,8 @@
 
   &__tab {
     flex: 1;
-    padding: calc(globals.$spacing-unit * 0.75) calc(globals.$spacing-unit * 1.5);
+    padding: calc(globals.$spacing-unit * 0.75)
+      calc(globals.$spacing-unit * 1.5);
     background: transparent;
     border: none;
     border-radius: 6px;

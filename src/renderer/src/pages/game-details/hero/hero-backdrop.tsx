@@ -58,9 +58,7 @@ export function HeroBackdrop() {
         </div>
         <div className="game-details__hero-classics-content">
           <div className="game-details__hero-classics-cover">
-            {launchboxCover && (
-              <img src={launchboxCover} alt={game?.title} />
-            )}
+            {launchboxCover && <img src={launchboxCover} alt={game?.title} />}
           </div>
           <div className="game-details__hero-classics-meta">
             <h1 className="game-details__hero-classics-title">

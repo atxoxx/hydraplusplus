@@ -1,8 +1,5 @@
 import { lazy, Suspense, useContext, useEffect, useState } from "react";
-import type {
-  CrackWatchStatus,
-  ProtonDBData,
-} from "@types";
+import type { CrackWatchStatus, ProtonDBData } from "@types";
 import { useTranslation } from "react-i18next";
 import { StarRating } from "@renderer/components/star-rating/star-rating";
 

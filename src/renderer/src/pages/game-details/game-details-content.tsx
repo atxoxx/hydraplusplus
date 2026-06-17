@@ -89,9 +89,7 @@ export function GameDetailsContent() {
         <div className="game-details__hero">
           <HeroBackdrop />
 
-          <div
-            className="game-details__hero-logo-backdrop"
-          >
+          <div className="game-details__hero-logo-backdrop">
             <HeroPlayerCounter />
 
             <div className="game-details__hero-content">

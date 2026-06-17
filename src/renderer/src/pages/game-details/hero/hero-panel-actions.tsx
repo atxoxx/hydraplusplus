@@ -340,7 +340,11 @@ export function HeroPanelActions() {
   const createDesktopShortcut = async () => {
     if (!game) return;
     try {
-      await window.electron.createGameShortcut(game.shop, game.objectId, "desktop");
+      await window.electron.createGameShortcut(
+        game.shop,
+        game.objectId,
+        "desktop"
+      );
       showSuccessToast(t("shortcut_created", "Shortcut created"));
     } catch {
       showErrorToast(t("shortcut_failed", "Failed to create shortcut"));
@@ -358,7 +362,6 @@ export function HeroPanelActions() {
       showErrorToast(t("uninstall_failed", "Failed to uninstall"));
     }
   };
-
 
   const closeGame = () => {
     if (game) window.electron.closeGame(game.shop, game.objectId);
@@ -456,7 +459,10 @@ export function HeroPanelActions() {
           }}
         >
           <div className="hero-panel-actions__cta-progress-ring">
-            <svg viewBox="0 0 36 36" className="hero-panel-actions__progress-svg">
+            <svg
+              viewBox="0 0 36 36"
+              className="hero-panel-actions__progress-svg"
+            >
               <path
                 className="hero-panel-actions__progress-track"
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -590,7 +596,9 @@ export function HeroPanelActions() {
                   }}
                 >
                   <FileDirectoryIcon size={14} />
-                  <span>{t("open_install_directory", "Open Install Directory")}</span>
+                  <span>
+                    {t("open_install_directory", "Open Install Directory")}
+                  </span>
                 </button>
                 <div className="hero-panel-actions__manage-separator" />
                 <button

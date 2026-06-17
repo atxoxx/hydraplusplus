@@ -17,7 +17,7 @@ export function SystemRequirementsCard() {
     // Skip empty/placeholder HTML
     if (
       raw === "<br>\n" ||
-      raw === "<ul class=\"bb_ul\"></ul>" ||
+      raw === '<ul class="bb_ul"></ul>' ||
       raw === "<br>" ||
       raw === ""
     )
@@ -37,7 +37,7 @@ export function SystemRequirementsCard() {
   const hasAnyRequirements = !!(
     shopDetails.pc_requirements.minimum?.trim() &&
     shopDetails.pc_requirements.minimum !== "<br>\n" &&
-    shopDetails.pc_requirements.minimum !== "<ul class=\"bb_ul\"></ul>"
+    shopDetails.pc_requirements.minimum !== '<ul class="bb_ul"></ul>'
   );
 
   if (!hasAnyRequirements) return null;
