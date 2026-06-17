@@ -1,9 +1,7 @@
 import type { GameShop, SteamReviewsPage, SteamReviewFilters } from "@types";
 import { registerEvent } from "../register-event";
-import {
-  fetchSteamReviewsPage,
-  searchSteamGame,
-} from "@main/services/steam-charts";
+import { fetchSteamReviewsPage } from "@main/services/steam-charts";
+import { getResolvedSteamAppId } from "@main/services/steam-appid-mapping";
 
 const getSteamReviews = async (
   _event: Electron.IpcMainInvokeEvent,
@@ -18,13 +16,12 @@ const getSteamReviews = async (
   _event.sender.once("ipc-message-sync", onAbort);
 
   try {
-    if (shop === "steam") {
-      const appId = parseInt(objectId, 10);
-      if (isNaN(appId)) return null;
-      return await fetchSteamReviewsPage(appId, filters, controller.signal);
-    }
-
-    const appId = await searchSteamGame(gameTitle);
+    const appId = await getResolvedSteamAppId(
+      shop,
+      objectId,
+      gameTitle,
+      controller.signal
+    );
     if (appId === null) return null;
     return await fetchSteamReviewsPage(appId, filters, controller.signal);
   } finally {

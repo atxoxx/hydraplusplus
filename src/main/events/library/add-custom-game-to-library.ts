@@ -2,6 +2,7 @@ import { registerEvent } from "../register-event";
 import { gamesSublevel, gamesShopAssetsSublevel, levelKeys } from "@main/level";
 import { randomUUID } from "node:crypto";
 import type { GameShop } from "@types";
+import { seedSteamAppIdMapping } from "@main/services/steam-appid-mapping";
 
 const addCustomGameToLibrary = async (
   _event: Electron.IpcMainInvokeEvent,
@@ -69,6 +70,11 @@ const addCustomGameToLibrary = async (
   };
 
   await gamesSublevel.put(gameKey, game);
+
+  // Best-effort: pre-resolve a Steam AppID so reviews work the first time
+  // the user opens the reviews tab. Fire-and-forget — network failures
+  // must not roll back the custom-game add.
+  void seedSteamAppIdMapping(shop, objectId, title);
 
   return game;
 };

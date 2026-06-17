@@ -20,3 +20,4 @@ export * from "./metadata-cache";
 export * from "./crackwatch-cache";
 export * from "./news-feeds";
 export * from "./news-read-state";
+export * from "./steam-appid-mapping";

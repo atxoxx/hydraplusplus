@@ -1,6 +1,7 @@
 import { registerEvent } from "../register-event";
 import type { GameShop } from "@types";
 import { createGame } from "@main/services/library-sync";
+import { seedSteamAppIdMapping } from "@main/services/steam-appid-mapping";
 import {
   downloadsSublevel,
   gamesShopAssetsSublevel,
@@ -84,6 +85,12 @@ const addGameToLibrary = async (
       game.shop,
       game.objectId
     );
+
+    // Best-effort: pre-resolve a Steam AppID so reviews work the first time
+    // the user opens the reviews tab. Fire-and-forget — network failures
+    // must not roll back the library add. `seedSteamAppIdMapping` itself
+    // short-circuits when shop === "steam".
+    void seedSteamAppIdMapping(game.shop, game.objectId, game.title);
   }
 };
 

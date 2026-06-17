@@ -2,6 +2,9 @@ import { registerEvent } from "../register-event";
 import { gamesSublevel, gamesShopAssetsSublevel, levelKeys } from "@main/level";
 import { randomUUID } from "node:crypto";
 import type { Game, GameShop } from "@types";
+import { seedSteamAppIdMapping } from "@main/services/steam-appid-mapping";
+
+const SEED_DELAY_MS = 1100;
 
 interface BulkGameEntry {
   title: string;
@@ -20,6 +23,19 @@ interface BulkAddResult {
   games: Game[];
   errors: { title: string; executablePath: string; error: string }[];
 }
+
+// Best-effort Steam AppID seeding for every successfully-batch-added game.
+// Sequential with ~1.1s spacing to match Playnite ReviewViewer's TimeLimiter
+// so the bulk path doesn't trip Steam's store-search rate limiter.
+const seedBulkMappings = async (games: Game[]): Promise<void> => {
+  if (games.length === 0) return;
+  for (const game of games) {
+    if (game.shop !== "steam") {
+      await seedSteamAppIdMapping(game.shop, game.objectId, game.title);
+      await new Promise((resolve) => setTimeout(resolve, SEED_DELAY_MS));
+    }
+  }
+};
 
 const bulkAddCustomGamesToLibrary = async (
   _event: Electron.IpcMainInvokeEvent,
@@ -101,6 +117,10 @@ const bulkAddCustomGamesToLibrary = async (
       });
     }
   }
+
+  // Best-effort Steam AppID seeding for every successfully-batch-added game.
+  // Fire-and-forget so this never blocks the IPC response.
+  void seedBulkMappings(addedGames);
 
   return { success: true, games: addedGames, errors };
 };

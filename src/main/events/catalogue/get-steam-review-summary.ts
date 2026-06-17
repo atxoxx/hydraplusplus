@@ -1,9 +1,7 @@
 import type { GameShop, SteamReviewSummary } from "@types";
 import { registerEvent } from "../register-event";
-import {
-  getSteamReviewSummaryData,
-  searchSteamGame,
-} from "@main/services/steam-charts";
+import { getSteamReviewSummaryData } from "@main/services/steam-charts";
+import { getResolvedSteamAppId } from "@main/services/steam-appid-mapping";
 
 const getSteamReviewSummary = async (
   _event: Electron.IpcMainInvokeEvent,
@@ -11,13 +9,7 @@ const getSteamReviewSummary = async (
   objectId: string,
   gameTitle: string
 ): Promise<SteamReviewSummary | null> => {
-  if (shop === "steam") {
-    const appId = parseInt(objectId, 10);
-    if (isNaN(appId)) return null;
-    return getSteamReviewSummaryData(appId);
-  }
-
-  const appId = await searchSteamGame(gameTitle);
+  const appId = await getResolvedSteamAppId(shop, objectId, gameTitle);
   if (appId === null) return null;
   return getSteamReviewSummaryData(appId);
 };

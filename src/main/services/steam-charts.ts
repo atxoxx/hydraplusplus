@@ -653,7 +653,8 @@ export async function fetchSteamReviewsPage(
  * Used for non-Steam games.
  */
 export async function searchSteamGame(
-  gameTitle: string
+  gameTitle: string,
+  signal?: AbortSignal
 ): Promise<number | null> {
   try {
     const response = await axios.get<{
@@ -661,6 +662,7 @@ export async function searchSteamGame(
     }>(`${STEAM_STORE_API}/storesearch/`, {
       params: { term: gameTitle, l: "english" },
       timeout: 8000,
+      signal,
     });
 
     const items = response.data?.items;

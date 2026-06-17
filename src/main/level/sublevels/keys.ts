@@ -43,4 +43,7 @@ export const levelKeys = {
   crackwatchCache: "crackwatchCache",
   newsFeeds: "newsFeeds",
   newsReadState: "newsReadState",
+  steamAppIdMapping: "steamAppIdMapping",
+  steamAppIdMappingKey: (shop: GameShop, objectId: string) =>
+    `${shop}:${objectId}`,
 };

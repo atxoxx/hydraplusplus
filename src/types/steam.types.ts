@@ -227,3 +227,24 @@ export interface SteamReviewFilters {
   /** Defaults to 20 in the service layer; max 100 (Steam hard cap). */
   numPerPage?: number;
 }
+
+/* --- Persistent Steam AppID mapping for non-Steam (locally added) games --- */
+
+/**
+ * How the Steam AppID was resolved for a game whose native shop is not Steam.
+ * Persisted in a LevelDB sublevel keyed by `${shop}:${objectId}` so that
+ * Steam reviews / player count keep working across restarts and don't fall back
+ * to a rate-limited, ambiguous-by-title Steam store search every visit.
+ *  - `title_search`: resolved via the Steam store search API by game title.
+ *  - `linked`: derived from a catalogue record the user explicitly linked.
+ */
+export type SteamAppIdMappingSource = "title_search" | "linked";
+
+export interface SteamAppIdMapping {
+  /** Resolved Steam AppID. */
+  steamAppId: number;
+  /** Epoch milliseconds when this mapping was resolved. */
+  resolvedAt: number;
+  /** How the mapping was originally discovered. */
+  source: SteamAppIdMappingSource;
+}
