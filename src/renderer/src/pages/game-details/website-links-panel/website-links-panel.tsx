@@ -142,12 +142,9 @@ export function WebsiteLinksPanel() {
     [gameKey, lastTabs]
   );
 
-  const handleSubTabChange = useCallback(
-    (tabId: WebsiteId) => {
-      setActiveSubTabId(tabId);
-    },
-    []
-  );
+  const handleSubTabChange = useCallback((tabId: WebsiteId) => {
+    setActiveSubTabId(tabId);
+  }, []);
 
   if (!objectId || !gameTitle || orderedLinks.length === 0) {
     return null;
