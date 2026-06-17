@@ -214,7 +214,6 @@ const searchGameAssetsAggregatedEvent = async (
     }
   });
 
-
   const deduped = dedupe(merged);
 
   // Prefer sources in the order: SteamGridDB (curated) → IGDB (canonical) →

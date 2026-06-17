@@ -1084,9 +1084,7 @@ export function GameAssetsSettings({
                 key={result.id}
                 type="button"
                 className="game-assets-settings__result-thumb"
-                aria-label={`${result.sourceName}${
-                  dims ? ` (${dims})` : ""
-                }`}
+                aria-label={`${result.sourceName}${dims ? ` (${dims})` : ""}`}
                 onClick={() => handlePreviewOpen(result)}
               >
                 <img
