@@ -5,12 +5,10 @@ import type { StoreGame, AuthResult, SyncResult } from "@types";
 
 const EPIC_CLIENT_ID = "34a02cf8f4414e29b15921876da36f9a";
 const EPIC_CLIENT_SECRET = "daafbccc737745039dffe53d94fc76cf";
-const EPIC_OAUTH_URL =
-  "https://account-public-service-prod03.ol.epicgames.com";
+const EPIC_OAUTH_URL = "https://account-public-service-prod03.ol.epicgames.com";
 const EPIC_CATALOG_URL =
   "https://catalog-public-service-prod06.ol.epicgames.com";
-const EPIC_LIBRARY_URL =
-  "https://library-service.live.use1a.on.epicgames.com";
+const EPIC_LIBRARY_URL = "https://library-service.live.use1a.on.epicgames.com";
 const EPIC_AUTH_HEADER = Buffer.from(
   `${EPIC_CLIENT_ID}:${EPIC_CLIENT_SECRET}`
 ).toString("base64");
@@ -52,7 +50,7 @@ function isNonGameItem(metadata: any): boolean {
   const categories: any[] = metadata.categories || [];
   for (const cat of categories) {
     const path: string =
-      typeof cat === "object" ? cat.path ?? "" : String(cat);
+      typeof cat === "object" ? (cat.path ?? "") : String(cat);
     if (!path) continue;
 
     // Editor / content-creation resources
@@ -65,8 +63,7 @@ function isNonGameItem(metadata: any): boolean {
   }
 
   // customAttributes: ListingIdentifier indicates a non-game store listing
-  const customAttrs: Record<string, unknown> =
-    metadata.customAttributes || {};
+  const customAttrs: Record<string, unknown> = metadata.customAttributes || {};
   if (customAttrs["ListingIdentifier"]) return true;
 
   // Items that are tied to a parent game (DLCs, add-ons):
@@ -176,9 +173,7 @@ export class EpicGamesStore extends BaseStore {
           }
 
           if (!authCode) {
-            this.logError(
-              "No authorization code found in redirect page JSON"
-            );
+            this.logError("No authorization code found in redirect page JSON");
             return;
           }
 
@@ -314,9 +309,7 @@ export class EpicGamesStore extends BaseStore {
           }),
         }
       );
-      return (
-        response.status < 500 && !response.data?.errorMessage
-      );
+      return response.status < 500 && !response.data?.errorMessage;
     } catch {
       return false;
     }
@@ -367,8 +360,7 @@ export class EpicGamesStore extends BaseStore {
         const records: any[] = libraryResponse.data.records || [];
         gameRecords.push(...records);
 
-        nextCursor =
-          libraryResponse.data.responseMetadata?.nextCursor || null;
+        nextCursor = libraryResponse.data.responseMetadata?.nextCursor || null;
         page++;
       } while (nextCursor && page < 20);
 
@@ -457,9 +449,7 @@ export class EpicGamesStore extends BaseStore {
 
             const catalogItems = catalogResponse.data;
 
-            for (const [itemId, item] of Object.entries(
-              catalogItems as any
-            )) {
+            for (const [itemId, item] of Object.entries(catalogItems as any)) {
               const metadata = item as any;
               if (!metadata?.title) continue;
 
@@ -492,8 +482,7 @@ export class EpicGamesStore extends BaseStore {
                   : [];
                 gameEntry.releaseDate =
                   metadata.releaseInfo?.[0]?.dateAdded ?? null;
-                gameEntry.storeUrl =
-                  `https://store.epicgames.com/product/${metadata.urlSlug}`;
+                gameEntry.storeUrl = `https://store.epicgames.com/product/${metadata.urlSlug}`;
                 enriched++;
               }
             }

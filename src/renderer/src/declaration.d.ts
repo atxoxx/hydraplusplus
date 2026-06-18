@@ -1256,7 +1256,9 @@ declare global {
     getStoreStatuses: () => Promise<StoreStatus[]>;
     storeLogin: (storeId: StoreId) => Promise<AuthResult>;
     storeLogout: (storeId: StoreId) => Promise<void>;
-    storeSync: (storeId: StoreId) => Promise<{ success: boolean; gamesSynced: number; error?: string }>;
+    storeSync: (
+      storeId: StoreId
+    ) => Promise<{ success: boolean; gamesSynced: number; error?: string }>;
     storeSyncAll: () => Promise<void>;
     storeGetGames: (storeId?: StoreId) => Promise<StoreGameWithStore[]>;
     storeInstallGame: (storeId: StoreId, gameId: string) => Promise<void>;

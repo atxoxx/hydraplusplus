@@ -1534,7 +1534,10 @@ contextBridge.exposeInMainWorld("electron", {
 
   /* Owned Game Store Lookup */
   getOwnedGame: (title: string) =>
-    ipcRenderer.invoke("get-owned-game", title) as Promise<OwnedGameEntry | null>,
+    ipcRenderer.invoke(
+      "get-owned-game",
+      title
+    ) as Promise<OwnedGameEntry | null>,
   openStoreForGame: (storeUrl: string) =>
     ipcRenderer.invoke("open-store-for-game", storeUrl),
 });

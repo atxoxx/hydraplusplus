@@ -78,7 +78,9 @@ export abstract class BaseStore {
     // Safeguard: if sync returned 0 games, don't wipe the existing library.
     // An empty result likely indicates an API anomaly, not a genuinely empty account.
     if (games.length === 0) {
-      this.log("Sync returned 0 games – skipping save to keep existing library");
+      this.log(
+        "Sync returned 0 games – skipping save to keep existing library"
+      );
       return;
     }
 

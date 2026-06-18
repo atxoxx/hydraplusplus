@@ -88,7 +88,9 @@ export function DownloadsSettingsSection({
     );
   }
 
-  const storeLabel = ownedEntry ? (STORE_LABELS[ownedEntry.store] ?? null) : null;
+  const storeLabel = ownedEntry
+    ? (STORE_LABELS[ownedEntry.store] ?? null)
+    : null;
 
   return (
     <div className="game-options-modal__downloads">

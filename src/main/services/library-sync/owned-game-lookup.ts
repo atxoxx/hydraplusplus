@@ -30,7 +30,7 @@ export async function findOwnedGame(
     const normalized = title.toLowerCase().replace(/[^a-z0-9]/g, "");
 
     // Find best match: prefer exact title match, then fuzzy match
-    let bestMatch: StoreGame & { storeId: StoreId } | null = null;
+    let bestMatch: (StoreGame & { storeId: StoreId }) | null = null;
     let bestScore = 0;
 
     for (const game of allGames) {

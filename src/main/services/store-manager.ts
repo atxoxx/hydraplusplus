@@ -143,7 +143,11 @@ class StoreManager {
     const store = this.stores.get(storeId);
     if (!store) throw new Error(`Unknown store: ${storeId}`);
     if (this.syncingStores.has(storeId))
-      return { success: false, gamesSynced: 0, error: "Sync already in progress" };
+      return {
+        success: false,
+        gamesSynced: 0,
+        error: "Sync already in progress",
+      };
 
     this.syncingStores.add(storeId);
     this.notifySyncListeners();

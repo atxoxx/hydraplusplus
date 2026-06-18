@@ -341,8 +341,7 @@ export class XboxGamePassStore extends BaseStore {
               const images = gpProduct.LocalizedProperties?.[0]?.Images || [];
               const boxArt = images.find(
                 (img: any) =>
-                  img.ImagePurpose === "BoxArt" ||
-                  img.ImagePurpose === "Poster"
+                  img.ImagePurpose === "BoxArt" || img.ImagePurpose === "Poster"
               );
               if (boxArt) gpCoverUrl = boxArt.Uri;
             }

@@ -297,7 +297,9 @@
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
-      transition: opacity 0.15s ease, filter 0.15s ease;
+      transition:
+        opacity 0.15s ease,
+        filter 0.15s ease;
       font-family: inherit;
 
       &:hover:not(:disabled) {

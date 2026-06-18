@@ -240,10 +240,7 @@ export function SettingsContextPlatformImport() {
         const statuses = await window.electron.getStoreStatuses();
         setStoreStatuses(statuses);
       } else {
-        showErrorToast(
-          t("store_login_failed"),
-          result.error ?? undefined
-        );
+        showErrorToast(t("store_login_failed"), result.error ?? undefined);
       }
     } catch (err: any) {
       showErrorToast(t("store_login_failed"), err?.message);
