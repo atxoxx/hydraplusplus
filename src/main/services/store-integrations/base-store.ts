@@ -75,6 +75,13 @@ export abstract class BaseStore {
   }
 
   protected async saveGames(games: StoreGame[]): Promise<void> {
+    // Safeguard: if sync returned 0 games, don't wipe the existing library.
+    // An empty result likely indicates an API anomaly, not a genuinely empty account.
+    if (games.length === 0) {
+      this.log("Sync returned 0 games – skipping save to keep existing library");
+      return;
+    }
+
     const batch = storeGamesSublevel.batch();
 
     // Mark all existing games for this store as not owned so stale entries

@@ -31,6 +31,7 @@ import "./metadata/fetch-game-metadata";
 import "./library/set-game-user-status";
 import "./library/save-game-metadata";
 import "./playtime";
+import "./library/get-owned-game";
 import "./store";
 
 import { isPortableVersion } from "@main/helpers";

@@ -25,10 +25,10 @@ ipcMain.handle("stores:logout", async (_event, storeId: StoreId) => {
 
 ipcMain.handle("stores:sync", async (_event, storeId: StoreId) => {
   try {
-    await storeManager.syncStore(storeId);
-    return { success: true };
+    const result = await storeManager.syncStore(storeId);
+    return { success: result.success, gamesSynced: result.gamesSynced, error: result.error };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    return { success: false, gamesSynced: 0, error: error.message };
   }
 });
 

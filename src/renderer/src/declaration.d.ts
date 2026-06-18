@@ -76,6 +76,7 @@ import type {
   NewsSnapshot,
   RssFeed,
 } from "@types";
+import type { OwnedGameEntry } from "@main/services/library-sync/owned-game-lookup";
 import type { AxiosProgressEvent } from "axios";
 
 export interface Giveaway {
@@ -1255,7 +1256,7 @@ declare global {
     getStoreStatuses: () => Promise<StoreStatus[]>;
     storeLogin: (storeId: StoreId) => Promise<AuthResult>;
     storeLogout: (storeId: StoreId) => Promise<void>;
-    storeSync: (storeId: StoreId) => Promise<void>;
+    storeSync: (storeId: StoreId) => Promise<{ success: boolean; gamesSynced: number; error?: string }>;
     storeSyncAll: () => Promise<void>;
     storeGetGames: (storeId?: StoreId) => Promise<StoreGameWithStore[]>;
     storeInstallGame: (storeId: StoreId, gameId: string) => Promise<void>;
@@ -1264,6 +1265,10 @@ declare global {
     onStoreSyncStatusUpdate: (
       cb: (statuses: StoreStatus[]) => void
     ) => () => Electron.IpcRenderer;
+
+    /* Owned Game Store Lookup */
+    getOwnedGame: (title: string) => Promise<OwnedGameEntry | null>;
+    openStoreForGame: (storeUrl: string) => Promise<void>;
 
     /* Event listeners for transfer progress */
     on: (channel: string, listener: (...args: any[]) => void) => void;

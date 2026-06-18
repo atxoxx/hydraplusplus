@@ -246,6 +246,82 @@
     gap: globals.$spacing-unit;
   }
 
+  &__owned-store-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 0;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+
+    &-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      gap: 16px;
+    }
+
+    &-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    &-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    &-subtitle {
+      font-size: 12px;
+      opacity: 0.65;
+      color: #c0c1c7;
+      line-height: 1.4;
+    }
+
+    &-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: opacity 0.15s ease, filter 0.15s ease;
+      font-family: inherit;
+
+      &:hover:not(:disabled) {
+        filter: brightness(1.1);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+
+    @media (max-width: 560px) {
+      &-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      &-button {
+        align-self: stretch;
+      }
+    }
+  }
+
   &__danger-zone {
     display: flex;
     flex-direction: column;

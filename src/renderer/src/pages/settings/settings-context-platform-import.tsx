@@ -9,7 +9,7 @@ import {
   DiscoveryWizardModal,
 } from "@renderer/components";
 import { settingsContext } from "@renderer/context";
-import { useAppSelector } from "@renderer/hooks";
+import { useAppSelector, useToast } from "@renderer/hooks";
 import { useSteamLogin } from "@renderer/hooks/use-steam-login";
 import type {
   GameShop,
@@ -122,6 +122,8 @@ export function SettingsContextPlatformImport() {
   const [storeStatuses, setStoreStatuses] = useState<StoreStatus[]>([]);
   const [storeActions, setStoreActions] = useState<Record<string, string>>({});
 
+  const { showSuccessToast, showErrorToast } = useToast();
+
   const steamLogin = useSteamLogin();
 
   /* Load store statuses on mount and listen for updates */
@@ -233,10 +235,18 @@ export function SettingsContextPlatformImport() {
     try {
       const result = await window.electron.storeLogin(storeId);
       if (result.success) {
-        await window.electron.storeSync(storeId);
+        showSuccessToast(t("store_login_success"));
+        // storeManager.login auto-triggers sync on success — just refresh statuses
         const statuses = await window.electron.getStoreStatuses();
         setStoreStatuses(statuses);
+      } else {
+        showErrorToast(
+          t("store_login_failed"),
+          result.error ?? undefined
+        );
       }
+    } catch (err: any) {
+      showErrorToast(t("store_login_failed"), err?.message);
     } finally {
       setStoreActions((prev) => {
         const next = { ...prev };
@@ -250,9 +260,21 @@ export function SettingsContextPlatformImport() {
     if (storeActions[storeId]) return;
     setStoreActions((prev) => ({ ...prev, [storeId]: "syncing" }));
     try {
-      await window.electron.storeSync(storeId);
+      const result = await window.electron.storeSync(storeId);
       const statuses = await window.electron.getStoreStatuses();
       setStoreStatuses(statuses);
+
+      if (result.success && result.gamesSynced > 0) {
+        showSuccessToast(
+          t("store_sync_success", { count: result.gamesSynced })
+        );
+      } else if (result.success) {
+        showSuccessToast(t("store_sync_no_games"));
+      } else {
+        showErrorToast(t("store_sync_failed"), result.error ?? undefined);
+      }
+    } catch (err: any) {
+      showErrorToast(t("store_sync_failed"), err?.message);
     } finally {
       setStoreActions((prev) => {
         const next = { ...prev };
@@ -275,11 +297,21 @@ export function SettingsContextPlatformImport() {
     try {
       // Auto-detect this store first (storeLogin will auto-detect)
       await window.electron.storeLogin(storeId);
-      await window.electron.storeSync(storeId);
+      const result = await window.electron.storeSync(storeId);
       const statuses = await window.electron.getStoreStatuses();
       setStoreStatuses(statuses);
-    } catch {
-      // Graceful failure
+
+      if (result.success && result.gamesSynced > 0) {
+        showSuccessToast(
+          t("store_sync_success", { count: result.gamesSynced })
+        );
+      } else if (result.success) {
+        showSuccessToast(t("store_sync_no_games"));
+      } else {
+        showErrorToast(t("store_sync_failed"), result.error ?? undefined);
+      }
+    } catch (err: any) {
+      showErrorToast(t("store_sync_failed"), err?.message);
     } finally {
       setStoreActions((prev) => {
         const next = { ...prev };

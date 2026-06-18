@@ -6,6 +6,7 @@ import type {
   StoreGame,
   PlatformGame,
   GameShop,
+  SyncResult,
 } from "@types";
 import { storeGamesSublevel, levelKeys } from "@main/level";
 import { BaseStore } from "./store-integrations/base-store";
@@ -138,10 +139,11 @@ class StoreManager {
     return store.logout();
   }
 
-  async syncStore(storeId: StoreId): Promise<void> {
+  async syncStore(storeId: StoreId): Promise<SyncResult> {
     const store = this.stores.get(storeId);
     if (!store) throw new Error(`Unknown store: ${storeId}`);
-    if (this.syncingStores.has(storeId)) return;
+    if (this.syncingStores.has(storeId))
+      return { success: false, gamesSynced: 0, error: "Sync already in progress" };
 
     this.syncingStores.add(storeId);
     this.notifySyncListeners();
@@ -156,6 +158,11 @@ class StoreManager {
       if (result.success && result.gamesSynced > 0) {
         await this.importSyncedGamesToLibrary(storeId);
       }
+
+      return result;
+    } catch (error: any) {
+      logger.error(`[StoreManager] Sync ${storeId} failed:`, error);
+      return { success: false, gamesSynced: 0, error: error.message };
     } finally {
       this.syncingStores.delete(storeId);
       this.notifySyncListeners();

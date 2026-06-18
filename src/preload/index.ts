@@ -49,6 +49,7 @@ import type {
 } from "@types";
 import type { AuthPage } from "@shared";
 import type { AxiosProgressEvent } from "axios";
+import type { OwnedGameEntry } from "@main/services/library-sync/owned-game-lookup";
 
 contextBridge.exposeInMainWorld("electron", {
   /* Torrenting */
@@ -1502,7 +1503,12 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.invoke("stores:login", storeId) as Promise<AuthResult>,
   storeLogout: (storeId: StoreId) =>
     ipcRenderer.invoke("stores:logout", storeId),
-  storeSync: (storeId: StoreId) => ipcRenderer.invoke("stores:sync", storeId),
+  storeSync: (storeId: StoreId) =>
+    ipcRenderer.invoke("stores:sync", storeId) as Promise<{
+      success: boolean;
+      gamesSynced: number;
+      error?: string;
+    }>,
   storeSyncAll: () => ipcRenderer.invoke("stores:sync-all"),
   storeGetGames: (storeId?: StoreId) =>
     ipcRenderer.invoke("stores:get-games", storeId) as Promise<
@@ -1525,4 +1531,10 @@ contextBridge.exposeInMainWorld("electron", {
     return () =>
       ipcRenderer.removeListener("stores:sync-status-update", listener);
   },
+
+  /* Owned Game Store Lookup */
+  getOwnedGame: (title: string) =>
+    ipcRenderer.invoke("get-owned-game", title) as Promise<OwnedGameEntry | null>,
+  openStoreForGame: (storeUrl: string) =>
+    ipcRenderer.invoke("open-store-for-game", storeUrl),
 });

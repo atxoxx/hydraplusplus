@@ -258,9 +258,12 @@ export class XboxGamePassStore extends BaseStore {
       );
 
       const titles: XblTitle[] = titleHistoryResponse.data.titles || [];
+      // Filter: only PC games
+      const pcTitles = titles.filter((t) => t.type === "Game");
+
       const games: StoreGame[] = [];
 
-      for (const title of titles) {
+      for (const title of pcTitles) {
         const titleId = title.titleId;
         const name = title.name || `Xbox Game ${titleId}`;
 
@@ -299,13 +302,80 @@ export class XboxGamePassStore extends BaseStore {
             titleId,
             titleType: title.type,
             lastPlayed: title.titleHistory?.lastTimePlayed ?? null,
+            source: "owned",
             ...(packageFamilyName ? { packageFamilyName } : {}),
           },
         });
       }
 
+      // Also fetch the GamePass catalog for subscription titles
+      try {
+        const gpResponse = await axios.get(
+          "https://catalog.gamepass.com/v3/products?market=US&language=en-US&hydration=PCGamePassCoreCatalogProductsWithBigIds",
+          {
+            headers: { "MS-CV": "DGU1mcuYo0WMMp+F.1" },
+            timeout: 10000,
+          }
+        );
+
+        const gpProducts: any[] = gpResponse.data.Products ?? [];
+        const existingIds = new Set(games.map((g) => g.storeGameId));
+
+        for (const product of gpProducts) {
+          const productId = product.ProductId;
+          if (!productId || existingIds.has(productId)) continue;
+
+          const name =
+            product.LocalizedProperties?.[0]?.ProductTitle ??
+            `GamePass Game ${productId}`;
+
+          // Get box art for GamePass titles
+          let gpCoverUrl: string | null = null;
+          try {
+            const gpStoreResponse = await axios.get(
+              `https://displaycatalog.mp.microsoft.com/v7.0/products?bigIds=${productId}&market=US&languages=en-us&MS-CV=DGU1mcuYo0WMMp+F.1`,
+              { timeout: 5000 }
+            );
+            const gpProduct = gpStoreResponse.data.Products?.[0];
+            if (gpProduct) {
+              const images = gpProduct.LocalizedProperties?.[0]?.Images || [];
+              const boxArt = images.find(
+                (img: any) =>
+                  img.ImagePurpose === "BoxArt" ||
+                  img.ImagePurpose === "Poster"
+              );
+              if (boxArt) gpCoverUrl = boxArt.Uri;
+            }
+          } catch {
+            // skip
+          }
+
+          games.push({
+            storeGameId: productId,
+            title: name,
+            coverImageUrl: gpCoverUrl,
+            isOwned: false, // GamePass titles: owned via subscription
+            storeUrl: `ms-windows-store://pdp/?productid=${productId}`,
+            extraData: {
+              titleId: productId,
+              titleType: "GamePass",
+              source: "gamepass",
+            },
+          });
+        }
+
+        this.log(
+          `Added ${gpProducts.length} GamePass catalog titles (${games.length} total)`
+        );
+      } catch (gpError) {
+        this.logError("Failed to fetch GamePass catalog", gpError);
+        // Non-fatal: still save the owned games
+      }
+
       await this.saveGames(games);
-      this.log(`Synced ${games.length} games from Xbox title history`);
+      this.log(
+        `Synced ${games.length} games from Xbox (owned + GamePass catalog)`
+      );
       await this.logSync({ success: true, gamesSynced: games.length });
       return { success: true, gamesSynced: games.length };
     } catch (error: any) {
