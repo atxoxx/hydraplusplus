@@ -106,6 +106,7 @@ const SHOP_LABEL_KEYS: Record<GameShop, string> = {
   rockstar: "platform_rockstar",
   "itch-io": "platform_itch_io",
   humble: "platform_humble",
+  ea: "platform_ea",
   custom: "platform_custom",
   launchbox: "platform_launchbox",
 };

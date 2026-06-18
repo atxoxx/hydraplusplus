@@ -1,6 +1,7 @@
 import type { AuthPage } from "@shared";
 import type {
   AppUpdaterEvent,
+  AuthResult,
   GameShop,
   Steam250Game,
   DownloadProgress,
@@ -60,6 +61,9 @@ import type {
   SteamFamilyScanResult,
   PlatformGame,
   AllPlatformsScanResult,
+  StoreGameWithStore,
+  StoreId,
+  StoreStatus,
   WatchlistEntry,
   GameMetadata,
   UserGameStatus,
@@ -1246,6 +1250,20 @@ declare global {
 
     // Cancel for game transfers
     cancelGameTransfer: (shop: GameShop, objectId: string) => Promise<void>;
+
+    /* Store Integrations */
+    getStoreStatuses: () => Promise<StoreStatus[]>;
+    storeLogin: (storeId: StoreId) => Promise<AuthResult>;
+    storeLogout: (storeId: StoreId) => Promise<void>;
+    storeSync: (storeId: StoreId) => Promise<void>;
+    storeSyncAll: () => Promise<void>;
+    storeGetGames: (storeId?: StoreId) => Promise<StoreGameWithStore[]>;
+    storeInstallGame: (storeId: StoreId, gameId: string) => Promise<void>;
+    storeLaunchGame: (storeId: StoreId, gameId: string) => Promise<void>;
+    storeCheckOwnership: (title: string) => Promise<StoreGameWithStore[]>;
+    onStoreSyncStatusUpdate: (
+      cb: (statuses: StoreStatus[]) => void
+    ) => () => Electron.IpcRenderer;
 
     /* Event listeners for transfer progress */
     on: (channel: string, listener: (...args: any[]) => void) => void;
