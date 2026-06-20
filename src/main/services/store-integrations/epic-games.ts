@@ -15,12 +15,7 @@ const EPIC_AUTH_HEADER = Buffer.from(
 
 // Epic API requires the official launcher User-Agent to return data.
 // Generic UAs cause empty responses. (Lutris/Playnite pattern)
-const EPIC_USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-  "AppleWebKit/537.36 (KHTML, like Gecko) " +
-  "EpicGamesLauncher/11.0.1-14907503+++Portal+Release-Live " +
-  "UnrealEngine/4.23.0-14907503+++Portal+Release-Live " +
-  "Chrome/84.0.4147.38 Safari/537.36";
+const EPIC_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) EpicGamesLauncher";
 
 /** Shared headers used on all Epic API calls */
 function epicApiHeaders(extra: Record<string, string> = {}) {
@@ -35,31 +30,30 @@ function isNonGameItem(metadata: any): boolean {
   // Audience entitlements are subscriptions/community, not owned games
   if (metadata.entitlementType === "AUDIENCE") return true;
 
-  // DLCs / add-ons / demos / unlockables
-  const offerType = metadata.offerType;
-  if (
-    typeof offerType === "string" &&
-    ["DLC", "ADDON", "DEMO", "OTHERS", "UNLOCKABLE", "CONSUMABLE"].includes(
-      offerType.toUpperCase()
-    )
-  ) {
+  const categories: any[] = metadata.categories || [];
+  const catPaths = categories.map((cat) =>
+    typeof cat === "object" ? (cat.path ?? "") : String(cat)
+  );
+
+  // Must have "applications" category to be a game
+  if (!catPaths.includes("applications")) {
     return true;
   }
 
-  // Category-based filtering (editor resources, asset packages, engines, apps)
-  const categories: any[] = metadata.categories || [];
-  for (const cat of categories) {
-    const path: string =
-      typeof cat === "object" ? (cat.path ?? "") : String(cat);
-    if (!path) continue;
+  // If it has a mainGameItem (meaning it's an add-on or DLC), it must be launchable
+  if (metadata.mainGameItem && !catPaths.includes("addons/launchable")) {
+    return true;
+  }
 
-    // Editor / content-creation resources
-    if (path === "type/format-item") return true;
-    // Asset format packages (brushes, materials, etc.)
-    if (path.startsWith("asset-format")) return true;
-    // Game engines / editor applications
-    if (path.startsWith("engines") || path.startsWith("applications"))
-      return true;
+  // Skip digital extras, plugins, engines, assets
+  if (
+    catPaths.some((path) =>
+      ["digitalextras", "plugins", "plugins/engine", "type/format-item"].includes(path) ||
+      path.startsWith("engines") ||
+      path.startsWith("asset-format")
+    )
+  ) {
+    return true;
   }
 
   // customAttributes: ListingIdentifier indicates a non-game store listing
@@ -103,130 +97,116 @@ export class EpicGamesStore extends BaseStore {
         },
       });
 
-      const loginUrl =
-        "https://www.epicgames.com/id/login?" +
-        new URLSearchParams({
-          redirectUrl:
-            "https://www.epicgames.com/id/api/redirect?clientId=" +
-            EPIC_CLIENT_ID +
-            "&responseType=code",
-        }).toString();
+      // Set user agent globally for all frames, sub-resources, and redirects to prevent hCaptcha blocking
+      loginWindow.webContents.setUserAgent(EPIC_USER_AGENT);
 
-      loginWindow.loadURL(loginUrl, {
-        userAgent: EPIC_USER_AGENT,
+      // Clear cookies and session storage to bypass hCaptcha response incorrect state
+      loginWindow.webContents.session.clearStorageData({
+        storages: ["cookies", "localstorage", "indexdb"],
       });
+
+      const loginUrl = "https://www.epicgames.com/id/login?responseType=code";
+
+      loginWindow.loadURL(loginUrl);
 
       let resolved = false;
 
-      const handlePageLoad = async () => {
+      const handleRedirect = async (url: string) => {
         if (resolved) return;
-        if (loginWindow.isDestroyed()) return;
 
-        const currentUrl = loginWindow.webContents.getURL();
-        if (!currentUrl.includes("epicgames.com/id/api/redirect")) return;
-
-        try {
-          // Small delay to ensure the JSON content is rendered in the DOM
-          await new Promise((r) => setTimeout(r, 500));
-
-          // Try multiple approaches to extract the JSON text from the page.
-          // Chrome renders raw JSON inside <pre>, but behavior varies.
-          let bodyText =
-            (await loginWindow.webContents.executeJavaScript(
-              "document.body.innerText"
-            )) || "";
-
-          if (!bodyText.trim()) {
-            bodyText =
-              (await loginWindow.webContents.executeJavaScript(
-                "document.body.textContent || ''"
-              )) || "";
+        if (
+          url.includes("localhost/launcher/authorized") ||
+          url.includes("epicgames.com/id/api/redirect")
+        ) {
+          let authCode: string | null = null;
+          try {
+            const urlObj = new URL(url);
+            authCode =
+              urlObj.searchParams.get("code") ||
+              urlObj.searchParams.get("authorizationCode");
+          } catch {
+            // Ignore URL parsing errors
           }
 
-          if (!bodyText.trim()) {
-            bodyText =
-              (await loginWindow.webContents.executeJavaScript(
-                "(document.querySelector('pre') || {}).textContent || ''"
-              )) || "";
-          }
+          if (authCode) {
+            resolved = true;
 
-          if (!bodyText.trim()) {
-            this.log(
-              "Redirect page loaded but body is empty — retrying on next load event"
-            );
-            return;
-          }
+            // Immediately unsubscribe to prevent further events/crashes
+            loginWindow.webContents.removeAllListeners("will-navigate");
+            loginWindow.webContents.removeAllListeners("did-navigate");
+            loginWindow.webContents.removeAllListeners("did-redirect-navigation");
+            loginWindow.webContents.removeAllListeners("will-redirect");
+            loginWindow.webContents.removeAllListeners("did-finish-load");
 
-          const json: {
-            authorizationCode?: string;
-            redirectUrl?: string;
-          } = JSON.parse(bodyText.trim());
+            setImmediate(() => {
+              if (!loginWindow.isDestroyed()) loginWindow.close();
+            });
 
-          let authCode = json.authorizationCode ?? null;
-
-          if (!authCode && json.redirectUrl) {
             try {
-              authCode = new URL(json.redirectUrl).searchParams.get("code");
-            } catch {
-              // redirectUrl may not be a valid URL
+              const tokenResponse = await axios.post(
+                `${EPIC_OAUTH_URL}/account/api/oauth/token`,
+                new URLSearchParams({
+                  grant_type: "authorization_code",
+                  code: authCode,
+                  token_type: "eg1",
+                }),
+                {
+                  headers: epicApiHeaders({
+                    Authorization: `Basic ${EPIC_AUTH_HEADER}`,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                  }),
+                }
+              );
+
+              const {
+                access_token,
+                refresh_token,
+                expires_in,
+                account_id,
+                displayName,
+              } = tokenResponse.data;
+
+              const account = {
+                storeId: this.storeId,
+                displayName,
+                accountId: account_id,
+                isAuthenticated: true,
+                accessToken: access_token,
+                refreshToken: refresh_token,
+                tokenExpiry: Date.now() + expires_in * 1000,
+              };
+
+              await this.saveAccount(account);
+              resolve({ success: true, account });
+            } catch (error: any) {
+              resolve({ success: false, error: error.message });
             }
           }
-
-          if (!authCode) {
-            this.logError("No authorization code found in redirect page JSON");
-            return;
-          }
-
-          resolved = true;
-          loginWindow.close();
-
-          const tokenResponse = await axios.post(
-            `${EPIC_OAUTH_URL}/account/api/oauth/token`,
-            new URLSearchParams({
-              grant_type: "authorization_code",
-              code: authCode,
-              token_type: "eg1",
-            }),
-            {
-              headers: epicApiHeaders({
-                Authorization: `Basic ${EPIC_AUTH_HEADER}`,
-                "Content-Type": "application/x-www-form-urlencoded",
-              }),
-            }
-          );
-
-          const {
-            access_token,
-            refresh_token,
-            expires_in,
-            account_id,
-            displayName,
-          } = tokenResponse.data;
-
-          const account = {
-            storeId: this.storeId,
-            displayName,
-            accountId: account_id,
-            isAuthenticated: true,
-            accessToken: access_token,
-            refreshToken: refresh_token,
-            tokenExpiry: Date.now() + expires_in * 1000,
-          };
-
-          await this.saveAccount(account);
-          resolve({ success: true, account });
-        } catch (error: any) {
-          if (!loginWindow.isDestroyed()) loginWindow.close();
-          resolve({ success: false, error: error.message });
         }
       };
 
-      loginWindow.webContents.on("did-finish-load", handlePageLoad);
+      loginWindow.webContents.on("will-navigate", (_event: Electron.Event, url: string) => {
+        handleRedirect(url);
+      });
+
+      loginWindow.webContents.on("did-navigate", (_event: Electron.Event, url: string) => {
+        handleRedirect(url);
+      });
+
+      loginWindow.webContents.on("did-redirect-navigation", (_event: Electron.Event, url: string) => {
+        handleRedirect(url);
+      });
+
+      loginWindow.webContents.on("will-redirect", (_event: Electron.Event, url: string) => {
+        handleRedirect(url);
+      });
 
       const timeout = setTimeout(() => {
         if (resolved) return;
         resolved = true;
-        if (!loginWindow.isDestroyed()) loginWindow.close();
+        setImmediate(() => {
+          if (!loginWindow.isDestroyed()) loginWindow.close();
+        });
         resolve({
           success: false,
           error: "Login timed out. Please try again.",
@@ -335,6 +315,11 @@ export class EpicGamesStore extends BaseStore {
         return this.syncLibrary();
       }
 
+      const account = await this.loadAccount();
+      if (!account || !account.accountId) {
+        throw new Error("Epic account details not found. Please log in again.");
+      }
+
       // Fetch all library items with cursor-based pagination (Lutris pattern).
       // Note: NO platform filter — Lutris gets ALL items and filters in code.
       const gameRecords: any[] = [];
@@ -377,8 +362,21 @@ export class EpicGamesStore extends BaseStore {
       const allGames: StoreGame[] = [];
 
       for (const r of gameRecords) {
-        if (r.namespace === "ue") continue;
-        if (!r.appName) continue;
+        if (!r.appName || !r.catalogItemId) continue;
+
+        const ns = (r.namespace ?? "").toLowerCase();
+        const appName = (r.appName ?? "").toLowerCase();
+        const sandbox = (r.sandboxType ?? "").toLowerCase();
+
+        // Skip Unreal Engine and developer listings (case-insensitive)
+        if (
+          ns === "ue" ||
+          sandbox === "private" ||
+          sandbox === "stage" ||
+          appName.startsWith("ue_")
+        ) {
+          continue;
+        }
 
         allGames.push({
           storeGameId: r.catalogItemId || r.appName,
@@ -415,6 +413,8 @@ export class EpicGamesStore extends BaseStore {
       let enriched = 0;
       // Track which catalog items are non-game (DLCs, editor resources, etc.)
       const nonGameItemIds = new Set<string>();
+      // Track which catalog items are confirmed playable games
+      const playableGameItemIds = new Set<string>();
 
       for (let i = 0; i < allGames.length; i += batchSize) {
         const batch = allGames.slice(i, i + batchSize);
@@ -483,6 +483,7 @@ export class EpicGamesStore extends BaseStore {
                 gameEntry.releaseDate =
                   metadata.releaseInfo?.[0]?.dateAdded ?? null;
                 gameEntry.storeUrl = `https://store.epicgames.com/product/${metadata.urlSlug}`;
+                playableGameItemIds.add(itemId);
                 enriched++;
               }
             }
@@ -495,11 +496,21 @@ export class EpicGamesStore extends BaseStore {
         }
       }
 
-      // Filter out non-game items (only if they were confirmed by catalog metadata).
-      // Items that couldn't be enriched are kept (safe fallback).
+      // Filter out non-game items.
+      // If the catalog query succeeded for at least one game (enriched > 0), we only keep items
+      // that are explicitly confirmed as playable games via metadata.
+      // Otherwise, we keep them but filter out items marked as non-game (safe fallback).
       let filteredOut = 0;
       const games = allGames.filter((g) => {
         const cid = (g.extraData as any)?.catalogItemId;
+        if (enriched > 0) {
+          if (!cid || !playableGameItemIds.has(cid)) {
+            filteredOut++;
+            return false;
+          }
+          return true;
+        }
+
         if (cid && nonGameItemIds.has(cid)) {
           filteredOut++;
           return false;

@@ -7,6 +7,8 @@ export interface ActivitySparklineProps {
   label: string;
   unit: string;
   value: number;
+  max?: number;
+  min?: number;
   thresholds?: { warn: number; danger: number };
   inverted?: boolean;
 }
@@ -16,6 +18,8 @@ export function ActivitySparkline({
   label,
   unit,
   value,
+  max,
+  min,
   thresholds,
   inverted,
 }: Readonly<ActivitySparklineProps>) {
@@ -47,16 +51,43 @@ export function ActivitySparkline({
     });
   }
 
-  if (data.length < 2) {
-    return (
-      <div className="activity-sparkline">
-        <span className="activity-sparkline__label">{label}</span>
+  const renderValueGroup = () => (
+    <div className="activity-sparkline__value-group">
+      <div className="activity-sparkline__value-item">
+        <span className="activity-sparkline__value-item-label">avg</span>
         <span
           className={`activity-sparkline__value activity-sparkline__value--${status}`}
         >
           {value}
           {unit}
         </span>
+      </div>
+      {max !== undefined && max > 0 && (
+        <div className="activity-sparkline__value-item">
+          <span className="activity-sparkline__value-item-label">max</span>
+          <span className="activity-sparkline__value activity-sparkline__value--max">
+            {max}
+            {unit}
+          </span>
+        </div>
+      )}
+      {min !== undefined && min > 0 && (
+        <div className="activity-sparkline__value-item">
+          <span className="activity-sparkline__value-item-label">min</span>
+          <span className="activity-sparkline__value activity-sparkline__value--min">
+            {min}
+            {unit}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+
+  if (data.length < 2) {
+    return (
+      <div className="activity-sparkline">
+        <span className="activity-sparkline__label">{label}</span>
+        {renderValueGroup()}
       </div>
     );
   }
@@ -109,12 +140,7 @@ export function ActivitySparkline({
           animate={false}
         />
       </div>
-      <span
-        className={`activity-sparkline__value activity-sparkline__value--${status}`}
-      >
-        {value}
-        {unit}
-      </span>
+      {renderValueGroup()}
     </div>
   );
 }

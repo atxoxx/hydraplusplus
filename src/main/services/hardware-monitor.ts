@@ -120,41 +120,32 @@ export class HardwareMonitor {
     const nativeMetrics = NativeAddon.readHardwareMetrics();
 
     if (nativeMetrics) {
-      const hasAnyData =
-        nativeMetrics.fps > 0 ||
-        nativeMetrics.gpu_usage > 0 ||
-        nativeMetrics.gpu_temp > 0 ||
-        nativeMetrics.cpu_temp > 0;
+      let cpuUsage = Math.round(nativeMetrics.cpu_usage);
+      let ramUsageMB = Math.round(nativeMetrics.ram_usage_mb);
 
-      if (hasAnyData) {
-        // Get CPU usage and RAM from systeminformation since native addon may not have them
-        let cpuUsage = Math.round(nativeMetrics.cpu_usage);
-        let ramUsageMB = Math.round(nativeMetrics.ram_usage_mb);
-
-        if (cpuUsage <= 0 || ramUsageMB <= 0) {
-          try {
-            const [cpuLoad, mem] = await Promise.all([
-              si.currentLoad(),
-              si.mem(),
-            ]);
-            if (cpuUsage <= 0) cpuUsage = Math.round(cpuLoad.currentLoad);
-            if (ramUsageMB <= 0)
-              ramUsageMB = Math.round(mem.used / (1024 * 1024));
-          } catch {
-            // Ignore read failures
-          }
+      if (cpuUsage <= 0 || ramUsageMB <= 0) {
+        try {
+          const [cpuLoad, mem] = await Promise.all([
+            si.currentLoad(),
+            si.mem(),
+          ]);
+          if (cpuUsage <= 0) cpuUsage = Math.round(cpuLoad.currentLoad);
+          if (ramUsageMB <= 0)
+            ramUsageMB = Math.round(mem.used / (1024 * 1024));
+        } catch {
+          // Ignore read failures
         }
-
-        return {
-          timestamp: Date.now(),
-          fps: Math.round(nativeMetrics.fps),
-          cpuUsage,
-          gpuUsage: Math.round(nativeMetrics.gpu_usage),
-          cpuTemp: Math.round(nativeMetrics.cpu_temp),
-          gpuTemp: Math.round(nativeMetrics.gpu_temp),
-          ramUsageMB,
-        };
       }
+
+      return {
+        timestamp: Date.now(),
+        fps: Math.round(nativeMetrics.fps),
+        cpuUsage,
+        gpuUsage: Math.round(nativeMetrics.gpu_usage),
+        cpuTemp: Math.round(nativeMetrics.cpu_temp),
+        gpuTemp: Math.round(nativeMetrics.gpu_temp),
+        ramUsageMB,
+      };
     }
 
     // Fallback to systeminformation

@@ -19,10 +19,32 @@
     min-width: 40px;
   }
 
-  &__value {
-    font-size: 12px;
+  &__value-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  &__value-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 32px;
+  }
+
+  &__value-item-label {
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
     font-weight: 600;
-    min-width: 48px;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  &__value {
+    font-size: 11px;
+    font-weight: 600;
     text-align: right;
     font-variant-numeric: tabular-nums;
 
@@ -36,6 +58,14 @@
 
     &--danger {
       color: #e74c3c;
+    }
+
+    &--max {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    &--min {
+      color: rgba(255, 255, 255, 0.5);
     }
   }
 

@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useContext, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { GraphIcon } from "@primer/octicons-react";
 import type { GameShop } from "@types";
+import { gameDetailsContext } from "@renderer/context";
 import type { DailyPlaytimeEntry, GameSession } from "../../declaration";
 import { ActivityChart } from "./activity-chart";
 import { ActivityHardwareCard } from "./activity-hardware-card";
@@ -85,11 +86,14 @@ function getDateRange(days: number) {
 
 export function GameActivityPanel({ shop, objectId }: GameActivityPanelProps) {
   const { t } = useTranslation("activity");
+  const { isGameRunning } = useContext(gameDetailsContext);
   const [timeframe, setTimeframe] = useState<Timeframe>("30d");
   const [dailyEntries, setDailyEntries] = useState<DailyPlaytimeEntry[]>([]);
   const [sessions, setSessions] = useState<GameSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+
+  const isInitialMount = useRef(true);
 
   const fetchDailyPlaytime = useCallback(async () => {
     const days = getTimeframeDays(timeframe);
@@ -140,6 +144,17 @@ export function GameActivityPanel({ shop, objectId }: GameActivityPanelProps) {
       cancelled = true;
     };
   }, [fetchDailyPlaytime, fetchSessions]);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (!isGameRunning) {
+      fetchDailyPlaytime();
+      fetchSessions();
+    }
+  }, [isGameRunning, fetchDailyPlaytime, fetchSessions]);
 
   const chartData = useMemo(() => {
     return dailyEntries

@@ -303,7 +303,7 @@ export const watchProcesses = async () => {
         onOpenGame(game);
       }
     } else if (gamesPlaytime.has(gameKey)) {
-      onCloseGame(game);
+      await onCloseGame(game);
     }
   }
 
@@ -488,7 +488,7 @@ function onTickGame(game: Game) {
   }
 }
 
-const onCloseGame = (game: Game) => {
+const onCloseGame = async (game: Game) => {
   const gameKey = levelKeys.game(game.shop, game.objectId);
   const now = performance.now();
   const gamePlaytime = gamesPlaytime.get(gameKey)!;
@@ -497,7 +497,7 @@ const onCloseGame = (game: Game) => {
 
   const delta = now - gamePlaytime.lastTick;
 
-  updateDailyPlaytime(game.shop, game.objectId, delta);
+  await updateDailyPlaytime(game.shop, game.objectId, delta);
 
   // Finalize hardware monitoring and attach metrics to session
   const hardwareMetrics = HardwareMonitor.stop(gameKey);
@@ -517,14 +517,12 @@ const onCloseGame = (game: Game) => {
     };
 
     const sessionId = activeSession.id;
-    sessionsSublevel
-      .put(levelKeys.session(game.shop, game.objectId, sessionId), session)
-      .then(() => {
-        activeSessions.delete(gameKey);
-      })
-      .catch((error) => {
-        logger.error("Failed to persist game session", error);
-      });
+    try {
+      await sessionsSublevel.put(levelKeys.session(game.shop, game.objectId, sessionId), session);
+      activeSessions.delete(gameKey);
+    } catch (error) {
+      logger.error("Failed to persist game session", error);
+    }
   }
 
   logPlaytimeTrace("session-close", game, {
@@ -541,7 +539,7 @@ const onCloseGame = (game: Game) => {
     lastTimePlayed: new Date(),
   };
 
-  gamesSublevel.put(gameKey, updatedGame);
+  await gamesSublevel.put(gameKey, updatedGame);
 
   if (game.shop === "custom") return;
 
@@ -568,28 +566,27 @@ const onCloseGame = (game: Game) => {
           : game.lastTimePlayed,
     });
 
-    return trackGamePlaytime(game, deltaToSync, game.lastTimePlayed!)
-      .then(() => {
-        logPlaytimeTrace("close-sync-track-success", game, {
-          deltaToSync,
-        });
-
-        return gamesSublevel.put(gameKey, {
-          ...updatedGame,
-          unsyncedDeltaPlayTimeInMilliseconds: 0,
-        });
-      })
-      .catch((error) => {
-        logPlaytimeTrace("close-sync-track-failed", game, {
-          deltaToSync,
-          error: error instanceof Error ? error.message : String(error),
-        });
-
-        return gamesSublevel.put(gameKey, {
-          ...updatedGame,
-          unsyncedDeltaPlayTimeInMilliseconds: deltaToSync,
-        });
+    try {
+      await trackGamePlaytime(game, deltaToSync, game.lastTimePlayed!);
+      logPlaytimeTrace("close-sync-track-success", game, {
+        deltaToSync,
       });
+
+      await gamesSublevel.put(gameKey, {
+        ...updatedGame,
+        unsyncedDeltaPlayTimeInMilliseconds: 0,
+      });
+    } catch (error) {
+      logPlaytimeTrace("close-sync-track-failed", game, {
+        deltaToSync,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      await gamesSublevel.put(gameKey, {
+        ...updatedGame,
+        unsyncedDeltaPlayTimeInMilliseconds: deltaToSync,
+      });
+    }
   } else {
     logPlaytimeTrace("close-sync-create-request", game, {
       syncTimestamp:
@@ -598,15 +595,14 @@ const onCloseGame = (game: Game) => {
           : game.lastTimePlayed,
     });
 
-    return createGame(game)
-      .then(() => {
-        logPlaytimeTrace("close-sync-create-success", game);
-      })
-      .catch((error) => {
-        logPlaytimeTrace("close-sync-create-failed", game, {
-          error: error instanceof Error ? error.message : String(error),
-        });
+    try {
+      await createGame(game);
+      logPlaytimeTrace("close-sync-create-success", game);
+    } catch (error) {
+      logPlaytimeTrace("close-sync-create-failed", game, {
+        error: error instanceof Error ? error.message : String(error),
       });
+    }
   }
 };
 

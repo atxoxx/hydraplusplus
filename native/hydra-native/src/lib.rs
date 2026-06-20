@@ -630,15 +630,26 @@ pub fn read_hardware_metrics() -> HardwareMetrics {
 
         let fps = hardware::read_rtss_fps().unwrap_or(0.0);
 
-        // CPU usage and RAM are not reliably available from shared memory.
-        // Return 0 for those — the TypeScript layer will fall back to systeminformation.
+        let mut system = System::new_all();
+        system.refresh_cpu_all();
+        system.refresh_memory();
+
+        let cpu_usage = system.global_cpu_usage();
+        let total_ram = system.total_memory();
+        let used_ram = system.used_memory();
+        let ram_usage_mb = if total_ram > 0 {
+            (used_ram as f64) / (1024.0 * 1024.0)
+        } else {
+            0.0
+        };
+
         return HardwareMetrics {
             fps: fps as f64,
-            cpu_usage: 0.0,
+            cpu_usage: cpu_usage as f64,
             gpu_usage: gpu_usage as f64,
             cpu_temp: cpu_temp as f64,
             gpu_temp: gpu_temp as f64,
-            ram_usage_mb: 0.0,
+            ram_usage_mb,
         };
     }
 

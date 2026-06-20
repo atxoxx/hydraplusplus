@@ -4,7 +4,7 @@ import { exec } from "node:child_process";
 import { BaseStore } from "./base-store";
 import type { StoreGame, AuthResult, SyncResult } from "@types";
 
-const XBOX_CLIENT_ID = "04b076bd-fd36-4b4a-b586-b48450125585";
+const XBOX_CLIENT_ID = "38cd2fa8-66fd-4760-afb2-405eb65d5b0c";
 const REDIRECT_URI = "https://login.live.com/oauth20_desktop.srf";
 const SCOPE = "Xboxlive.signin Xboxlive.offline_access";
 
@@ -12,6 +12,8 @@ interface XblTitle {
   titleId: string;
   name: string;
   type: string;
+  pfn: string;
+  devices: string[];
   titleHistory: {
     lastTimePlayed: string;
   };
@@ -46,100 +48,131 @@ export class XboxGamePassStore extends BaseStore {
 
       let resolved = false;
 
-      loginWindow.webContents.on(
-        "did-navigate",
-        async (_event: Electron.Event, url: string) => {
-          if (resolved) return;
+      const handleRedirect = async (url: string) => {
+        if (resolved) return;
+        if (!url.startsWith(REDIRECT_URI)) return;
 
-          if (!url.startsWith(REDIRECT_URI)) return;
+        resolved = true;
 
-          resolved = true;
-          const urlObj = new URL(url);
-          const code = urlObj.searchParams.get("code");
+        // Immediately remove listeners to avoid any event loop racing / crash issues
+        loginWindow.webContents.removeAllListeners("did-navigate");
+        loginWindow.webContents.removeAllListeners("did-redirect-navigation");
+        loginWindow.webContents.removeAllListeners("will-navigate");
+        loginWindow.webContents.removeAllListeners("will-redirect");
 
-          if (!code) {
-            loginWindow.close();
-            resolve({
-              success: false,
-              error: "No authorization code in redirect",
-            });
-            return;
-          }
+        const urlObj = new URL(url);
+        const code = urlObj.searchParams.get("code");
 
-          loginWindow.close();
-
-          try {
-            // Step 1: Exchange code for Microsoft access token
-            const tokenResponse = await axios.post(
-              "https://login.live.com/oauth20_token.srf",
-              new URLSearchParams({
-                client_id: XBOX_CLIENT_ID,
-                grant_type: "authorization_code",
-                code,
-                redirect_uri: REDIRECT_URI,
-              }),
-              {
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-              }
-            );
-
-            const { access_token, refresh_token, expires_in } =
-              tokenResponse.data;
-
-            // Step 2: Authenticate with Xbox Live (XBL)
-            const xblResponse = await axios.post(
-              "https://user.auth.xboxlive.com/user/authenticate",
-              {
-                Properties: {
-                  AuthMethod: "RPS",
-                  SiteName: "user.auth.xboxlive.com",
-                  RpsTicket: `d=${access_token}`,
-                },
-                RelyingParty: "http://auth.xboxlive.com",
-                TokenType: "JWT",
-              }
-            );
-
-            const xblToken = xblResponse.data.Token;
-            const userHash = xblResponse.data.DisplayClaims.xui[0].uhs;
-
-            // Step 3: Get XSTS token
-            const xstsResponse = await axios.post(
-              "https://xsts.auth.xboxlive.com/xsts/authorize",
-              {
-                Properties: {
-                  SandboxId: "RETAIL",
-                  UserTokens: [xblToken],
-                },
-                RelyingParty: "http://xboxlive.com",
-                TokenType: "JWT",
-              }
-            );
-
-            const xstsToken = xstsResponse.data.Token;
-            const gamertag = xstsResponse.data.DisplayClaims.xui[0].gtg;
-            const xuid = xstsResponse.data.DisplayClaims.xui[0].xid;
-
-            const account = {
-              storeId: this.storeId,
-              displayName: gamertag,
-              accountId: xuid,
-              isAuthenticated: true,
-              accessToken: xstsToken,
-              refreshToken: refresh_token,
-              tokenExpiry: Date.now() + expires_in * 1000,
-              extraData: { userHash, msAccessToken: access_token },
-            };
-
-            await this.saveAccount(account);
-            resolve({ success: true, account });
-          } catch (error: any) {
-            resolve({ success: false, error: error.message });
-          }
+        if (!code) {
+          setImmediate(() => {
+            if (!loginWindow.isDestroyed()) loginWindow.close();
+          });
+          resolve({
+            success: false,
+            error: "No authorization code in redirect",
+          });
+          return;
         }
-      );
+
+        setImmediate(() => {
+          if (!loginWindow.isDestroyed()) loginWindow.close();
+        });
+
+        try {
+          // Step 1: Exchange code for Microsoft access token
+          const tokenResponse = await axios.post(
+            "https://login.live.com/oauth20_token.srf",
+            new URLSearchParams({
+              client_id: XBOX_CLIENT_ID,
+              grant_type: "authorization_code",
+              code,
+              redirect_uri: REDIRECT_URI,
+            }),
+            {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+            }
+          );
+
+          const { access_token, refresh_token, expires_in } =
+            tokenResponse.data;
+
+          // Step 2: Authenticate with Xbox Live (XBL)
+          const xblResponse = await axios.post(
+            "https://user.auth.xboxlive.com/user/authenticate",
+            {
+              Properties: {
+                AuthMethod: "RPS",
+                SiteName: "user.auth.xboxlive.com",
+                RpsTicket: `d=${access_token}`,
+              },
+              RelyingParty: "http://auth.xboxlive.com",
+              TokenType: "JWT",
+            }
+          );
+
+          const xblToken = xblResponse.data.Token;
+          const userHash = xblResponse.data.DisplayClaims?.xui?.[0]?.uhs;
+
+          if (!xblToken || !userHash) {
+            throw new Error("Missing Token or User Hash (uhs) in Xbox authenticate response.");
+          }
+
+          // Step 3: Get XSTS token
+          const xstsResponse = await axios.post(
+            "https://xsts.auth.xboxlive.com/xsts/authorize",
+            {
+              Properties: {
+                SandboxId: "RETAIL",
+                UserTokens: [xblToken],
+              },
+              RelyingParty: "http://xboxlive.com",
+              TokenType: "JWT",
+            }
+          );
+
+          const xstsToken = xstsResponse.data.Token;
+          const gamertag = xstsResponse.data.DisplayClaims?.xui?.[0]?.gtg;
+          const xuid = xstsResponse.data.DisplayClaims?.xui?.[0]?.xid;
+
+          if (!xstsToken || !gamertag || !xuid) {
+            throw new Error("Missing Gamertag (gtg) or XUID in Xbox authorize response. Please create an Xbox Live profile.");
+          }
+
+          const account = {
+            storeId: this.storeId,
+            displayName: gamertag,
+            accountId: xuid,
+            isAuthenticated: true,
+            accessToken: xstsToken,
+            refreshToken: refresh_token,
+            tokenExpiry: Date.now() + expires_in * 1000,
+            extraData: { userHash, msAccessToken: access_token },
+          };
+
+          await this.saveAccount(account);
+          resolve({ success: true, account });
+        } catch (error: any) {
+          resolve({ success: false, error: error.message });
+        }
+      };
+
+      loginWindow.webContents.on("did-navigate", (_event: Electron.Event, url: string) => {
+        handleRedirect(url);
+      });
+
+      loginWindow.webContents.on("did-redirect-navigation", (_event: Electron.Event, url: string) => {
+        handleRedirect(url);
+      });
+
+      loginWindow.webContents.on("will-navigate", (_event: Electron.Event, url: string) => {
+        handleRedirect(url);
+      });
+
+      loginWindow.webContents.on("will-redirect", (_event: Electron.Event, url: string) => {
+        handleRedirect(url);
+      });
 
       loginWindow.loadURL(authUrl);
 
@@ -258,8 +291,10 @@ export class XboxGamePassStore extends BaseStore {
       );
 
       const titles: XblTitle[] = titleHistoryResponse.data.titles || [];
-      // Filter: only PC games
-      const pcTitles = titles.filter((t) => t.type === "Game");
+      // Filter: only PC games with valid Package Family Name (pfn) and played on PC
+      const pcTitles = titles.filter(
+        (t) => t.type === "Game" && t.devices?.includes("PC") && t.pfn
+      );
 
       const games: StoreGame[] = [];
 
@@ -270,6 +305,7 @@ export class XboxGamePassStore extends BaseStore {
         // Fetch box art from the Microsoft Store catalog
         let coverImageUrl: string | null = null;
         let packageFamilyName: string | null = null;
+        let productId: string | null = null;
         try {
           const storeResponse = await axios.get(
             `https://displaycatalog.mp.microsoft.com/v7.0/products?bigIds=${titleId}&market=US&languages=en-us&MS-CV=DGU1mcuYo0WMMp+F.1`,
@@ -277,6 +313,7 @@ export class XboxGamePassStore extends BaseStore {
           );
           const product = storeResponse.data.Products?.[0];
           if (product) {
+            productId = product.ProductId || null;
             const images = product.LocalizedProperties?.[0]?.Images || [];
             const boxArt = images.find(
               (img: any) =>
@@ -297,13 +334,16 @@ export class XboxGamePassStore extends BaseStore {
           title: name,
           coverImageUrl,
           isOwned: true,
-          storeUrl: `ms-windows-store://pdp/?productid=${titleId}`,
+          storeUrl: productId
+            ? `ms-windows-store://pdp/?productid=${productId}`
+            : `ms-windows-store://pdp/?productid=${titleId}`,
           extraData: {
             titleId,
+            productId,
             titleType: title.type,
             lastPlayed: title.titleHistory?.lastTimePlayed ?? null,
             source: "owned",
-            ...(packageFamilyName ? { packageFamilyName } : {}),
+            packageFamilyName: title.pfn || packageFamilyName,
           },
         });
       }
@@ -395,8 +435,26 @@ export class XboxGamePassStore extends BaseStore {
     const games = await this.getStoredGames();
     const game = games.find((g) => g.storeGameId === gameId);
     const extraData = (game?.extraData ?? {}) as any;
+    let productId = extraData.productId;
+
+    if (!productId && gameId) {
+      // Fallback: Query Microsoft Store Catalog at runtime to resolve the Product ID
+      try {
+        const storeResponse = await axios.get(
+          `https://displaycatalog.mp.microsoft.com/v7.0/products?bigIds=${gameId}&market=US&languages=en-us&MS-CV=DGU1mcuYo0WMMp+F.1`,
+          { timeout: 5000 }
+        );
+        const product = storeResponse.data.Products?.[0];
+        if (product?.ProductId) {
+          productId = product.ProductId;
+        }
+      } catch (err) {
+        this.logError("Failed to fetch product ID at install runtime", err);
+      }
+    }
+
     shell.openExternal(
-      `ms-windows-store://pdp/?productid=${extraData.productId ?? gameId}`
+      `ms-windows-store://pdp/?productid=${productId ?? gameId}`
     );
   }
 

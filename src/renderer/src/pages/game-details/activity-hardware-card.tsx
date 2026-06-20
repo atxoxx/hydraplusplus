@@ -53,9 +53,10 @@ export function ActivityHardwareCard({
         {metrics.avgCpuUsage > 0 && (
           <ActivitySparkline
             data={samplesToSparklineData(samples, "cpuUsage")}
-            label={t("cpu_usage")}
+            label={t("cpu")}
             unit="%"
             value={metrics.avgCpuUsage}
+            max={metrics.maxCpuUsage}
             thresholds={{ warn: 70, danger: 90 }}
           />
         )}
@@ -63,9 +64,10 @@ export function ActivityHardwareCard({
         {metrics.avgGpuUsage > 0 && (
           <ActivitySparkline
             data={samplesToSparklineData(samples, "gpuUsage")}
-            label={t("gpu_usage")}
+            label={t("gpu")}
             unit="%"
             value={metrics.avgGpuUsage}
+            max={metrics.maxGpuUsage}
             thresholds={{ warn: 70, danger: 90 }}
           />
         )}
@@ -76,6 +78,7 @@ export function ActivityHardwareCard({
             label={t("cpu_temp")}
             unit="°C"
             value={metrics.avgCpuTemp}
+            max={metrics.maxCpuTemp}
             thresholds={{ warn: 75, danger: 85 }}
           />
         )}
@@ -86,6 +89,7 @@ export function ActivityHardwareCard({
             label={t("gpu_temp")}
             unit="°C"
             value={metrics.avgGpuTemp}
+            max={metrics.maxGpuTemp}
             thresholds={{ warn: 75, danger: 85 }}
           />
         )}
@@ -93,18 +97,21 @@ export function ActivityHardwareCard({
         {metrics.avgRamUsageMB > 0 && (
           <ActivitySparkline
             data={samplesToSparklineData(samples, "ramUsageMB")}
-            label={t("ram_usage")}
-            unit=" MB"
+            label={t("ram")}
+            unit="MB"
             value={metrics.avgRamUsageMB}
+            max={metrics.maxRamUsageMB}
           />
         )}
 
         {metrics.avgFps > 0 && (
           <ActivitySparkline
             data={samplesToSparklineData(samples, "fps")}
-            label={t("avg_fps")}
+            label={t("fps")}
             unit=""
             value={metrics.avgFps}
+            max={metrics.maxFps}
+            min={metrics.minFps}
             thresholds={{ warn: 60, danger: 30 }}
             inverted
           />
