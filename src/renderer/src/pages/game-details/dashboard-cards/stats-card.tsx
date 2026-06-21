@@ -6,12 +6,16 @@ import {
   PeopleIcon,
   SunIcon,
   XIcon,
+  DatabaseIcon,
+  HistoryIcon,
+  ClockIcon,
 } from "@primer/octicons-react";
 import { StarRating } from "@renderer/components/star-rating/star-rating";
 import { GameStatusDropdown } from "@renderer/components";
 import { gameDetailsContext } from "@renderer/context";
-import { useFormat, useToast } from "@renderer/hooks";
+import { useFormat, useToast, useDate } from "@renderer/hooks";
 import type { GameShop, UserGameStatus } from "@types";
+import { formatBytes } from "@shared";
 
 import "./dashboard-card.scss";
 import "./stats-card.scss";
@@ -21,11 +25,7 @@ import "./stats-card.scss";
  *   - User-editable status (via shared `GameStatusDropdown`)
  *   - Inline playtime editor that writes through `changeGamePlayTime` IPC
  *   - Catalogue-level stats (downloads, players, rating)
- *
- * Earlier iterations split this across two cards (Stats + a separate
- * "Interactive playtime" component). That duplicated the user-status row
- * and the playtime renderer; folding both into StatsCard keeps the
- * dashboard grid compact.
+ *   - Local stats (game size, session count, last played)
  */
 export function StatsCard() {
   const { t } = useTranslation("game_details");
@@ -33,8 +33,19 @@ export function StatsCard() {
     useContext(gameDetailsContext);
   const { numberFormatter } = useFormat();
   const { showSuccessToast, showErrorToast } = useToast();
+  const { formatDistance } = useDate();
 
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [sessions, setSessions] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (objectId && shop) {
+      window.electron
+        .getGameSessions(shop as GameShop, objectId)
+        .then(setSessions)
+        .catch(() => setSessions([]));
+    }
+  }, [shop, objectId, game?.playTimeInMilliseconds]);
 
   // Normalize legacy "to_play" from existing LevelDB data.
   const rawStatus = game?.userStatus;
@@ -106,6 +117,50 @@ export function StatsCard() {
         )}
 
         <div className="stats-card__list">
+          {game && (
+            <>
+              <div className="stats-card__item">
+                <span className="stats-card__item-label">
+                  <DatabaseIcon size={16} />
+                  {t("game_size", "Game size")}
+                </span>
+                <span className="stats-card__item-value">
+                  {game.installedSizeInBytes
+                    ? formatBytes(game.installedSizeInBytes)
+                    : t("not_available", "N/A")}
+                </span>
+              </div>
+
+              <div className="stats-card__item">
+                <span className="stats-card__item-label">
+                  <HistoryIcon size={16} />
+                  {t("sessions", "Sessions")}
+                </span>
+                <span className="stats-card__item-value">
+                  {sessions.length}
+                </span>
+              </div>
+
+              <div className="stats-card__item">
+                <span className="stats-card__item-label">
+                  <ClockIcon size={16} />
+                  {t("last_played", "Last played")}
+                </span>
+                <span className="stats-card__item-value">
+                  {game.lastTimePlayed
+                    ? formatDistance(
+                        new Date(game.lastTimePlayed),
+                        new Date(),
+                        {
+                          addSuffix: true,
+                        }
+                      )
+                    : t("not_played_yet", { title: game.title })}
+                </span>
+              </div>
+            </>
+          )}
+
           {stats && (
             <>
               <div className="stats-card__item">

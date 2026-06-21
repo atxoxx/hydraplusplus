@@ -63,3 +63,5 @@ import "./check-steam-shortcut";
 
 import "./transfer-game-files";
 import "./get-available-drives";
+import "./auto-detect-game-size";
+import "./update-install-path";

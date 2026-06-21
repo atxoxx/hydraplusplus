@@ -1,10 +1,16 @@
 @use "../../../scss/globals.scss";
 
-.hero-player-counter {
+.hero-stats-container {
   position: absolute;
   top: calc(globals.$spacing-unit * 1.5);
   right: calc(globals.$spacing-unit * 2);
   z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: calc(globals.$spacing-unit * 0.75);
+}
+
+.hero-player-counter {
   display: flex;
   align-items: center;
   gap: calc(globals.$spacing-unit * 0.75);
@@ -32,6 +38,17 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: globals.$muted-color;
+  }
+
+  &__label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: globals.$muted-color;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 600;
   }
 
   &__live-dot {

@@ -275,6 +275,13 @@ interface GeneralSettingsSectionProps {
   showTransferSection?: boolean;
   showShortcutsSection?: boolean;
   showLaunchOptionsSection?: boolean;
+  gameSizeGB?: string;
+  isDetectingSize?: boolean;
+  onChangeGameSize?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlurGameSize?: () => Promise<void>;
+  onAutoDetectSize?: () => Promise<void>;
+  onChangeInstallPath?: () => Promise<void>;
+  onClearInstallPath?: () => Promise<void>;
 }
 
 //
@@ -337,6 +344,13 @@ export function GeneralSettingsSection({
   showTransferSection = true,
   showShortcutsSection = true,
   showLaunchOptionsSection = true,
+  gameSizeGB = "",
+  isDetectingSize = false,
+  onChangeGameSize = () => {},
+  onBlurGameSize = async () => {},
+  onAutoDetectSize = async () => {},
+  onChangeInstallPath = async () => {},
+  onClearInstallPath = async () => {},
 }: Readonly<GeneralSettingsSectionProps>) {
   const { t } = useTranslation("game_details");
 
@@ -497,6 +511,110 @@ export function GeneralSettingsSection({
                   </Button>
                 )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Game Folder */}
+      {showExecutableSection && game.shop !== "launchbox" && (
+        <div className="game-options-modal__section">
+          <div className="game-options-modal__header">
+            <h2>{t("game_folder_section_title", "Game Folder")}</h2>
+            <h4 className="game-options-modal__header-description">
+              {t(
+                "game_folder_section_description",
+                "The folder where the game files are installed."
+              )}
+            </h4>
+          </div>
+
+          <div className="game-options-modal__executable-field">
+            <TextField
+              value={game.installPath || ""}
+              readOnly
+              theme="dark"
+              disabled
+              placeholder={t("no_folder_selected", "No folder selected")}
+              rightContent={
+                <>
+                  <Button
+                    type="button"
+                    theme="outline"
+                    onClick={onChangeInstallPath}
+                  >
+                    <FolderOpen size={14} />
+                    {t("select_folder", "Select folder")}
+                  </Button>
+                  {game.installPath && (
+                    <Button onClick={onClearInstallPath} theme="outline">
+                      {t("clear")}
+                    </Button>
+                  )}
+                </>
+              }
+            />
+
+            <div className="game-options-modal__executable-field-buttons">
+              <Button
+                type="button"
+                theme="outline"
+                onClick={onAutoDetectSize}
+                disabled={isDetectingSize || (!game.executablePath && !game.installPath)}
+              >
+                {isDetectingSize
+                  ? t("detecting", "Detecting...")
+                  : t("auto_detect", "Auto Detect Size")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Game Size */}
+      {showExecutableSection && game.shop !== "launchbox" && (
+        <div className="game-options-modal__section">
+          <div className="game-options-modal__header">
+            <h2>{t("game_size_section_title", "Game Size")}</h2>
+            <h4 className="game-options-modal__header-description">
+              {t(
+                "game_size_section_description",
+                "Specify the installed size of the game or auto-detect it."
+              )}
+            </h4>
+          </div>
+
+          <div className="game-options-modal__executable-field">
+            <TextField
+              label={t("game_size_label", "Size (GB)")}
+              type="number"
+              min="0"
+              step="0.01"
+              theme="dark"
+              value={gameSizeGB}
+              onChange={onChangeGameSize}
+              onBlur={onBlurGameSize}
+              placeholder={t("game_size_placeholder", "e.g. 50")}
+              rightContent={
+                <Button
+                  type="button"
+                  theme="outline"
+                  onClick={onAutoDetectSize}
+                  disabled={isDetectingSize || (!game.executablePath && !game.installPath)}
+                  title={
+                    !game.executablePath && !game.installPath
+                      ? t(
+                          "executable_path_required",
+                          "Executable or Game Folder path is required to auto detect size"
+                        )
+                      : ""
+                  }
+                >
+                  {isDetectingSize
+                    ? t("detecting", "Detecting...")
+                    : t("auto_detect", "Auto Detect")}
+                </Button>
+              }
+            />
           </div>
         </div>
       )}

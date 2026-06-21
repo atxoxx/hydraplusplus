@@ -1,14 +1,8 @@
 import { lazy, Suspense, useContext, useEffect, useState } from "react";
 import type { CrackWatchStatus, ProtonDBData } from "@types";
-import { useTranslation } from "react-i18next";
-import { StarRating } from "@renderer/components/star-rating/star-rating";
-
 import { gameDetailsContext } from "@renderer/context";
-import { useFormat } from "@renderer/hooks";
-import { DownloadIcon, PeopleIcon, StarIcon } from "@primer/octicons-react";
 import { CrackWatchSection } from "./crackwatch-section";
 import { LaunchboxDetailsSection } from "./launchbox-details-section";
-import { SidebarSection } from "../sidebar-section/sidebar-section";
 import "./sidebar.scss";
 import { GameLanguageSection } from "./game-language-section";
 import { ControllerSupportSection } from "./controller-support-section";
@@ -74,11 +68,7 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
     shop,
     effectiveShop,
     effectiveObjectId,
-    stats,
   } = useContext(gameDetailsContext);
-
-  const { t } = useTranslation("game_details");
-  const { numberFormatter } = useFormat();
 
   const [showSteamReviewModal, setShowSteamReviewModal] = useState(false);
 
@@ -130,46 +120,6 @@ export function Sidebar({ activeTab }: Readonly<{ activeTab: GameTabId }>) {
                 objectId={objectId ?? ""}
               />
             </Suspense>
-          )}
-
-          {stats && (
-            <SidebarSection
-              title={t("stats")}
-              collapseStorageKey="sidebar_stats"
-            >
-              <div className="stats__section">
-                <div className="stats__category">
-                  <p className="stats__category-title">
-                    <DownloadIcon size={18} />
-                    {t("download_count")}
-                  </p>
-                  <p>{numberFormatter.format(stats?.downloadCount)}</p>
-                </div>
-
-                <div className="stats__category">
-                  <p className="stats__category-title">
-                    <PeopleIcon size={18} />
-                    {t("player_count")}
-                  </p>
-                  <p>{numberFormatter.format(stats?.playerCount)}</p>
-                </div>
-
-                <div className="stats__category">
-                  <p className="stats__category-title">
-                    <StarIcon size={18} />
-                    {t("rating_count")}
-                  </p>
-                  <StarRating
-                    rating={
-                      stats?.averageScore === 0
-                        ? null
-                        : (stats?.averageScore ?? null)
-                    }
-                    size={16}
-                  />
-                </div>
-              </div>
-            </SidebarSection>
           )}
 
           <CrackWatchSection

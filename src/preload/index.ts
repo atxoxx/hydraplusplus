@@ -606,6 +606,12 @@ contextBridge.exposeInMainWorld("electron", {
     executablePath: string | null
   ) =>
     ipcRenderer.invoke("updateExecutablePath", shop, objectId, executablePath),
+  updateInstallPath: (
+    shop: GameShop,
+    objectId: string,
+    installPath: string | null
+  ) =>
+    ipcRenderer.invoke("updateInstallPath", shop, objectId, installPath),
   addGameToFavorites: (shop: GameShop, objectId: string) =>
     ipcRenderer.invoke("addGameToFavorites", shop, objectId),
   removeGameFromFavorites: (shop: GameShop, objectId: string) =>
@@ -1476,8 +1482,11 @@ contextBridge.exposeInMainWorld("electron", {
       tags?: string[] | null;
       releaseDate?: string | null;
       userStatus?: UserGameStatus | null;
+      installedSizeInBytes?: number | null;
     };
   }) => ipcRenderer.invoke("saveGameMetadata", payload),
+  autoDetectGameSize: (shop: GameShop, objectId: string) =>
+    ipcRenderer.invoke("autoDetectGameSize", shop, objectId),
 
   /* Playtime providers (HLTB / Backlogged / IGDB+Steam) */
   searchPlaytimeGames: (params: {

@@ -93,6 +93,12 @@ export function GameOptionsModal({
   const [gameTitle, setGameTitle] = useState(game.title ?? "");
   const [updatingGameTitle, setUpdatingGameTitle] = useState(false);
   const [launchOptions, setLaunchOptions] = useState(game.launchOptions ?? "");
+  const [gameSizeGB, setGameSizeGB] = useState<string>(
+    game.installedSizeInBytes
+      ? (game.installedSizeInBytes / (1024 * 1024 * 1024)).toFixed(2)
+      : ""
+  );
+  const [isDetectingSize, setIsDetectingSize] = useState(false);
   const [showResetAchievementsModal, setShowResetAchievementsModal] =
     useState(false);
   const [showChangePlaytimeModal, setShowChangePlaytimeModal] = useState(false);
@@ -177,6 +183,13 @@ export function GameOptionsModal({
   useEffect(() => {
     setGameTitle(game.title ?? "");
   }, [game.title]);
+  useEffect(() => {
+    setGameSizeGB(
+      game.installedSizeInBytes
+        ? (game.installedSizeInBytes / (1024 * 1024 * 1024)).toFixed(2)
+        : ""
+    );
+  }, [game.installedSizeInBytes]);
   useEffect(() => {
     setSelectedProtonPath(game.protonPath ?? "");
   }, [game.protonPath]);
@@ -555,6 +568,84 @@ export function GameOptionsModal({
   const handleChangeGameTitle = (event: React.ChangeEvent<HTMLInputElement>) =>
     setGameTitle(event.target.value);
 
+  const handleChangeGameSize = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setGameSizeGB(event.target.value);
+  };
+
+  const handleBlurGameSize = async () => {
+    const parsed = parseFloat(gameSizeGB);
+    const bytes =
+      isNaN(parsed) || parsed <= 0
+        ? null
+        : Math.round(parsed * 1024 * 1024 * 1024);
+
+    try {
+      const result = await window.electron.saveGameMetadata({
+        shop: game.shop,
+        objectId: game.objectId,
+        metadata: {
+          installedSizeInBytes: bytes,
+        },
+      });
+
+      if (result.ok) {
+        await updateGame();
+      } else {
+        showErrorToast(result.error || t("edit_game_modal_failed"));
+      }
+    } catch (error) {
+      logger.error("Failed to save custom game size:", error);
+      showErrorToast(t("edit_game_modal_failed"));
+    }
+  };
+
+  const handleAutoDetectSize = async () => {
+    if (!game.executablePath && !game.installPath) return;
+    setIsDetectingSize(true);
+    try {
+      const res = await window.electron.autoDetectGameSize(
+        game.shop,
+        game.objectId
+      );
+      if (res.ok && res.size !== undefined) {
+        showSuccessToast(
+          t("size_detected_success", "Game size successfully detected")
+        );
+        await updateGame();
+      } else {
+        showErrorToast(
+          res.error || t("size_detection_failed", "Failed to detect game size")
+        );
+      }
+    } catch (err) {
+      logger.error("Failed to auto detect size:", err);
+      showErrorToast(t("size_detection_failed", "Failed to detect game size"));
+    } finally {
+      setIsDetectingSize(false);
+    }
+  };
+
+  const handleChangeInstallPath = async () => {
+    const defaultPath = game.installPath || undefined;
+    const { filePaths } = await window.electron.showOpenDialog({
+      properties: ["openDirectory"],
+      defaultPath: defaultPath,
+    });
+    if (filePaths?.length) {
+      await window.electron.updateInstallPath(
+        game.shop,
+        game.objectId,
+        filePaths[0]
+      );
+      await updateGame();
+    }
+  };
+
+  const handleClearInstallPath = async () => {
+    await window.electron.updateInstallPath(game.shop, game.objectId, null);
+    await updateGame();
+  };
+
   const handleBlurGameTitle = async () => {
     if (updatingGameTitle) return;
     const trimmed = gameTitle.trim();
@@ -835,6 +926,13 @@ export function GameOptionsModal({
                 showExecutableSection={isLaunchbox}
                 showTransferSection={false}
                 showLaunchOptionsSection={!isLaunchbox}
+                gameSizeGB={gameSizeGB}
+                isDetectingSize={isDetectingSize}
+                onChangeGameSize={handleChangeGameSize}
+                onBlurGameSize={handleBlurGameSize}
+                onAutoDetectSize={handleAutoDetectSize}
+                onChangeInstallPath={handleChangeInstallPath}
+                onClearInstallPath={handleClearInstallPath}
               />
             )}
             {selectedCategory === "locations" && (
@@ -878,6 +976,13 @@ export function GameOptionsModal({
                 showTitleSection={false}
                 showShortcutsSection={false}
                 showLaunchOptionsSection={false}
+                gameSizeGB={gameSizeGB}
+                isDetectingSize={isDetectingSize}
+                onChangeGameSize={handleChangeGameSize}
+                onBlurGameSize={handleBlurGameSize}
+                onAutoDetectSize={handleAutoDetectSize}
+                onChangeInstallPath={handleChangeInstallPath}
+                onClearInstallPath={handleClearInstallPath}
               />
             )}
             {selectedCategory === "metadata" && (

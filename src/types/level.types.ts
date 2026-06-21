@@ -61,6 +61,7 @@ export interface Game {
   protonPath?: string | null;
   executablePath?: string | null;
   executablePathUpdatedAt?: Date | null;
+  installPath?: string | null;
   launchOptions?: string | null;
   autoRunMangohud?: boolean | null;
   autoRunGamemode?: boolean | null;

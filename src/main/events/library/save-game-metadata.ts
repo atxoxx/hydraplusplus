@@ -14,6 +14,7 @@ export interface SaveGameMetadataPayload {
     tags?: string[] | null;
     releaseDate?: string | null;
     userStatus?: string | null;
+    installedSizeInBytes?: number | null;
   };
 }
 
@@ -61,6 +62,9 @@ ipcMain.handle(
           updated.userStatus = normalized as Game["userStatus"];
           updated.userStatusUpdatedAt = new Date();
         }
+      }
+      if ("installedSizeInBytes" in metadata) {
+        updated.installedSizeInBytes = metadata.installedSizeInBytes ?? null;
       }
 
       await gamesSublevel.put(gameKey, updated);

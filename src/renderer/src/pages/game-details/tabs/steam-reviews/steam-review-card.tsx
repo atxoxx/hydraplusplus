@@ -183,12 +183,16 @@ export function SteamReviewCard({
       </div>
 
       {bodyText && (
-        <div
-          className={`steam-review-card__body ${
-            isExpanded || !bodyIsLong ? "steam-review-card__body--expanded" : ""
-          }`}
-        >
-          <p className="steam-review-card__body-text">{bodyText}</p>
+        <>
+          <div
+            className={`steam-review-card__body ${
+              isExpanded || !bodyIsLong
+                ? "steam-review-card__body--expanded"
+                : ""
+            }`}
+          >
+            <p className="steam-review-card__body-text">{bodyText}</p>
+          </div>
           {bodyIsLong && (
             <button
               type="button"
@@ -198,7 +202,7 @@ export function SteamReviewCard({
               {isExpanded ? t("review_show_less") : t("review_show_more")}
             </button>
           )}
-        </div>
+        </>
       )}
 
       <footer className="steam-review-card__footer">

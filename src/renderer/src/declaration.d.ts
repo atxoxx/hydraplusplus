@@ -429,6 +429,11 @@ declare global {
       objectId: string,
       executablePath: string | null
     ) => Promise<void>;
+    updateInstallPath: (
+      shop: GameShop,
+      objectId: string,
+      installPath: string | null
+    ) => Promise<void>;
     addGameToFavorites: (shop: GameShop, objectId: string) => Promise<void>;
     removeGameFromFavorites: (
       shop: GameShop,
@@ -1234,8 +1239,13 @@ declare global {
         tags?: string[] | null;
         releaseDate?: string | null;
         userStatus?: UserGameStatus | null;
+        installedSizeInBytes?: number | null;
       };
     }) => Promise<{ ok: boolean; error?: string; game?: Game }>;
+    autoDetectGameSize: (
+      shop: GameShop,
+      objectId: string
+    ) => Promise<{ ok: boolean; size?: number; error?: string }>;
 
     /* Playtime providers */
     searchPlaytimeGames: (params: {
