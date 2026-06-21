@@ -3,6 +3,7 @@
 ## Overview
 
 Two-part feature request:
+
 1. **Bug Fix**: After applying metadata from the search modal to a game, the fields in the Metadata General and Description sections of the Game Options modal do not reflect the updated values — they remain stale.
 2. **New Feature**: Add a language selector dropdown to the metadata search modal so users can search for metadata in specific languages (inspired by Playnite).
 
@@ -27,19 +28,21 @@ In `src/renderer/src/pages/game-details/modals/game-options-modal/metadata-gener
 ```tsx
 // Line ~99-101
 useEffect(() => {
-    setState(initializeState(game, shopDetails));
+  setState(initializeState(game, shopDetails));
 }, [game.shop, game.objectId, shopDetails]);
 ```
 
 The dependency array only includes `game.shop`, `game.objectId`, and `shopDetails`. After metadata is applied via search, the game object is refreshed with new metadata, but `shop` and `objectId` haven't changed — so the `useEffect` never re-runs and the component keeps showing stale state from the initial render.
 
 A similar issue may exist in `MetadataDescriptionSection`:
+
 ```tsx
 // Line ~35-37
 useEffect(() => {
-    setDescription(getDescription(game, shopDetails));
+  setDescription(getDescription(game, shopDetails));
 }, [game, shopDetails]);
 ```
+
 Here the dependency includes `game` itself, which should work if the game object reference changes after `updateGame()`. However, timing issues or reference equality may still cause problems.
 
 ### Fix
@@ -49,16 +52,26 @@ Change the `MetadataGeneralSection`'s re-initialization `useEffect` to include t
 ```tsx
 // metadata-general-section.tsx
 useEffect(() => {
-    setState(initializeState(game, shopDetails));
-}, [game.shop, game.objectId, shopDetails, game.title, game.releaseDate, 
-    game.genres, game.developers, game.publishers, game.tags, game.userStatus]);
+  setState(initializeState(game, shopDetails));
+}, [
+  game.shop,
+  game.objectId,
+  shopDetails,
+  game.title,
+  game.releaseDate,
+  game.genres,
+  game.developers,
+  game.publishers,
+  game.tags,
+  game.userStatus,
+]);
 ```
 
 Or more simply:
 
 ```tsx
 useEffect(() => {
-    setState(initializeState(game, shopDetails));
+  setState(initializeState(game, shopDetails));
 }, [game.shop, game.objectId, shopDetails, game]);
 ```
 
@@ -90,28 +103,29 @@ For `MetadataDescriptionSection`, verify that the game object reference actually
 
 A curated list of major languages (matching common Steam/IGDB language support):
 
-| Label | Code (Steam) | IGDB locale |
-|-------|-------------|-------------|
-| English | `english` | `en` |
-| French | `french` | `fr` |
-| German | `german` | `de` |
-| Spanish | `spanish` | `es` |
-| Italian | `italian` | `it` |
-| Portuguese (Brazil) | `brazilian` | `pt-BR` |
-| Russian | `russian` | `ru` |
-| Japanese | `japanese` | `ja` |
-| Korean | `korean` | `ko` |
-| Simplified Chinese | `schinese` | `zh-CN` |
-| Traditional Chinese | `tchinese` | `zh-TW` |
-| Polish | `polish` | `pl` |
-| Dutch | `dutch` | `nl` |
-| Turkish | `turkish` | `tr` |
+| Label               | Code (Steam) | IGDB locale |
+| ------------------- | ------------ | ----------- |
+| English             | `english`    | `en`        |
+| French              | `french`     | `fr`        |
+| German              | `german`     | `de`        |
+| Spanish             | `spanish`    | `es`        |
+| Italian             | `italian`    | `it`        |
+| Portuguese (Brazil) | `brazilian`  | `pt-BR`     |
+| Russian             | `russian`    | `ru`        |
+| Japanese            | `japanese`   | `ja`        |
+| Korean              | `korean`     | `ko`        |
+| Simplified Chinese  | `schinese`   | `zh-CN`     |
+| Traditional Chinese | `tchinese`   | `zh-TW`     |
+| Polish              | `polish`     | `pl`        |
+| Dutch               | `dutch`      | `nl`        |
+| Turkish             | `turkish`    | `tr`        |
 
 ### UI Design
 
 The language dropdown should be placed in the metadata search modal, in the `metadata-search-modal__search-row` area, positioned between the source tabs and the search input. It should be a compact dropdown/select component.
 
 Layout:
+
 ```
 [Source Tabs: All | Steam | SteamGridDB | PCGamingWiki | IGN | VNDB]
 [  Language: [English ▼]  ]  [Search input........................] [🔍]
@@ -146,6 +160,7 @@ Pass `language` down to all search functions.
 #### 2. Search Aggregator (`src/main/services/metadata-search-aggregator.ts`)
 
 Change hardcoded `"english"` to accept a language parameter:
+
 - `searchAllSources(query, limit, language?)`
 - `searchSteamFirst(query, limit, language?)`
 - `enrichSteamCandidate(appId, language)` — already uses `getSteamAppDetails(appId, language)`, just needs wiring
@@ -179,10 +194,10 @@ searchGameMetadata: (
 
 ```ts
 searchGameMetadata: (
-    query: string,
-    source: string,
-    shop?: string,
-    language?: string  // NEW
+  query: string,
+  source: string,
+  shop?: string,
+  language?: string // NEW
 ) => Promise<MetadataSearchResult[]>;
 ```
 
@@ -191,11 +206,12 @@ searchGameMetadata: (
 #### 1. UserPreferences Type (`src/types/level.types.ts`)
 
 Add new field:
+
 ```ts
 export interface UserPreferences {
-    // ... existing fields ...
-    /** Language code for metadata search (e.g. "english", "french"). Falls back to UI language if null. */
-    metadataSearchLanguage?: string | null;
+  // ... existing fields ...
+  /** Language code for metadata search (e.g. "english", "french"). Falls back to UI language if null. */
+  metadataSearchLanguage?: string | null;
 }
 ```
 
@@ -214,6 +230,7 @@ Store the preference via the existing user preferences mechanism. The metadata s
 ### SCSS Changes
 
 Add styling for the language dropdown in `metadata-search-modal.scss`:
+
 - Inline with the search bar
 - Matches existing dark theme styling
 - Compact width (~120-140px)
@@ -223,10 +240,12 @@ Add styling for the language dropdown in `metadata-search-modal.scss`:
 ## Files to Modify
 
 ### Bug Fix
+
 - `src/renderer/src/pages/game-details/modals/game-options-modal/metadata-general-section.tsx` — Fix dependency array
 - `src/renderer/src/pages/game-details/modals/game-options-modal/metadata-description-section.tsx` — Verify/fix dependency array
 
 ### Language Feature
+
 - `src/renderer/src/components/metadata-search-modal/metadata-search-modal.tsx` — Add language dropdown UI and wiring
 - `src/renderer/src/components/metadata-search-modal/metadata-search-modal.scss` — Style the dropdown
 - `src/preload/index.ts` — Update IPC bridge signature
@@ -238,6 +257,7 @@ Add styling for the language dropdown in `metadata-search-modal.scss`:
 ### New Translation Keys (i18n)
 
 Keys to add to `src/locales/*/translation.json` (under `game_details` namespace):
+
 - `metadata_search_language`: "Search Language" (dropdown label)
 - Language option labels can reuse existing locale names or be hardcoded as proper nouns
 

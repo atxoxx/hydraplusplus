@@ -108,8 +108,8 @@ export function MetadataSearchModal({
   const [selectedSource, setSelectedSource] = useState("all");
   // Language: use stored preference, fall back to UI language.
   // Sync from userPreferences when it loads or changes (e.g. async fetch on mount).
-  const [selectedLanguage, setSelectedLanguage] = useState(() =>
-    getSteamLanguage(i18n.language) || "english"
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    () => getSteamLanguage(i18n.language) || "english"
   );
 
   // When userPreferences loads async, sync the stored language preference.
