@@ -49,7 +49,7 @@ function formatTimeTick(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-const MAX_POINTS = 80;
+const MAX_POINTS = 60;
 
 export function CombinedLineChart({
   samples,
@@ -72,47 +72,72 @@ export function CombinedLineChart({
     return samples.map((_, i) => i);
   }, [samples, isolatedSessionIndex]);
 
-  // Construct unified data array sorted by elapsedSeconds
+  const isMultiple = activeSessionIndices.length > 1 && samples.length > 1;
+
+  // Construct unified data array downsampled to exactly MAX_POINTS points
   const chartData = useMemo(() => {
-    const dataMap = new Map<number, Record<string, number>>();
-
-    for (const s of series) {
-      for (const sessionIdx of activeSessionIndices) {
+    // 1. Downsample/interpolate every active session to exactly MAX_POINTS
+    const sessionData = activeSessionIndices
+      .map((sessionIdx) => {
         const sessionSamples = samples[sessionIdx];
-        if (!sessionSamples || sessionSamples.length < 2) continue;
-
-        const step = Math.max(
-          1,
-          Math.floor(sessionSamples.length / MAX_POINTS)
-        );
         const duration = sessionDurations[sessionIdx] ?? 0;
+        if (!sessionSamples || sessionSamples.length === 0) {
+          return null;
+        }
 
-        sessionSamples.forEach((sample, sampleIdx) => {
-          if (sampleIdx % step !== 0) return;
+        const interpolated: HardwareSample[] = [];
+        for (let i = 0; i < MAX_POINTS; i++) {
+          const sampleIdx = Math.min(
+            sessionSamples.length - 1,
+            Math.round((i / (MAX_POINTS - 1)) * (sessionSamples.length - 1))
+          );
+          interpolated.push(sessionSamples[sampleIdx]);
+        }
+        return {
+          sessionIdx,
+          samples: interpolated,
+          duration,
+        };
+      })
+      .filter((s): s is NonNullable<typeof s> => s !== null);
 
-          const elapsedMs =
-            (sampleIdx / Math.max(1, sessionSamples.length - 1)) * duration;
-          const elapsedSeconds = Math.round(elapsedMs / 1000);
+    if (sessionData.length === 0) return [];
+
+    const points: Record<string, any>[] = [];
+
+    for (let i = 0; i < MAX_POINTS; i++) {
+      const progressPercent = Math.round((i / (MAX_POINTS - 1)) * 100);
+      const pointObj: Record<string, any> = {
+        progressPercent,
+        elapsedSeconds:
+          sessionData.length === 1
+            ? Math.round((i / (MAX_POINTS - 1)) * (sessionData[0].duration / 1000))
+            : 0,
+      };
+
+      for (const s of series) {
+        for (const data of sessionData) {
+          const sample = data.samples[i];
+          if (!sample) continue;
 
           let val = (sample[s.field] as number) || 0;
-          // RAM metrics in raw MB are converted to GB for better readability
           if (s.field === "ramUsageMB") {
             val = Math.round((val / 1024) * 10) / 10;
           }
 
-          if (!dataMap.has(elapsedSeconds)) {
-            dataMap.set(elapsedSeconds, { elapsedSeconds });
-          }
+          const lineKey = `${s.id}_${data.sessionIdx}`;
+          pointObj[lineKey] = val;
 
-          const lineKey = `${s.id}_${sessionIdx}`;
-          dataMap.get(elapsedSeconds)![lineKey] = val;
-        });
+          const elapsedSec = Math.round(
+            (i / (MAX_POINTS - 1)) * (data.duration / 1000)
+          );
+          pointObj[`elapsedSeconds_${data.sessionIdx}`] = elapsedSec;
+        }
       }
+      points.push(pointObj);
     }
 
-    return Array.from(dataMap.values()).sort(
-      (a, b) => a.elapsedSeconds - b.elapsedSeconds
-    );
+    return points;
   }, [samples, sessionDurations, series, activeSessionIndices]);
 
   // Helper to determine line color based on session order
@@ -133,10 +158,22 @@ export function CombinedLineChart({
     return (
       <div className="combined-line-chart__tooltip">
         <div className="combined-line-chart__tooltip-time">
-          {t("elapsed_time") || "Elapsed Time"}: {formatTimeTick(label)}
+          {isMultiple
+            ? `${t("session_progress", "Session Progress")}: ${label}%`
+            : `${t("elapsed_time", "Elapsed Time")}: ${formatTimeTick(label)}`}
         </div>
         <div className="combined-line-chart__tooltip-items">
           {payload.map((item: any) => {
+            let elapsedStr = "";
+            if (isMultiple) {
+              const parts = item.dataKey.split("_");
+              const sessionIdx = parts[parts.length - 1];
+              const sec = item.payload[`elapsedSeconds_${sessionIdx}`];
+              if (typeof sec === "number") {
+                elapsedStr = ` (at ${formatTimeTick(sec)})`;
+              }
+            }
+
             return (
               <div
                 key={item.name}
@@ -152,6 +189,7 @@ export function CombinedLineChart({
                 <span className="combined-line-chart__tooltip-item-value">
                   {item.value}
                   {yAxisLabel ?? ""}
+                  {elapsedStr}
                 </span>
               </div>
             );
@@ -186,12 +224,12 @@ export function CombinedLineChart({
               />
               <XAxis
                 type="number"
-                dataKey="elapsedSeconds"
-                tickFormatter={formatTimeTick}
+                dataKey={isMultiple ? "progressPercent" : "elapsedSeconds"}
+                tickFormatter={isMultiple ? (v) => `${v}%` : formatTimeTick}
                 tick={{ fontSize: 10, fill: "rgba(255,255,255,0.4)" }}
                 tickLine={false}
                 axisLine={false}
-                domain={[0, "auto"]}
+                domain={isMultiple ? [0, 100] : [0, "auto"]}
               />
               <YAxis
                 domain={[yMin ?? "auto", yMax ?? "auto"]}
@@ -212,10 +250,20 @@ export function CombinedLineChart({
               {series.flatMap((s) =>
                 activeSessionIndices.map((sessionIdx) => {
                   const lineKey = `${s.id}_${sessionIdx}`;
+
+                  let translationKey = s.id
+                    .toLowerCase()
+                    .replace(" & ", "_")
+                    .replace(" ", "_");
+                  if (translationKey === "ram") translationKey = "ram_usage";
+                  if (translationKey === "fps") translationKey = "avg_fps";
+
+                  const translatedId = t(translationKey, s.id);
+
                   const label =
                     activeSessionIndices.length > 1 && samples.length > 1
-                      ? `${s.id} (${sessionLabels[sessionIdx]})`
-                      : s.id;
+                      ? `${translatedId} (${sessionLabels[sessionIdx]})`
+                      : translatedId;
 
                   return (
                     <Line

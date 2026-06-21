@@ -236,7 +236,7 @@ export function PerformanceTimeline({
             {selectedGame !== "all" && filteredSessions.length > 1 && (
               <div className="performance-timeline__session-selector">
                 <span className="performance-timeline__session-selector-label">
-                  SESSION
+                  {t("session", "Session")}
                 </span>
                 <select
                   className="performance-timeline__session-select"

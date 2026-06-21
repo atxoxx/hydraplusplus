@@ -587,7 +587,10 @@ mod hardware {
             let names = ["RTSSSharedMemoryV2", "RTSSSharedMemory"];
 
             for name in &names {
-                let (handle, view, _) = open_shared_memory(name)?;
+                let (handle, view, _) = match open_shared_memory(name) {
+                    Some(val) => val,
+                    None => continue,
+                };
 
                 let header = &*(view as *const RtssHeader);
                 if header.signature != RTSS_SIGNATURE {
@@ -610,13 +613,17 @@ mod hardware {
                             app_arr.add(i * header.app_entry_size as usize) as *const RtssAppEntry;
                         let entry = &*entry_ptr;
                         if entry.process_id != 0 {
+                            let mut fps = 0.0;
                             let duration = entry.time1.saturating_sub(entry.time0);
                             if duration > 0 && entry.frames > 0 {
-                                let fps = (entry.frames as f32 * 1000.0) / duration as f32;
-                                if fps > 0.0 && fps < 1000.0 {
-                                    close_shared_memory(handle, view);
-                                    return Some(fps);
-                                }
+                                fps = (entry.frames as f32 * 1000.0) / duration as f32;
+                            }
+                            if fps <= 0.0 && entry.frame_time > 0 {
+                                fps = 1_000_000.0 / entry.frame_time as f32;
+                            }
+                            if fps > 0.0 && fps < 1000.0 {
+                                close_shared_memory(handle, view);
+                                return Some(fps);
                             }
                         }
                     }

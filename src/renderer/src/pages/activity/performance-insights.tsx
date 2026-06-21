@@ -233,7 +233,7 @@ export function PerformanceInsights() {
               display: "block",
             }}
           >
-            Play games with hardware monitoring enabled to see metrics here.
+            {t("hw_monitoring_hint", "Play games with hardware monitoring enabled to see metrics here.")}
           </small>
         </div>
       </div>
@@ -263,10 +263,10 @@ export function PerformanceInsights() {
                 {m === "temps" && <Flame size={12} />}
                 {m === "ram" && <Cpu size={12} />}
                 {m === "fps"
-                  ? "Avg FPS"
+                  ? t("avg_fps", "Avg FPS")
                   : m === "temps"
-                    ? "Temps (°C)"
-                    : "RAM (GB)"}
+                    ? t("temps_c", "Temps (°C)")
+                    : t("ram_gb", "RAM (GB)")}
               </button>
             ))}
           </div>
@@ -346,12 +346,12 @@ export function PerformanceInsights() {
               <tr>
                 <th>{t("game", "Game")}</th>
                 <th>{t("sessions", "Sessions")}</th>
-                <th>Avg FPS</th>
-                <th>Avg CPU Temp</th>
-                <th>Avg GPU Temp</th>
-                <th>Avg RAM</th>
-                <th>Avg CPU Usage</th>
-                <th>Avg GPU Usage</th>
+                <th>{t("avg_fps", "Avg FPS")}</th>
+                <th>{t("avg_cpu_temp", "Avg CPU Temp")}</th>
+                <th>{t("avg_gpu_temp", "Avg GPU Temp")}</th>
+                <th>{t("avg_ram", "Avg RAM")}</th>
+                <th>{t("avg_cpu_usage", "Avg CPU Usage")}</th>
+                <th>{t("avg_gpu_usage", "Avg GPU Usage")}</th>
               </tr>
             </thead>
             <tbody>
