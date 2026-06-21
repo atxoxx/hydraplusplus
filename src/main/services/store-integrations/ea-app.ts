@@ -1,6 +1,7 @@
 import { BrowserWindow, shell } from "electron";
 import fs from "node:fs";
 import path from "node:path";
+import { spawn } from "node:child_process";
 import { BaseStore } from "./base-store";
 import type { StoreGame, AuthResult, SyncResult } from "@types";
 
@@ -197,7 +198,33 @@ export class EAAppStore extends BaseStore {
     const game = games.find((g) => g.storeGameId === gameId);
 
     if (game?.executablePath && fs.existsSync(game.executablePath)) {
-      shell.openPath(game.executablePath);
+      const workingDirectory = path.dirname(game.executablePath);
+      try {
+        const processRef = spawn(game.executablePath, [], {
+          shell: false,
+          detached: true,
+          stdio: "ignore",
+          cwd: workingDirectory,
+          env: process.env,
+        });
+
+        let errorFired = false;
+        processRef.on("error", (error) => {
+          if (errorFired) return;
+          errorFired = true;
+          this.logError(
+            `EA App launch via spawn failed: ${error.message}. Falling back to shell.openPath.`
+          );
+          shell.openPath(game.executablePath!);
+        });
+
+        processRef.unref();
+      } catch (error: any) {
+        this.logError(
+          `EA App launch spawn sync failed: ${error.message}. Falling back to shell.openPath.`
+        );
+        shell.openPath(game.executablePath);
+      }
       return;
     }
 

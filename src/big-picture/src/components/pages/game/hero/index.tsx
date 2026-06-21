@@ -73,6 +73,7 @@ export function Hero({
     isGameRunning ||
     Boolean(game?.executablePath) ||
     isPlayableClassicsGame ||
+    game?.shop === "steam" ||
     Boolean(game) ||
     canAddToLibrary;
   const shouldShowCatalogActions = !game && canAddToLibrary;
@@ -148,7 +149,11 @@ export function Hero({
       };
     }
 
-    if (game?.executablePath || isPlayableClassicsGame) {
+    if (
+      game?.executablePath ||
+      isPlayableClassicsGame ||
+      game?.shop === "steam"
+    ) {
       return {
         primaryActionButton: (
           <Button

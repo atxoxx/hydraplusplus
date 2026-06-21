@@ -308,6 +308,19 @@ export function HeroPanelActions() {
       return;
     }
 
+    if (
+      game.shop === "steam" &&
+      (game.acquisitionSource === "steam_scan" || !game.executablePath)
+    ) {
+      try {
+        await window.electron.steamLaunchGame(game.objectId);
+        showSuccessToast(t("launching_via_steam"));
+      } catch {
+        showErrorToast(t("steam_launch_failed"));
+      }
+      return;
+    }
+
     if (game.executablePath) {
       window.electron.openGame(
         game.shop,
@@ -505,7 +518,7 @@ export function HeroPanelActions() {
     const isPlayableClassics =
       game?.shop === "launchbox" && (game?.discs?.length ?? 0) > 0;
 
-    if (game?.executablePath || isPlayableClassics) {
+    if (game?.executablePath || isPlayableClassics || game?.shop === "steam") {
       return (
         <Button
           onClick={openGame}

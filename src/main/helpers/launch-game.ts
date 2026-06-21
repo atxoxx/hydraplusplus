@@ -44,31 +44,42 @@ const launchNatively = (
     ],
   });
 
-  if (
-    resolvedLaunchCommand.command === executablePath &&
-    resolvedLaunchCommand.args.length === 0 &&
-    Object.keys(resolvedLaunchCommand.env).length === 0
-  ) {
+  const ext = path.extname(resolvedLaunchCommand.command).toLowerCase();
+  const isScript = ext === ".bat" || ext === ".cmd" || ext === ".sh";
+
+  try {
+    const processRef = spawn(
+      resolvedLaunchCommand.command,
+      resolvedLaunchCommand.args,
+      {
+        shell: isScript,
+        detached: true,
+        stdio: "ignore",
+        cwd: workingDirectory,
+        env: {
+          ...process.env,
+          ...resolvedLaunchCommand.env,
+        },
+      }
+    );
+
+    let errorFired = false;
+    processRef.on("error", (error) => {
+      if (errorFired) return;
+      errorFired = true;
+      logger.error(
+        `Failed to spawn game process natively: ${error.message}. Falling back to shell.openPath.`
+      );
+      shell.openPath(executablePath);
+    });
+
+    processRef.unref();
+  } catch (error: any) {
+    logger.error(
+      `Error spawning game process: ${error.message}. Falling back to shell.openPath.`
+    );
     shell.openPath(executablePath);
-    return;
   }
-
-  const processRef = spawn(
-    resolvedLaunchCommand.command,
-    resolvedLaunchCommand.args,
-    {
-      shell: false,
-      detached: true,
-      stdio: "ignore",
-      cwd: workingDirectory,
-      env: {
-        ...process.env,
-        ...resolvedLaunchCommand.env,
-      },
-    }
-  );
-
-  processRef.unref();
 };
 
 const launchWithWine = async (

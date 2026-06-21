@@ -10,7 +10,7 @@ import { Inbox } from "lucide-react";
 interface OwnedGameEntry {
   storeGameId: string;
   title: string;
-  store: StoreId;
+  store: StoreId | "steam";
   coverImageUrl: string | null;
   storeUrl: string | null;
   installed: boolean;
@@ -21,6 +21,7 @@ const STORE_LABELS: Record<
   string,
   { name: string; color: string; bg: string }
 > = {
+  steam: { name: "Steam", color: "#ffffff", bg: "#1b2838" },
   epic: { name: "Epic Games Store", color: "#ffffff", bg: "#0078f2" },
   xbox: { name: "Xbox / Game Pass", color: "#ffffff", bg: "#107c10" },
   ubisoft: { name: "Ubisoft Connect", color: "#ffffff", bg: "#0070d1" },

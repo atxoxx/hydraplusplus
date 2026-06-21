@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -319,7 +319,33 @@ export class UbisoftConnectStore extends BaseStore {
     const game = games.find((g) => g.storeGameId === gameId);
 
     if (game?.executablePath && fs.existsSync(game.executablePath)) {
-      shell.openPath(game.executablePath);
+      const workingDirectory = path.dirname(game.executablePath);
+      try {
+        const processRef = spawn(game.executablePath, [], {
+          shell: false,
+          detached: true,
+          stdio: "ignore",
+          cwd: workingDirectory,
+          env: process.env,
+        });
+
+        let errorFired = false;
+        processRef.on("error", (error) => {
+          if (errorFired) return;
+          errorFired = true;
+          this.logError(
+            `Ubisoft Connect launch via spawn failed: ${error.message}. Falling back to shell.openPath.`
+          );
+          shell.openPath(game.executablePath!);
+        });
+
+        processRef.unref();
+      } catch (error: any) {
+        this.logError(
+          `Ubisoft Connect launch spawn sync failed: ${error.message}. Falling back to shell.openPath.`
+        );
+        shell.openPath(game.executablePath);
+      }
       return;
     }
 

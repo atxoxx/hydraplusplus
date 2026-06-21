@@ -140,6 +140,24 @@ export function useGameDetails(objectId: string, shop: GameShop) {
         return;
       }
 
+      if (
+        game.shop === "steam" &&
+        (game.acquisitionSource === "steam_scan" || !game.executablePath)
+      ) {
+        NavigationAudioService.getInstance().play("launch");
+        try {
+          await globalThis.window.electron.steamLaunchGame(game.objectId);
+          showSuccessToast("Launching via Steam", {
+            message: `Starting ${game.title}...`,
+          });
+        } catch {
+          showErrorToast("Failed to launch game", {
+            message: `Could not launch ${game.title} via Steam.`,
+          });
+        }
+        return;
+      }
+
       if (!game.executablePath) return;
 
       NavigationAudioService.getInstance().play("launch");
@@ -150,7 +168,7 @@ export function useGameDetails(objectId: string, shop: GameShop) {
         game.launchOptions
       );
     },
-    [game]
+    [game, showErrorToast, showSuccessToast]
   );
 
   const closeGame = useCallback(() => {
