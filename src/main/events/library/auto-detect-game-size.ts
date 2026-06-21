@@ -58,6 +58,7 @@ const LIBRARY_ROOT_NAMES = new Set([
 const getDirectoriesChain = (filePath: string): string[] => {
   const chain: string[] = [];
   let current = path.dirname(filePath);
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const parent = path.dirname(current);
     if (parent === current || !current) break;
