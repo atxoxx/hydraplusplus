@@ -1,10 +1,10 @@
-# Hydra Launcher — Project Knowledge
+# Hydra++ Launcher — Project Knowledge
 
 ## What this is
 
-Hydra Launcher is an open-source gaming platform (Electron desktop app) for managing your game library — downloading, launching, achievements, cloud saves, and social features. Written in **TypeScript, React, Python, and Rust**.
+Hydra++ is an open-source gaming platform (Electron desktop app) for managing your game library — downloading, launching, achievements, cloud saves, and social features. Written in **TypeScript, React, Python, and Rust**.
 
-- **Repo**: https://github.com/hydralauncher/hydra
+- **Repo**: https://github.com/atxoxx/hydraplusplus
 
 ## Quickstart
 

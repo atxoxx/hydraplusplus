@@ -54,10 +54,10 @@ jobs:
 
           export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa -F ~/.ssh/config -o UserKnownHostsFile=$SSH_PATH/known_hosts"
 
-          git clone ssh://aur@aur.archlinux.org/hydra-launcher-bin.git
+          git clone ssh://aur@aur.archlinux.org/hydraplusplus-launcher-bin.git
 
           # Give builder user ownership of the repository
-          chown -R builder:builder hydra-launcher-bin
+          chown -R builder:builder hydraplusplus-launcher-bin
 
       - name: Get version to update
         id: get-version
@@ -78,7 +78,7 @@ jobs:
       - name: Check if update is needed
         id: check-update
         run: |
-          CURRENT_VERSION=$(grep '^pkgver=' hydra-launcher-bin/PKGBUILD | cut -d'=' -f2)
+          CURRENT_VERSION=$(grep '^pkgver=' hydraplusplus-launcher-bin/PKGBUILD | cut -d'=' -f2)
           NEW_VERSION="${{ steps.get-version.outputs.version }}"
 
           echo "Current AUR version: $CURRENT_VERSION"
@@ -98,7 +98,7 @@ jobs:
           # sleeps for 1 minute to be sure GH updated the release info
           sleep 60
           # Update pkgver in PKGBUILD
-          cd hydra-launcher-bin
+          cd hydraplusplus-launcher-bin
           NEW_VERSION="${{ steps.get-version.outputs.version }}"
           NEW_VERSION="${NEW_VERSION#v}"
 
@@ -119,7 +119,7 @@ jobs:
       - name: Commit and push changes
         if: steps.check-update.outputs.update_needed == 'true'
         run: |
-          cd hydra-launcher-bin
+          cd hydraplusplus-launcher-bin
           git config --global --add safe.directory .
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

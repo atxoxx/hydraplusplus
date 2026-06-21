@@ -50,6 +50,6 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           npx --yes wrangler@3 pages deploy out/renderer \
-            --project-name="hydra" \
+            --project-name="hydraplusplus" \
             --branch "$BRANCH_NAME" \
             --commit-dirty

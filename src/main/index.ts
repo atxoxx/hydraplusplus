@@ -23,7 +23,7 @@ const { autoUpdater } = updater;
 autoUpdater.setFeedURL({
   provider: "github",
   owner: "atxoxx",
-  repo: "hydra",
+  repo: "hydraplusplus",
 });
 
 autoUpdater.logger = logger;
@@ -74,7 +74,7 @@ if (process.defaultApp) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  electronApp.setAppUserModelId("gg.hydralauncher.hydra");
+  electronApp.setAppUserModelId("gg.hydralauncher.hydraplusplus");
 
   protocol.handle("local", (request) => {
     const filePath = request.url.slice("local:".length);

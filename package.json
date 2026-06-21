@@ -1,12 +1,12 @@
 {
-  "name": "hydralauncher",
+  "name": "hydraplusplus",
   "version": "4.0.1",
-  "description": "Hydra",
+  "description": "Hydra++",
   "main": "./out/main/index.js",
   "author": "Los Broxas",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atxoxx/hydra.git"
+    "url": "https://github.com/atxoxx/hydraplusplus.git"
   },
   "type": "module",
   "engines": {
