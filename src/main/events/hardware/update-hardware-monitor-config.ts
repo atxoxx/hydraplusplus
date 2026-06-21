@@ -10,6 +10,7 @@ const updateHardwareMonitorConfig = async (
     enabled: boolean;
     pollingIntervalMs: number;
     alertsEnabled: boolean;
+    selectedGpuIndex: number;
     fpsAlertThreshold: number;
     cpuTempAlertThreshold: number;
     gpuTempAlertThreshold: number;

@@ -1,0 +1,25 @@
+@use "../../scss/globals.scss";
+
+.combined-line-chart {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: calc(globals.$spacing-unit * 1.5);
+  min-width: 0;
+
+  &__container {
+    width: 100%;
+    position: relative;
+  }
+
+  &__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 120px;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 12px;
+    font-weight: 500;
+  }
+}

@@ -581,17 +581,25 @@ declare global {
       gpuTempAlertThreshold: number;
       cpuUsageAlertThreshold: number;
       ramUsageAlertThresholdMB: number;
+      selectedGpuIndex: number;
     }>;
     updateHardwareMonitorConfig: (config: {
       enabled?: boolean;
       pollingIntervalMs?: number;
       alertsEnabled?: boolean;
+      selectedGpuIndex?: number;
       fpsAlertThreshold?: number;
       cpuTempAlertThreshold?: number;
       gpuTempAlertThreshold?: number;
       cpuUsageAlertThreshold?: number;
       ramUsageAlertThresholdMB?: number;
     }) => Promise<{ success: boolean; error?: string }>;
+    getSystemGpus: () => Promise<{
+      index: number;
+      model: string;
+      vendor: string;
+      vram: number;
+    }[]>;
     getPlaytimeSummary: (
       startDate: string,
       endDate: string

@@ -22,11 +22,11 @@ type NativeProcessFriendImageResponse = NativeProcessProfileImageResponse & {
 
 export type HardwareMetricsPayload = {
   fps: number;
-  cpu_usage: number;
-  gpu_usage: number;
-  cpu_temp: number;
-  gpu_temp: number;
-  ram_usage_mb: number;
+  cpuUsage: number;
+  gpuUsage: number;
+  cpuTemp: number;
+  gpuTemp: number;
+  ramUsageMb: number;
 };
 
 type HydraNativeModule = {

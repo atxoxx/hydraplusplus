@@ -9,6 +9,7 @@ export type HardwareMonitorConfig = {
   enabled: boolean;
   pollingIntervalMs: number;
   alertsEnabled: boolean;
+  selectedGpuIndex: number;
   fpsAlertThreshold: number;
   cpuTempAlertThreshold: number;
   gpuTempAlertThreshold: number;
@@ -20,6 +21,7 @@ const DEFAULT_CONFIG: HardwareMonitorConfig = {
   enabled: true,
   pollingIntervalMs: 5000,
   alertsEnabled: false,
+  selectedGpuIndex: 0,
   fpsAlertThreshold: 30,
   cpuTempAlertThreshold: 90,
   gpuTempAlertThreshold: 85,
@@ -120,8 +122,8 @@ export class HardwareMonitor {
     const nativeMetrics = NativeAddon.readHardwareMetrics();
 
     if (nativeMetrics) {
-      let cpuUsage = Math.round(nativeMetrics.cpu_usage);
-      let ramUsageMB = Math.round(nativeMetrics.ram_usage_mb);
+      let cpuUsage = Math.round(nativeMetrics.cpuUsage);
+      let ramUsageMB = Math.round(nativeMetrics.ramUsageMb);
 
       if (cpuUsage <= 0 || ramUsageMB <= 0) {
         try {
@@ -140,10 +142,10 @@ export class HardwareMonitor {
       return {
         timestamp: Date.now(),
         fps: Math.round(nativeMetrics.fps),
-        cpuUsage,
-        gpuUsage: Math.round(nativeMetrics.gpu_usage),
-        cpuTemp: Math.round(nativeMetrics.cpu_temp),
-        gpuTemp: Math.round(nativeMetrics.gpu_temp),
+        cpuUsage: Math.max(0, Math.min(100, cpuUsage)),
+        gpuUsage: Math.max(0, Math.min(100, Math.round(nativeMetrics.gpuUsage))),
+        cpuTemp: Math.round(nativeMetrics.cpuTemp),
+        gpuTemp: Math.round(nativeMetrics.gpuTemp),
         ramUsageMB,
       };
     }
@@ -156,15 +158,16 @@ export class HardwareMonitor {
       si.graphics(),
     ]);
 
-    const gpuController = graphics.controllers?.[0];
+    const gpuIndex = this.config.selectedGpuIndex ?? 0;
+    const gpuController = graphics.controllers?.[gpuIndex] ?? graphics.controllers?.[0];
 
     return {
       timestamp: Date.now(),
       fps: 0, // FPS requires DirectX/Vulkan hook — not available at system level
-      cpuUsage: Math.round(cpuLoad.currentLoad),
-      gpuUsage: gpuController?.utilizationGpu ?? 0,
+      cpuUsage: Math.max(0, Math.min(100, Math.round(cpuLoad.currentLoad))),
+      gpuUsage: Math.max(0, Math.min(100, gpuController?.utilizationGpu ?? 0)),
       cpuTemp: Math.round(cpuTemp.main ?? 0),
-      gpuTemp: gpuController?.temperatureGpu ?? 0,
+      gpuTemp: Math.max(0, Math.min(125, gpuController?.temperatureGpu ?? 0)),
       ramUsageMB: Math.round(mem.used / (1024 * 1024)),
     };
   }

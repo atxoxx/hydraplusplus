@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ResponsiveBar } from "@nivo/bar";
 import { Cpu, Flame, BarChart3, Info } from "lucide-react";
 import type { SessionWithGame } from "../../declaration";
+import { PerformanceTimeline } from "./performance-timeline";
 import "./performance-insights.scss";
 
 interface GamePerformanceAvg {
@@ -391,6 +392,9 @@ export function PerformanceInsights() {
           </table>
         </div>
       </div>
+
+      {/* Time-series charts section */}
+      <PerformanceTimeline allSessions={sessions} />
     </div>
   );
 }

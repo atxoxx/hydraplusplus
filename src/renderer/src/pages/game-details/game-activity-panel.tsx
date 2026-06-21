@@ -18,6 +18,7 @@ import {
   Minus,
   BarChart2,
   Camera,
+  Cpu,
 } from "lucide-react";
 import type { GameShop } from "@types";
 import { gameDetailsContext } from "@renderer/context";
@@ -25,6 +26,7 @@ import type { DailyPlaytimeEntry, GameSession } from "../../declaration";
 import { ActivityChart } from "./activity-chart";
 import { ActivitySessionList } from "./activity-session-list";
 import { WeeklyHeatmap } from "../activity/weekly-heatmap";
+import { GamePerformanceView } from "./game-performance-view";
 import {
   ActivityTimeframeTabs,
   type Timeframe,
@@ -176,6 +178,7 @@ export function GameActivityPanel({ shop, objectId }: GameActivityPanelProps) {
   const [sessions, setSessions] = useState<GameSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"playtime" | "performance">("playtime");
   const panelRef = useRef<HTMLDivElement>(null);
 
   const prevIsGameRunning = useRef(isGameRunning);
@@ -495,7 +498,28 @@ export function GameActivityPanel({ shop, objectId }: GameActivityPanelProps) {
           {t("activity")}
         </h3>
         <div className="game-activity-panel__header-actions">
-          <ActivityTimeframeTabs active={timeframe} onChange={setTimeframe} />
+          {/* View toggle: Playtime / Performance */}
+          <div className="game-activity-panel__view-tabs">
+            <button
+              type="button"
+              className={`game-activity-panel__view-tab-btn ${viewMode === "playtime" ? "game-activity-panel__view-tab-btn--active" : ""}`}
+              onClick={() => setViewMode("playtime")}
+            >
+              <BarChart2 size={12} />
+              {t("playtime_view") || "Playtime"}
+            </button>
+            <button
+              type="button"
+              className={`game-activity-panel__view-tab-btn ${viewMode === "performance" ? "game-activity-panel__view-tab-btn--active" : ""}`}
+              onClick={() => setViewMode("performance")}
+            >
+              <Cpu size={12} />
+              {t("performance_view") || "Performance"}
+            </button>
+          </div>
+          {viewMode === "playtime" && (
+            <ActivityTimeframeTabs active={timeframe} onChange={setTimeframe} />
+          )}
           <button
             type="button"
             className="game-activity-panel__icon-btn"
@@ -508,54 +532,97 @@ export function GameActivityPanel({ shop, objectId }: GameActivityPanelProps) {
       </div>
 
       {/* ── Two-column body ── */}
-      <div className="game-activity-panel__body">
-        {/* LEFT COLUMN: Stats + Sessions */}
-        <div className="game-activity-panel__left">
-          {/* Stats Grid */}
-          <div className="game-activity-panel__stats-grid">
-            {statsItems.map((item) => (
-              <div className="game-activity-panel__stat-card" key={item.label}>
-                <span className="game-activity-panel__stat-icon">
-                  {item.icon}
-                </span>
-                <div className="game-activity-panel__stat-content">
-                  <span className="game-activity-panel__stat-label">
-                    {item.label}
+      {viewMode === "playtime" ? (
+        <div className="game-activity-panel__body">
+          {/* LEFT COLUMN: Stats + Sessions */}
+          <div className="game-activity-panel__left">
+            {/* Stats Grid */}
+            <div className="game-activity-panel__stats-grid">
+              {statsItems.map((item) => (
+                <div className="game-activity-panel__stat-card" key={item.label}>
+                  <span className="game-activity-panel__stat-icon">
+                    {item.icon}
                   </span>
-                  <span
-                    className="game-activity-panel__stat-value"
-                    style={item.color ? { color: item.color } : undefined}
-                  >
-                    {item.value}
-                  </span>
+                  <div className="game-activity-panel__stat-content">
+                    <span className="game-activity-panel__stat-label">
+                      {item.label}
+                    </span>
+                    <span
+                      className="game-activity-panel__stat-value"
+                      style={item.color ? { color: item.color } : undefined}
+                    >
+                      {item.value}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Session List */}
+            <div className="game-activity-panel__sessions-section">
+              <ActivitySessionList
+                sessions={sessions}
+                loading={sessionsLoading}
+                onDelete={handleRefresh}
+              />
+            </div>
           </div>
 
-          {/* Session List */}
-          <div className="game-activity-panel__sessions-section">
-            <ActivitySessionList
-              sessions={sessions}
-              loading={sessionsLoading}
-              onDelete={handleRefresh}
-            />
+          {/* RIGHT COLUMN: Charts */}
+          <div className="game-activity-panel__right">
+            {/* Playtime Chart Card */}
+            <div className="game-activity-panel__chart-card">
+              <ActivityChart data={chartData} />
+            </div>
+
+            {/* Heatmap Card */}
+            <div className="game-activity-panel__heatmap-card">
+              <WeeklyHeatmap days={heatmapDays} loading={loading} />
+            </div>
           </div>
         </div>
+      ) : (
+        /* Performance view: full-width layout */
+        <div className="game-activity-panel__body game-activity-panel__body--performance">
+          <div className="game-activity-panel__left">
+            {/* Playtime Stats Grid */}
+            <div className="game-activity-panel__stats-grid">
+              {statsItems.map((item) => (
+                <div className="game-activity-panel__stat-card" key={item.label}>
+                  <span className="game-activity-panel__stat-icon">
+                    {item.icon}
+                  </span>
+                  <div className="game-activity-panel__stat-content">
+                    <span className="game-activity-panel__stat-label">
+                      {item.label}
+                    </span>
+                    <span
+                      className="game-activity-panel__stat-value"
+                      style={item.color ? { color: item.color } : undefined}
+                    >
+                      {item.value}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-        {/* RIGHT COLUMN: Charts */}
-        <div className="game-activity-panel__right">
-          {/* Playtime Chart Card */}
-          <div className="game-activity-panel__chart-card">
-            <ActivityChart data={chartData} />
+            {/* Session List */}
+            <div className="game-activity-panel__sessions-section">
+              <ActivitySessionList
+                sessions={sessions}
+                loading={sessionsLoading}
+                onDelete={handleRefresh}
+              />
+            </div>
           </div>
 
-          {/* Heatmap Card */}
-          <div className="game-activity-panel__heatmap-card">
-            <WeeklyHeatmap days={heatmapDays} loading={loading} />
+          {/* RIGHT COLUMN: Performance Charts */}
+          <div className="game-activity-panel__right">
+            <GamePerformanceView sessions={sessions} />
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

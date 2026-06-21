@@ -809,12 +809,14 @@ contextBridge.exposeInMainWorld("electron", {
     enabled?: boolean;
     pollingIntervalMs?: number;
     alertsEnabled?: boolean;
+    selectedGpuIndex?: number;
     fpsAlertThreshold?: number;
     cpuTempAlertThreshold?: number;
     gpuTempAlertThreshold?: number;
     cpuUsageAlertThreshold?: number;
     ramUsageAlertThresholdMB?: number;
   }) => ipcRenderer.invoke("updateHardwareMonitorConfig", config),
+  getSystemGpus: () => ipcRenderer.invoke("getSystemGpus"),
   getPlaytimeSummary: (startDate: string, endDate: string) =>
     ipcRenderer.invoke("getPlaytimeSummary", startDate, endDate),
   getFriendsStats: () => ipcRenderer.invoke("getFriendsStats"),

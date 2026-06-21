@@ -47,6 +47,55 @@
     gap: calc(globals.$spacing-unit);
   }
 
+  // ── View toggle (Playtime / Performance) ──
+  &__view-tabs {
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 3px;
+  }
+
+  &__view-tab-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    &--active {
+      background: globals.$brand-teal;
+      color: #fff;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  // ── Performance layout override ──
+  &__body--performance {
+    @media (min-width: 960px) {
+      grid-template-columns: 380px 1fr;
+    }
+
+    @media (min-width: 1200px) {
+      grid-template-columns: 420px 1fr;
+    }
+  }
+
   &__icon-btn {
     display: flex;
     align-items: center;

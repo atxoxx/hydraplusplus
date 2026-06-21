@@ -30,17 +30,26 @@ export function SettingsContextContentGameplay() {
     enabled: false,
     pollingIntervalMs: 5000,
     alertsEnabled: false,
+    selectedGpuIndex: 0,
   });
 
+  const [gpus, setGpus] = useState<
+    { index: number; model: string; vendor: string; vram: number }[]
+  >([]);
+
   useEffect(() => {
-    window.electron
-      .getHardwareMonitorConfig()
-      .then((config) => {
+    Promise.all([
+      window.electron.getHardwareMonitorConfig(),
+      window.electron.getSystemGpus(),
+    ])
+      .then(([config, gpuList]) => {
         setHwConfig({
           enabled: config.enabled,
           pollingIntervalMs: config.pollingIntervalMs,
           alertsEnabled: config.alertsEnabled,
+          selectedGpuIndex: config.selectedGpuIndex ?? 0,
         });
+        setGpus(gpuList);
       })
       .catch(() => {});
   }, []);
@@ -169,6 +178,23 @@ export function SettingsContextContentGameplay() {
               { key: "30000", value: "30000", label: "30s" },
             ]}
           />
+
+          {gpus.length > 0 && (
+            <SelectField
+              label={t("select_gpu") || "GPU to monitor"}
+              value={String(hwConfig.selectedGpuIndex)}
+              onChange={(e) =>
+                updateHwConfig({
+                  selectedGpuIndex: Number(e.target.value),
+                })
+              }
+              options={gpus.map((gpu) => ({
+                key: String(gpu.index),
+                value: String(gpu.index),
+                label: `${gpu.model}${gpu.vram > 0 ? ` (${Math.round(gpu.vram / 1024)}GB)` : ""}`,
+              }))}
+            />
+          )}
         </div>
 
         <CheckboxField
