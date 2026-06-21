@@ -294,7 +294,9 @@ declare global {
     searchGameAssetsMulti: (
       gameTitle: string,
       assetType: "icon" | "logo" | "hero",
-      source: "google" | "steamgriddb" | "igdb" | "steamcdn"
+      source: "google" | "steamgriddb" | "igdb" | "steamcdn",
+      shop?: string,
+      objectId?: string
     ) => Promise<{
       results: {
         id: string;
@@ -309,7 +311,9 @@ declare global {
     }>;
     searchGameAssetsAggregated: (
       gameTitle: string,
-      assetType: "icon" | "logo" | "hero"
+      assetType: "icon" | "logo" | "hero",
+      shop?: string,
+      objectId?: string
     ) => Promise<{
       results: {
         id: string;

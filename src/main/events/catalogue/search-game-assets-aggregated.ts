@@ -1,5 +1,5 @@
 import { registerEvent } from "../register-event";
-import { searchGameAssets } from "@main/services/duckduckgo-image-search";
+import { searchGoogleImages } from "@main/services/google-image-search";
 import type {
   AssetSearchResult,
   AssetType,
@@ -33,8 +33,14 @@ interface AggregatedCacheEntry {
   timestamp: number;
 }
 
-function getCacheKey(gameTitle: string, assetType: string): string {
-  return `${levelKeys.metadataCache}:img:aggregated:${assetType}:${gameTitle.toLowerCase()}`;
+function getCacheKey(
+  gameTitle: string,
+  assetType: string,
+  shop?: string,
+  objectId?: string
+): string {
+  const suffix = shop && objectId ? `:${shop}:${objectId}` : "";
+  return `${levelKeys.metadataCache}:img:aggregated:${assetType}:${gameTitle.toLowerCase()}${suffix}`;
 }
 
 async function getCached(
@@ -78,17 +84,28 @@ async function setCached(
 async function fetchFromSource(
   source: string,
   title: string,
-  assetType: AssetType
+  assetType: AssetType,
+  shop?: string,
+  objectId?: string
 ): Promise<AssetSearchResult[]> {
   switch (source) {
     case "google":
-      return searchGameAssets(title, assetType).then((r) => r.results);
+      return searchGoogleImages(title, assetType).then((r) => r.results);
     case "steamgriddb":
-      return SteamGridDBApi.searchImages(title, SGDB_MAP[assetType]);
+      return SteamGridDBApi.searchImages(
+        title,
+        SGDB_MAP[assetType],
+        shop,
+        objectId
+      );
     case "igdb":
       return searchIGDBImages(title, assetType);
     case "steamcdn":
-      return searchSteamCDNImages(title, assetType);
+      return searchSteamCDNImages(
+        title,
+        assetType,
+        shop === "steam" ? objectId : null
+      );
     default:
       return [];
   }
@@ -166,18 +183,20 @@ const MAX_AGGREGATED_RESULTS = 40;
 const searchGameAssetsAggregatedEvent = async (
   _event: Electron.IpcMainInvokeEvent,
   gameTitle: string,
-  assetType: AssetType
+  assetType: AssetType,
+  shop?: string,
+  objectId?: string
 ): Promise<SearchGameAssetsAggregatedResponse> => {
   const trimmedTitle = gameTitle.trim();
   if (!trimmedTitle) {
     return { results: [], query: "" };
   }
 
-  const cacheKey = getCacheKey(trimmedTitle, assetType);
+  const cacheKey = getCacheKey(trimmedTitle, assetType, shop, objectId);
   const cached = await getCached(cacheKey);
   if (cached) {
     logger.log(
-      `Aggregated image search cache hit type=${assetType} query="${trimmedTitle}" resultCount=${cached.results.length}`
+      `Aggregated image search cache hit type=${assetType} query="${trimmedTitle}" shop=${shop} objectId=${objectId} resultCount=${cached.results.length}`
     );
     return cached;
   }
@@ -190,12 +209,12 @@ const searchGameAssetsAggregatedEvent = async (
   if (hasSteamGridDb) activeSources.push("steamgriddb");
 
   logger.log(
-    `Aggregated image search start type=${assetType} query="${trimmedTitle}" sources=[${activeSources.join(",")}]`
+    `Aggregated image search start type=${assetType} query="${trimmedTitle}" shop=${shop} objectId=${objectId} sources=[${activeSources.join(",")}]`
   );
 
   const settled = await Promise.allSettled(
     activeSources.map((source) =>
-      fetchFromSource(source, trimmedTitle, assetType)
+      fetchFromSource(source, trimmedTitle, assetType, shop, objectId)
     )
   );
 

@@ -72,6 +72,28 @@ export class SteamGridDBApi {
     }
   }
 
+  static async autocomplete(
+    gameName: string
+  ): Promise<{ id: number; name: string }[]> {
+    if (!this.isConfigured()) return [];
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/search/autocomplete/${encodeURIComponent(gameName)}`,
+        {
+          headers: this.getHeaders(),
+        }
+      );
+
+      if (response.data?.success && Array.isArray(response.data?.data)) {
+        return response.data.data;
+      }
+      return [];
+    } catch (error) {
+      logger.error("SteamGridDB autocomplete failed:", error);
+      return [];
+    }
+  }
+
   static async getGrids(
     gameIdOrName: number | string
   ): Promise<SteamGridDBSearchResponse | null> {
@@ -101,23 +123,41 @@ export class SteamGridDBApi {
     gameIdOrName: number | string
   ): Promise<SteamGridDBSearchResponse | null> {
     try {
-      let gameId: number;
+      let response: any;
 
-      if (typeof gameIdOrName === "number") {
-        gameId = gameIdOrName;
+      if (
+        typeof gameIdOrName === "string" &&
+        (gameIdOrName.startsWith("steam:") ||
+          gameIdOrName.startsWith("gog:") ||
+          gameIdOrName.startsWith("epic:"))
+      ) {
+        const [platform, platformId] = gameIdOrName.split(":");
+        response = await axios.get(
+          `${BASE_URL}/${type}/${platform}/${platformId}`,
+          {
+            headers: this.getHeaders(),
+          }
+        );
       } else {
-        const game = await this.searchGame(gameIdOrName);
-        if (!game) return null;
-        gameId = game.id;
+        let gameId: number;
+        if (typeof gameIdOrName === "number") {
+          gameId = gameIdOrName;
+        } else {
+          const game = await this.searchGame(gameIdOrName);
+          if (!game) return null;
+          gameId = game.id;
+        }
+        response = await axios.get(`${BASE_URL}/${type}/game/${gameId}`, {
+          headers: this.getHeaders(),
+        });
       }
-
-      const response = await axios.get(`${BASE_URL}/${type}/game/${gameId}`, {
-        headers: this.getHeaders(),
-      });
 
       return response.data as SteamGridDBSearchResponse;
     } catch (error) {
-      logger.error(`SteamGridDB fetch ${type} failed:`, error);
+      logger.error(
+        `SteamGridDB fetch ${type} failed for ${gameIdOrName}:`,
+        error
+      );
       return null;
     }
   }
@@ -154,10 +194,14 @@ export class SteamGridDBApi {
    * Search for game images by type, returning standardized AssetSearchResult[].
    * @param gameName The game title to search for
    * @param assetType Which image type to fetch (icon, logo, hero, grid)
+   * @param shop Optional store name
+   * @param objectId Optional store object ID
    */
   static async searchImages(
     gameName: string,
-    assetType: "icon" | "logo" | "hero" | "grid" | "banner"
+    assetType: "icon" | "logo" | "hero" | "grid" | "banner",
+    shop?: string,
+    objectId?: string
   ): Promise<AssetSearchResult[]> {
     if (!this.isConfigured()) {
       logger.warn("SteamGridDB searchImages called but API key not configured");
@@ -165,24 +209,30 @@ export class SteamGridDBApi {
     }
 
     try {
-      const game = await this.searchGame(gameName);
-      if (!game) return [];
+      let queryKey: string | number = gameName;
+      if (
+        shop &&
+        objectId &&
+        ["steam", "epic", "gog"].includes(shop.toLowerCase())
+      ) {
+        queryKey = `${shop.toLowerCase()}:${objectId}`;
+      }
 
       let response: SteamGridDBSearchResponse | null = null;
 
       switch (assetType) {
         case "icon":
-          response = await this.getIcons(game.id);
+          response = await this.getIcons(queryKey);
           break;
         case "logo":
-          response = await this.getLogos(game.id);
+          response = await this.getLogos(queryKey);
           break;
         case "hero":
-          response = await this.getHeroes(game.id);
+          response = await this.getHeroes(queryKey);
           break;
         case "grid":
         case "banner":
-          response = await this.getGrids(game.id);
+          response = await this.getGrids(queryKey);
           break;
       }
 

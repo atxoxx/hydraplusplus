@@ -14,6 +14,9 @@ const SOURCE_TABS: {
 }[] = [
   { id: "all", labelKey: "metadata_source_all" },
   { id: "steam", labelKey: "metadata_source_steam" },
+  { id: "steamgriddb", labelKey: "metadata_source_steamgriddb" },
+  { id: "pcgamingwiki", labelKey: "metadata_source_pcgamingwiki" },
+  { id: "ign", labelKey: "metadata_source_ign" },
   { id: "vndb", labelKey: "metadata_source_vndb" },
 ];
 
@@ -26,13 +29,14 @@ const SOURCE_LABELS: Record<string, string> = {
   hydra: "Catalogue",
   igdb: "Catalogue",
   vndb: "VNDB",
+  steamgriddb: "SteamGridDB",
+  pcgamingwiki: "PCGamingWiki",
+  ign: "IGN",
 };
 
-// "igdb" and "hydra" map onto the unified "all" path on the main side. Normalize
-// before sending the IPC so older hardcoded callers still work.
-function normalizeSource(source: string): "all" | "steam" | "vndb" {
-  if (source === "steam" || source === "vndb") return source;
-  return "all";
+// Returns the source code directly to pass through to IPC handlers
+function normalizeSource(source: string): string {
+  return source;
 }
 
 /** Fields that can be selectively merged from a metadata search result. */

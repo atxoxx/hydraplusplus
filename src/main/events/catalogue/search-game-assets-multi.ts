@@ -1,5 +1,5 @@
 import { registerEvent } from "../register-event";
-import { searchGameAssets } from "@main/services/duckduckgo-image-search";
+import { searchGoogleImages } from "@main/services/google-image-search";
 import { SteamGridDBApi } from "@main/services/steamgriddb-api";
 import { searchIGDBImages } from "@main/services/igdb-image-search";
 import { searchSteamCDNImages } from "@main/services/steam-cdn-image-search";
@@ -24,9 +24,12 @@ interface CachedEntry {
 function getCacheKey(
   gameTitle: string,
   assetType: string,
-  source: string
+  source: string,
+  shop?: string,
+  objectId?: string
 ): string {
-  return `${levelKeys.metadataCache}:img:${source}:${assetType}:${gameTitle.toLowerCase()}`;
+  const suffix = shop && objectId ? `:${shop}:${objectId}` : "";
+  return `${levelKeys.metadataCache}:img:${source}:${assetType}:${gameTitle.toLowerCase()}${suffix}`;
 }
 
 async function getCached(
@@ -57,7 +60,9 @@ const searchGameAssetsMultiEvent = async (
   _event: Electron.IpcMainInvokeEvent,
   gameTitle: string,
   assetType: AssetType,
-  source: ImageSearchSource
+  source: ImageSearchSource,
+  shop?: string,
+  objectId?: string
 ): Promise<SearchGameAssetsResponse> => {
   const trimmedTitle = gameTitle.trim();
   if (!trimmedTitle) {
@@ -65,7 +70,7 @@ const searchGameAssetsMultiEvent = async (
   }
 
   // Check cache
-  const cacheKey = getCacheKey(trimmedTitle, assetType, source);
+  const cacheKey = getCacheKey(trimmedTitle, assetType, source, shop, objectId);
   const cached = await getCached(cacheKey);
   if (cached) {
     logger.log(
@@ -79,7 +84,7 @@ const searchGameAssetsMultiEvent = async (
   try {
     switch (source) {
       case "google":
-        response = await searchGameAssets(trimmedTitle, assetType);
+        response = await searchGoogleImages(trimmedTitle, assetType);
         break;
 
       case "steamgriddb": {
@@ -116,7 +121,9 @@ const searchGameAssetsMultiEvent = async (
         const sgdbSingular: SgdbSingular = SGDB_MAP[assetType] ?? "icon";
         const results = await SteamGridDBApi.searchImages(
           trimmedTitle,
-          sgdbSingular
+          sgdbSingular,
+          shop,
+          objectId
         );
         response = { results, query: trimmedTitle };
         break;
@@ -129,7 +136,11 @@ const searchGameAssetsMultiEvent = async (
       }
 
       case "steamcdn": {
-        const results = await searchSteamCDNImages(trimmedTitle, assetType);
+        const results = await searchSteamCDNImages(
+          trimmedTitle,
+          assetType,
+          shop === "steam" ? objectId : null
+        );
         response = { results, query: trimmedTitle };
         break;
       }
@@ -138,7 +149,7 @@ const searchGameAssetsMultiEvent = async (
         logger.warn(
           `Unknown image search source: ${source}, falling back to google`
         );
-        response = await searchGameAssets(trimmedTitle, assetType);
+        response = await searchGoogleImages(trimmedTitle, assetType);
     }
   } catch (error) {
     logger.error(

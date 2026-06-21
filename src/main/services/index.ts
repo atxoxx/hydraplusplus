@@ -36,6 +36,7 @@ export * from "./crackwatch-service";
 export * from "./news-service";
 export * from "./power-save-blocker";
 export * from "./duckduckgo-image-search";
+export * from "./google-image-search";
 export * from "./native-addon";
 export * from "./steam-login";
 export * from "./steam-game-sync";

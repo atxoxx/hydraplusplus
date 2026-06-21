@@ -9,6 +9,9 @@ import {
   searchSteamFirst,
 } from "@main/services/metadata-search-aggregator";
 import { VNDBApi } from "@main/services/vndb-api";
+import { SteamGridDBApi } from "@main/services/steamgriddb-api";
+import { PCGamingWikiAPI } from "@main/services/pcgamingwiki-api";
+import { IGNMetadataService } from "@main/services/ign-metadata";
 import { networkLogger as logger } from "@main/services/logger";
 import type { MetadataSearchResult } from "@types";
 
@@ -56,7 +59,6 @@ ipcMain.handle(
  *  - "igdb" / "hydra" — deprecated names kept for backward compatibility
  *             so old builds don't break; both behave like "all".
  */
-type SearchSource = "all" | "steam" | "igdb" | "hydra" | "vndb";
 
 ipcMain.handle(
   "searchGameMetadata",
@@ -71,7 +73,7 @@ ipcMain.handle(
       if (trimmed.length < 2) return [];
 
       const limit = 10;
-      const normalized = (source ?? "all").toLowerCase() as SearchSource;
+      const normalized = (source ?? "all").toLowerCase();
 
       if (normalized === "vndb") {
         return searchVnDb(trimmed, limit);
@@ -79,6 +81,18 @@ ipcMain.handle(
 
       if (normalized === "steam") {
         return searchSteamFirst(trimmed, limit);
+      }
+
+      if (normalized === "steamgriddb") {
+        return searchSteamGridDB(trimmed, limit);
+      }
+
+      if (normalized === "pcgamingwiki") {
+        return searchPCGamingWiki(trimmed, limit);
+      }
+
+      if (normalized === "ign") {
+        return searchIGN(trimmed, limit);
       }
 
       // Default: "all" / legacy "igdb" / legacy "hydra" — fan out everywhere.
@@ -133,6 +147,105 @@ async function searchVnDb(
     }));
   } catch (err) {
     logger.error("VNDB searchMany failed in fetch-game-metadata:", err);
+    return [];
+  }
+}
+
+async function searchSteamGridDB(
+  query: string,
+  limit: number
+): Promise<MetadataSearchResult[]> {
+  try {
+    if (!SteamGridDBApi.isConfigured()) {
+      const { db } = await import("@main/level");
+      const { levelKeys } = await import("@main/level/sublevels");
+      const prefs = await db
+        .get<string, any>(levelKeys.userPreferences, { valueEncoding: "json" })
+        .catch(() => null);
+      const key = prefs?.steamgriddbApiKey;
+      if (key) {
+        SteamGridDBApi.setApiKey(key);
+      }
+    }
+
+    if (!SteamGridDBApi.isConfigured()) {
+      return [];
+    }
+
+    const games = await SteamGridDBApi.autocomplete(query);
+    return games.slice(0, limit).map((game) => ({
+      title: game.name,
+      objectId: String(game.id),
+      shop: "custom",
+      source: "steamgriddb",
+      iconUrl: null,
+      genres: [],
+      developers: [],
+      publishers: [],
+      releaseYear: null,
+      description: "SteamGridDB Entry",
+      similarityScore: 1,
+    }));
+  } catch (err) {
+    logger.error("SteamGridDB search in fetch-game-metadata failed:", err);
+    return [];
+  }
+}
+
+async function searchPCGamingWiki(
+  query: string,
+  limit: number
+): Promise<MetadataSearchResult[]> {
+  try {
+    const pages = await PCGamingWikiAPI.searchPages(query, limit);
+    return pages.map((page) => ({
+      title: page.title,
+      objectId: String(page.pageid),
+      shop: "custom",
+      source: "pcgamingwiki",
+      iconUrl: null,
+      genres: [],
+      developers: [],
+      publishers: [],
+      releaseYear: null,
+      description: page.extract || `PCGamingWiki article for ${page.title}`,
+      similarityScore: 1,
+    }));
+  } catch (err) {
+    logger.error("PCGamingWiki search in fetch-game-metadata failed:", err);
+    return [];
+  }
+}
+
+async function searchIGN(
+  query: string,
+  _limit: number
+): Promise<MetadataSearchResult[]> {
+  try {
+    const review = await IGNMetadataService.getReviewData(query);
+    if (review && (review.score || review.summary)) {
+      return [
+        {
+          title: query,
+          objectId: query,
+          shop: "custom",
+          source: "ign",
+          iconUrl: null,
+          genres: [],
+          developers: [],
+          publishers: [],
+          releaseYear: null,
+          description:
+            review.summary ||
+            review.verdict ||
+            `IGN Review Score: ${review.score}/10`,
+          similarityScore: 1,
+        },
+      ];
+    }
+    return [];
+  } catch (err) {
+    logger.error("IGN search in fetch-game-metadata failed:", err);
     return [];
   }
 }

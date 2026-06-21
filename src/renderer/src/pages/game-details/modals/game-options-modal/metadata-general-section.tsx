@@ -26,7 +26,6 @@ export interface MetadataGeneralSectionProps {
 interface MetadataState {
   title: string;
   releaseDate: string;
-  description: string;
   genres: string[];
   developers: string[];
   publishers: string[];
@@ -41,7 +40,6 @@ function initializeState(
   return {
     title: game.title ?? "",
     releaseDate: getReleaseDate(game, shopDetails),
-    description: getDescription(game, shopDetails),
     genres: getArray(
       game.genres,
       shopDetails?.genres?.map((g) => g.name)
@@ -61,17 +59,6 @@ function getArray(
   if (primary && primary.length > 0) return primary;
   if (fallback && fallback.length > 0) return fallback;
   return [];
-}
-
-/** Returns the best description available. */
-function getDescription(
-  game: LibraryGame,
-  shopDetails?: ShopDetails | null
-): string {
-  if (game.description) return game.description;
-  return (
-    shopDetails?.short_description || shopDetails?.detailed_description || ""
-  );
 }
 
 /** Returns the release date from game metadata, or falls back to Steam release date. */
@@ -130,7 +117,6 @@ export function MetadataGeneralSection({
     return (
       state.title !== original.title ||
       state.releaseDate !== original.releaseDate ||
-      state.description !== original.description ||
       JSON.stringify(state.genres) !== JSON.stringify(original.genres) ||
       JSON.stringify(state.developers) !==
         JSON.stringify(original.developers) ||
@@ -150,7 +136,6 @@ export function MetadataGeneralSection({
         objectId: game.objectId,
         metadata: {
           releaseDate: state.releaseDate || null,
-          description: state.description || null,
           genres: state.genres.length > 0 ? state.genres : null,
           developers: state.developers.length > 0 ? state.developers : null,
           publishers: state.publishers.length > 0 ? state.publishers : null,
@@ -218,23 +203,6 @@ export function MetadataGeneralSection({
           disabled={saving}
           theme="dark"
           type="date"
-        />
-      </div>
-
-      {/* Description */}
-      <div className="metadata-general-section__field">
-        <label className="metadata-general-section__label">
-          {t("metadata_field_description", "Description")}
-        </label>
-        <textarea
-          className="metadata-general-section__textarea"
-          value={state.description}
-          onChange={(e) =>
-            setState((prev) => ({ ...prev, description: e.target.value }))
-          }
-          placeholder={t("metadata_field_description", "Description")}
-          disabled={saving}
-          rows={4}
         />
       </div>
 

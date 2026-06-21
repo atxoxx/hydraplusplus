@@ -69,6 +69,38 @@ export class PCGamingWikiAPI {
     }
   }
 
+  static async searchPages(
+    gameTitle: string,
+    limit = 5
+  ): Promise<PCGamingWikiPage[]> {
+    try {
+      const response = await axios.get(BASE_URL, {
+        params: {
+          action: "query",
+          list: "search",
+          srsearch: gameTitle,
+          format: "json",
+          srlimit: limit,
+        },
+      });
+
+      const pages = response.data?.query?.search;
+      if (!pages || !Array.isArray(pages)) return [];
+
+      return pages.map((page: any) => ({
+        title: page.title,
+        pageid: page.pageid,
+        extract: page.snippet ? page.snippet.replace(/<[^>]*>/g, "") : "",
+        fullurl: `https://www.pcgamingwiki.com/wiki/${encodeURIComponent(
+          page.title.replace(/ /g, "_")
+        )}`,
+      }));
+    } catch (error) {
+      logger.error("PCGamingWiki search pages failed:", error);
+      return [];
+    }
+  }
+
   private static async searchPage(
     gameTitle: string
   ): Promise<PCGamingWikiPage | null> {

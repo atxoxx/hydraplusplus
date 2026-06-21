@@ -1,479 +1,179 @@
+@use "../../../scss/globals.scss";
+
 .game-assets-settings {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  width: 100%;
 
-  // --- Split layout ---
-  &__split-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  // --- Search panel (left) ---
-  &__search-panel {
+  &__header {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  &__search-results {
-    min-height: 200px;
-  }
-
-  // --- Search status ---
-  &__search-status {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 32px 16px;
-    color: var(--color-text-secondary);
-    text-align: center;
-
-    &--error {
-      color: var(--color-danger);
-    }
-  }
-
-  &__search-status-text {
-    font-size: 13px;
-  }
-
-  &__search-skeleton {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    justify-content: flex-end;
     width: 100%;
   }
 
-  &__skeleton-thumb {
-    aspect-ratio: 1;
-    background: var(--color-background-secondary);
-    border-radius: 6px;
-    animation: asset-skeleton-pulse 1.5s ease-in-out infinite;
-
-    &:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    &:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-    &:nth-child(4) {
-      animation-delay: 0.1s;
-    }
-    &:nth-child(5) {
-      animation-delay: 0.3s;
-    }
-    &:nth-child(6) {
-      animation-delay: 0.5s;
-    }
+  &__auto-fetch-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px !important;
+    padding: 6px 12px !important;
   }
 
-  // --- Results grid ---
-  &__results-grid {
+  // --- Slots Grid ---
+  &__slots-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 16px;
+    width: 100%;
   }
 
-  &__result-thumb {
-    position: relative;
-    aspect-ratio: 1;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    overflow: hidden;
-    cursor: pointer;
-    background: var(--color-background-secondary);
-    padding: 0;
-    transition:
-      border-color 0.15s ease,
-      transform 0.15s ease;
-
-    &:hover {
-      border-color: var(--color-primary);
-      transform: scale(1.05);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-  }
-
-  &__result-source-badge {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    max-width: calc(100% - 56px);
-    padding: 2px 6px;
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.72);
-    border-radius: 4px;
-    pointer-events: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__result-dims-badge {
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
-    padding: 2px 6px;
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 1.2;
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.72);
-    border-radius: 4px;
-    pointer-events: none;
-    font-variant-numeric: tabular-nums;
-  }
-
-  // --- Search footer ---
-  &__search-footer {
+  &__slot-card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
-  }
-
-  &__disclaimer {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    text-align: center;
-    opacity: 0.7;
-  }
-
-  &__refresh-btn {
-    align-self: center;
-  }
-
-  // --- Editor panel (right) ---
-  &__editor-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  &__editor-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color-text);
-  }
-
-  &__asset-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 4px;
-
-    button {
-      flex: 1;
-      min-width: 0;
-    }
-  }
-
-  &__auto-fetch-row {
-    display: flex;
-    margin-bottom: 4px;
-
-    .game-assets-settings__auto-fetch-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-  }
-
-  &__source-tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 4px;
-  }
-
-  &__source-tab {
-    flex: 1;
+    align-items: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid globals.$border-color;
+    border-radius: 12px;
+    transition: all 0.2s ease;
     min-width: 0;
-    padding: 4px 8px;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-    transition:
-      border-color 0.15s ease,
-      color 0.15s ease,
-      background-color 0.15s ease;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 
     &:hover {
-      border-color: var(--color-primary);
-      color: var(--color-text);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    &--active {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-      background-color: rgba(var(--color-primary-rgb), 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
   }
 
-  &__asset-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--color-text);
-    margin-bottom: 4px;
+  &__slot-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f0f1f7;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
-  &__image-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  &__input-actions {
-    display: flex;
-    gap: 8px;
-  }
-
-  &__resolution-info {
-    font-size: 12px;
-    color: var(--color-text-secondary);
-    margin-top: -4px;
-    margin-bottom: 4px;
-  }
-
-  // --- Existing image preview styles (preserved) ---
-  &__image-preview {
+  &__image-preview-container {
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 8px;
-    border: 1px solid var(--color-border);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    background-color: var(--color-background-secondary);
+    background-color: #0c0c0c;
     background-image:
-      linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
-      linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%),
-      linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%);
+      linear-gradient(45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(255, 255, 255, 0.03) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.03) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.03) 75%);
     background-size: 16px 16px;
-    background-position:
-      0 0,
-      0 8px,
-      8px -8px,
-      -8px 0;
-    transition:
-      border-color 0.2s ease,
-      background-color 0.2s ease,
-      transform 0.2s ease;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
     position: relative;
-
-    &[type="button"] {
-      font: inherit;
-      color: inherit;
-      text-align: inherit;
-      text-decoration: none;
-      outline: none;
-      cursor: pointer;
-
-      &:focus {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 2px;
-      }
-    }
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+    outline: none;
 
     &:hover {
-      border-color: var(--color-primary);
+      border-color: globals.$brand-teal;
+    }
+
+    &--icon {
+      aspect-ratio: 1 / 1;
+      max-width: 120px;
+    }
+
+    &--logo {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+    }
+
+    &--hero {
+      aspect-ratio: 16 / 9;
+      width: 100%;
     }
   }
 
-  &__drop-zone {
-    min-height: 120px;
-    cursor: pointer;
-    border-style: dashed !important;
+  &__slot-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+  }
 
-    &:hover {
-      border-color: var(--color-primary);
-      background-color: rgba(var(--color-primary-rgb), 0.05);
+  &__slot-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+
+    svg {
+      opacity: 0.5;
+    }
+  }
+
+  &__slot-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    margin-top: 14px;
+  }
+
+  &__slot-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+
+    &--remove {
+      color: #ff6b6b !important;
+      border-color: rgba(255, 107, 107, 0.2) !important;
+
+      &:hover {
+        background: rgba(255, 107, 107, 0.08) !important;
+        border-color: rgba(255, 107, 107, 0.4) !important;
+      }
     }
   }
 
   &__drop-zone--active {
-    border-color: var(--color-primary) !important;
-    background-color: rgba(var(--color-primary-rgb), 0.1) !important;
+    border-color: globals.$brand-teal !important;
+    background-color: rgba(22, 177, 149, 0.08) !important;
     transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
   }
 
   &__drop-overlay {
     position: absolute;
     inset: 0;
-    background-color: rgba(var(--color-primary-rgb), 0.9);
+    background-color: rgba(22, 177, 149, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
     color: #fff;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
+    text-align: center;
+    padding: 8px;
     backdrop-filter: blur(2px);
-  }
-
-  &__drop-zone-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: var(--color-text-secondary);
-    font-size: 14px;
-
-    svg {
-      width: 24px;
-      height: 24px;
-      opacity: 0.6;
-    }
-  }
-
-  &__icon-preview {
-    max-width: 200px;
-    margin: 0 auto;
-  }
-
-  &__preview-image {
-    max-width: 100%;
-    max-height: 120px;
-    object-fit: contain;
-    border-radius: 4px;
-  }
-
-  // --- Preview modal ---
-  &__preview-modal {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 320px;
-  }
-
-  &__preview-image-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;
-    position: relative;
-    background-color: var(--color-background-secondary);
-    background-image:
-      linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%),
-      linear-gradient(-45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.08) 75%),
-      linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.08) 75%);
-    background-size: 16px 16px;
-    background-position:
-      0 0,
-      0 8px,
-      8px -8px,
-      -8px 0;
-    border-radius: 8px;
-    padding: 16px;
-  }
-
-  &__preview-full-image {
-    max-width: 100%;
-    max-height: 300px;
-    object-fit: contain;
-    border-radius: 4px;
-  }
-
-  &__preview-loading,
-  &__preview-error {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text-secondary);
-    font-size: 13px;
-  }
-
-  &__preview-error {
-    color: var(--color-danger);
-  }
-
-  &__preview-meta {
-    display: flex;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--color-text-secondary);
-  }
-
-  &__preview-meta-label {
-    font-weight: 500;
-    color: var(--color-text);
-  }
-
-  &__preview-source {
-    word-break: break-all;
-  }
-
-  &__preview-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 8px;
-  }
-}
-
-@keyframes asset-skeleton-pulse {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.8;
   }
 }
 
 @keyframes asset-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-spin {
   animation: asset-spin 1s linear infinite;
-}
-
-.game-assets-settings {
-  &__search-status-spinner {
-    color: var(--color-primary);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 }

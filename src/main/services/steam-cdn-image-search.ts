@@ -9,21 +9,27 @@ import type { AssetSearchResult } from "./duckduckgo-image-search";
  */
 export async function searchSteamCDNImages(
   gameTitle: string,
-  assetType: "icon" | "logo" | "hero" | "grid" | "banner"
+  assetType: "icon" | "logo" | "hero" | "grid" | "banner",
+  appId?: string | null
 ): Promise<AssetSearchResult[]> {
   try {
-    // Get app ID from Hydra catalogue search.
-    // NOTE: The API returns the array directly, NOT wrapped in { results: [...] }.
-    const searchResults = await HydraApi.get<
-      Array<{ objectId: string; title: string }>
-    >(
-      "/catalogue/search/suggestions",
-      { query: gameTitle, limit: 1, shop: "steam" },
-      { needsAuth: false }
-    );
+    let finalAppId = appId;
 
-    const appId = searchResults?.[0]?.objectId;
-    if (!appId) return [];
+    if (!finalAppId) {
+      // Get app ID from Hydra catalogue search.
+      // NOTE: The API returns the array directly, NOT wrapped in { results: [...] }.
+      const searchResults = await HydraApi.get<
+        Array<{ objectId: string; title: string }>
+      >(
+        "/catalogue/search/suggestions",
+        { query: gameTitle, limit: 1, shop: "steam" },
+        { needsAuth: false }
+      );
+
+      finalAppId = searchResults?.[0]?.objectId;
+    }
+
+    if (!finalAppId) return [];
 
     const results: AssetSearchResult[] = [];
 
@@ -33,13 +39,13 @@ export async function searchSteamCDNImages(
       case "grid": {
         // Steam capsule images (600x900 and 231x87 variations)
         const urls = [
-          `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`,
-          `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/capsule_616x353.jpg`,
-          `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/capsule_231x87.jpg`,
+          `https://cdn.cloudflare.steamstatic.com/steam/apps/${finalAppId}/header.jpg`,
+          `https://cdn.cloudflare.steamstatic.com/steam/apps/${finalAppId}/capsule_616x353.jpg`,
+          `https://cdn.cloudflare.steamstatic.com/steam/apps/${finalAppId}/capsule_231x87.jpg`,
         ];
         urls.forEach((url, i) => {
           results.push({
-            id: `steamcdn-${assetType}-${appId}-${i}`,
+            id: `steamcdn-${assetType}-${finalAppId}-${i}`,
             thumbnailUrl: url,
             fullImageUrl: url,
             sourceUrl: url,
@@ -53,9 +59,9 @@ export async function searchSteamCDNImages(
 
       case "logo": {
         // Steam logo (horizontal game title artwork)
-        const logoUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/logo.png`;
+        const logoUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${finalAppId}/logo.png`;
         results.push({
-          id: `steamcdn-logo-${appId}`,
+          id: `steamcdn-logo-${finalAppId}`,
           thumbnailUrl: logoUrl,
           fullImageUrl: logoUrl,
           sourceUrl: logoUrl,
@@ -69,10 +75,10 @@ export async function searchSteamCDNImages(
       case "hero":
       case "banner": {
         // Library hero (1920x620) and header image
-        const heroUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/library_hero.jpg`;
-        const headerUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`;
+        const heroUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${finalAppId}/library_hero.jpg`;
+        const headerUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${finalAppId}/header.jpg`;
         results.push({
-          id: `steamcdn-hero-${appId}`,
+          id: `steamcdn-hero-${finalAppId}`,
           thumbnailUrl: headerUrl,
           fullImageUrl: heroUrl,
           sourceUrl: heroUrl,

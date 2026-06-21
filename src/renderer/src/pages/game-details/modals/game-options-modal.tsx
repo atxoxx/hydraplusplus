@@ -46,6 +46,7 @@ import { DownloadsSettingsSection } from "./game-options-modal/downloads-section
 import { DangerZoneSection } from "./game-options-modal/danger-zone-section";
 import { HydraCloudSettingsSection } from "./game-options-modal/hydra-cloud-section";
 import { MetadataGeneralSection } from "./game-options-modal/metadata-general-section";
+import { MetadataDescriptionSection } from "./game-options-modal/metadata-description-section";
 import type { GameSettingsCategoryId } from "./game-options-modal/types";
 import { ImageIcon, PencilIcon } from "@primer/octicons-react";
 import { CreateSteamShortcutModal } from "./create-steam-shortcut-modal";
@@ -122,9 +123,9 @@ export function GameOptionsModal({
   const [showSteamShortcutModal, setShowSteamShortcutModal] = useState(false);
   const [showMetadataSearchModal, setShowMetadataSearchModal] = useState(false);
   const [steamShortcutExists, setSteamShortcutExists] = useState(false);
-  const [metadataSubTab, setMetadataSubTab] = useState<"general" | "media">(
-    "general"
-  );
+  const [metadataSubTab, setMetadataSubTab] = useState<
+    "general" | "description" | "media"
+  >("general");
 
   const {
     removeGameInstaller,
@@ -896,6 +897,20 @@ export function GameOptionsModal({
                   <button
                     type="button"
                     className={`game-options-modal__subtab-button ${
+                      metadataSubTab === "description"
+                        ? "game-options-modal__subtab-button--active"
+                        : ""
+                    }`}
+                    onClick={() => setMetadataSubTab("description")}
+                  >
+                    <InfoIcon size={14} />
+                    <span>
+                      {t("metadata_subtab_description", "Description")}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`game-options-modal__subtab-button ${
                       metadataSubTab === "media"
                         ? "game-options-modal__subtab-button--active"
                         : ""
@@ -912,6 +927,14 @@ export function GameOptionsModal({
                     game={game}
                     shopDetails={shopDetails}
                     onDownloadMetadata={() => setShowMetadataSearchModal(true)}
+                    onSaved={updateGame}
+                  />
+                )}
+
+                {metadataSubTab === "description" && (
+                  <MetadataDescriptionSection
+                    game={game}
+                    shopDetails={shopDetails}
                     onSaved={updateGame}
                   />
                 )}

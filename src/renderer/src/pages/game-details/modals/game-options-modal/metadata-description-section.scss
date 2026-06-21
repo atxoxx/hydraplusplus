@@ -1,0 +1,58 @@
+@use "../../../../scss/globals.scss";
+
+.metadata-description-section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(globals.$spacing-unit * 1.5);
+  height: 100%;
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #dadbe1;
+  }
+
+  &__textarea {
+    width: 100%;
+    min-height: 280px;
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid globals.$border-color;
+    border-radius: 8px;
+    background: globals.$dark-background-color;
+    color: #dadbe1;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s ease;
+
+    &::placeholder {
+      color: globals.$muted-color;
+    }
+
+    &:focus {
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: globals.$spacing-unit;
+    margin-top: calc(globals.$spacing-unit / 2);
+  }
+}
