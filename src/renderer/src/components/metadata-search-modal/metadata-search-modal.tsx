@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { SearchIcon, SyncIcon } from "@primer/octicons-react";
+import { SearchIcon, SyncIcon, GlobeIcon } from "@primer/octicons-react";
 import { Modal, Button, TextField } from "@renderer/components";
-import { useToast } from "@renderer/hooks";
+import { useToast, useAppSelector } from "@renderer/hooks";
+import { getSteamLanguage } from "@renderer/helpers";
 import { logger } from "@renderer/logger";
 import type { LibraryGame, MetadataSearchResult } from "@types";
 
@@ -33,6 +34,24 @@ const SOURCE_LABELS: Record<string, string> = {
   pcgamingwiki: "PCGamingWiki",
   ign: "IGN",
 };
+
+/** Major languages available for metadata search. */
+const LANGUAGES: { code: string; label: string }[] = [
+  { code: "english", label: "English" },
+  { code: "french", label: "Français" },
+  { code: "german", label: "Deutsch" },
+  { code: "spanish", label: "Español" },
+  { code: "italian", label: "Italiano" },
+  { code: "brazilian", label: "Português (Brasil)" },
+  { code: "russian", label: "Русский" },
+  { code: "japanese", label: "日本語" },
+  { code: "korean", label: "한국어" },
+  { code: "schinese", label: "简体中文" },
+  { code: "tchinese", label: "繁體中文" },
+  { code: "polish", label: "Polski" },
+  { code: "dutch", label: "Nederlands" },
+  { code: "turkish", label: "Türkçe" },
+];
 
 // Returns the source code directly to pass through to IPC handlers
 function normalizeSource(source: string): string {
@@ -78,11 +97,28 @@ export function MetadataSearchModal({
   onClose,
   onMetadataApplied,
 }: Readonly<MetadataSearchModalProps>) {
-  const { t } = useTranslation("game_details");
+  const { t, i18n } = useTranslation("game_details");
   const { showSuccessToast, showErrorToast } = useToast();
+
+  const userPreferences = useAppSelector(
+    (state) => state.userPreferences.value
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSource, setSelectedSource] = useState("all");
+  // Language: use stored preference, fall back to UI language.
+  // Sync from userPreferences when it loads or changes (e.g. async fetch on mount).
+  const [selectedLanguage, setSelectedLanguage] = useState(() =>
+    getSteamLanguage(i18n.language) || "english"
+  );
+
+  // When userPreferences loads async, sync the stored language preference.
+  useEffect(() => {
+    if (userPreferences?.metadataSearchLanguage) {
+      setSelectedLanguage(userPreferences.metadataSearchLanguage);
+    }
+  }, [userPreferences?.metadataSearchLanguage]);
+
   const [results, setResults] = useState<MetadataSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -131,7 +167,8 @@ export function MetadataSearchModal({
         const response = await window.electron.searchGameMetadata(
           query,
           normalizeSource(source),
-          game.shop
+          game.shop,
+          selectedLanguage
         );
         if (!controller.signal.aborted) {
           setResults(response ?? []);
@@ -146,7 +183,7 @@ export function MetadataSearchModal({
         if (!controller.signal.aborted) setIsSearching(false);
       }
     },
-    [searchQuery, selectedSource, game.shop]
+    [searchQuery, selectedSource, game.shop, selectedLanguage]
   );
 
   // Auto-search when the modal opens or when switching games. We deliberately
@@ -358,6 +395,28 @@ export function MetadataSearchModal({
         </div>
 
         <div className="metadata-search-modal__search-row">
+          <div className="metadata-search-modal__language-selector">
+            <GlobeIcon size={14} />
+            <select
+              className="metadata-search-modal__language-dropdown"
+              value={selectedLanguage}
+              onChange={(e) => {
+                const lang = e.target.value;
+                setSelectedLanguage(lang);
+                // Persist to user preferences
+                window.electron
+                  .updateUserPreferences({ metadataSearchLanguage: lang })
+                  .catch(() => {});
+              }}
+              title={t("metadata_search_language", "Search Language")}
+            >
+              {LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          </div>
           <TextField
             placeholder={t("metadata_search_placeholder")}
             value={searchQuery}

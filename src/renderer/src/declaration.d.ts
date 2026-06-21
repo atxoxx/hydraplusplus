@@ -1215,7 +1215,8 @@ declare global {
     searchGameMetadata: (
       query: string,
       source: string,
-      shop?: string
+      shop?: string,
+      language?: string
     ) => Promise<MetadataSearchResult[]>;
     setGameUserStatus: (
       shop: GameShop,

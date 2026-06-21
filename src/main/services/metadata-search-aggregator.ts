@@ -32,7 +32,8 @@ const STEAM_CHROME_UA =
 async function searchCatalogue(
   query: string,
   limit: number,
-  shopFilter?: string
+  shopFilter?: string,
+  language?: string
 ): Promise<CatalogueCandidate[]> {
   try {
     const results = await HydraApi.get<CatalogueCandidate[]>(
@@ -41,6 +42,7 @@ async function searchCatalogue(
         query,
         limit,
         ...(shopFilter ? { shop: shopFilter } : {}),
+        ...(language ? { language } : {}),
       },
       { needsAuth: false }
     );
@@ -56,10 +58,11 @@ async function searchCatalogue(
  * Returns null on failure — callers must fall back to catalogue-suggestion values.
  */
 async function enrichSteamCandidate(
-  appId: string
+  appId: string,
+  language?: string
 ): Promise<Partial<MetadataSearchResult>> {
   try {
-    const details = await getSteamAppDetails(appId, "english");
+    const details = await getSteamAppDetails(appId, language || "english");
     if (!details) return {};
     return mapSteamDetails(details);
   } catch (err) {
@@ -182,10 +185,11 @@ function buildResult(
  * Steam gets full Steam appdetails; everything else gets the catalogue detail endpoint.
  */
 async function enrichCandidate(
-  candidate: CatalogueCandidate
+  candidate: CatalogueCandidate,
+  language?: string
 ): Promise<Partial<MetadataSearchResult>> {
   if (candidate.shop === "steam" && /^\d+$/.test(candidate.objectId)) {
-    return enrichSteamCandidate(candidate.objectId);
+    return enrichSteamCandidate(candidate.objectId, language);
   }
   return enrichHydraCandidate(candidate.shop, candidate.objectId);
 }
@@ -229,13 +233,14 @@ async function withConcurrencyLimit<T, R>(
  */
 async function searchSteamStoreSafe(
   query: string,
-  limit: number
+  limit: number,
+  language?: string
 ): Promise<MetadataSearchResult[]> {
   try {
     const response = await axios.get<{
       items?: Array<{ id: number; name: string; tiny_image?: string }>;
     }>(`https://store.steampowered.com/api/storesearch`, {
-      params: { term: query, l: "english" },
+      params: { term: query, l: language || "english" },
       timeout: 6000,
       headers: { "User-Agent": STEAM_CHROME_UA },
       validateStatus: () => true,
@@ -280,14 +285,15 @@ async function searchSteamStoreSafe(
  */
 export async function searchAllSources(
   query: string,
-  limit: number
+  limit: number,
+  language?: string
 ): Promise<MetadataSearchResult[]> {
   const trimmed = query.trim();
   if (trimmed.length < 2) return [];
 
   const [steamResults, catalogueCandidates] = await Promise.all([
-    searchSteamStoreSafe(trimmed, limit),
-    searchCatalogue(trimmed, limit),
+    searchSteamStoreSafe(trimmed, limit, language),
+    searchCatalogue(trimmed, limit, undefined, language),
   ]);
 
   // Merge and dedupe by (shop, objectId); prefer Steam-direct hits because
@@ -325,7 +331,7 @@ export async function searchAllSources(
   const enriched = await withConcurrencyLimit(
     merged.slice(0, limit),
     async (entry) => {
-      const patch = await enrichCandidate(entry.candidate);
+      const patch = await enrichCandidate(entry.candidate, language);
       const result = buildResult(entry.candidate, {
         ...patch,
         source: entry.steamHit ? "steam" : entry.candidate.shop,
@@ -345,9 +351,10 @@ export async function searchAllSources(
  */
 export async function searchSteamFirst(
   query: string,
-  limit: number
+  limit: number,
+  language?: string
 ): Promise<MetadataSearchResult[]> {
-  const direct = await searchSteamStoreSafe(query, limit);
+  const direct = await searchSteamStoreSafe(query, limit, language);
   if (direct.length > 0 && direct.some((r) => r.developers || r.genres)) {
     // Already enriched via Steam appdetails upstream path in some cases; if
     // not, the caller reuses the catalogue path.
@@ -355,13 +362,13 @@ export async function searchSteamFirst(
   }
 
   // Fall back to catalogue restricted to steam:shop + enrich every result.
-  const candidates = await searchCatalogue(query, limit, "steam");
+  const candidates = await searchCatalogue(query, limit, "steam", language);
   if (candidates.length === 0) return direct;
 
   const enriched = await withConcurrencyLimit(
     candidates,
     async (c) => {
-      const patch = await enrichSteamCandidate(c.objectId);
+      const patch = await enrichSteamCandidate(c.objectId, language);
       return buildResult(c, { ...patch, source: "steam" });
     },
     3

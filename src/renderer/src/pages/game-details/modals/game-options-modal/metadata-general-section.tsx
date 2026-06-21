@@ -107,10 +107,22 @@ export function MetadataGeneralSection({
 
   const suggestions = useLibrarySuggestions();
 
-  // Reset state when the game identity changes
+  // Reset state when the game identity changes or when the game's metadata
+  // fields are updated externally (e.g. via the metadata search modal).
   useEffect(() => {
     setState(initializeState(game, shopDetails));
-  }, [game.shop, game.objectId, shopDetails]);
+  }, [
+    game.shop,
+    game.objectId,
+    shopDetails,
+    game.title,
+    game.releaseDate,
+    game.genres,
+    game.developers,
+    game.publishers,
+    game.tags,
+    game.userStatus,
+  ]);
 
   const hasChanges = useMemo(() => {
     const original = initializeState(game, shopDetails);

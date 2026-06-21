@@ -1454,8 +1454,8 @@ contextBridge.exposeInMainWorld("electron", {
   /* Metadata */
   fetchGameMetadata: (shop: string, objectId: string, gameTitle: string) =>
     ipcRenderer.invoke("fetchGameMetadata", shop, objectId, gameTitle),
-  searchGameMetadata: (query: string, source: string, shop?: string) =>
-    ipcRenderer.invoke("searchGameMetadata", query, source, shop),
+  searchGameMetadata: (query: string, source: string, shop?: string, language?: string) =>
+    ipcRenderer.invoke("searchGameMetadata", query, source, shop, language),
   setGameUserStatus: (
     shop: GameShop,
     objectId: string,

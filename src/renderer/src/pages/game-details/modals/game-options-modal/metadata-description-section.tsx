@@ -37,9 +37,12 @@ export function MetadataDescriptionSection({
   );
   const [saving, setSaving] = useState(false);
 
+  // Reset state when the game changes or its description is updated externally
+  // (e.g. via the metadata search modal). Explicitly key on description field
+  // to avoid stale state when the reference is the same object with new values.
   useEffect(() => {
     setDescription(getDescription(game, shopDetails));
-  }, [game, shopDetails]);
+  }, [game, game.description, shopDetails]);
 
   const hasChanges = useMemo(() => {
     return description !== getDescription(game, shopDetails);

@@ -262,6 +262,8 @@ export interface UserPreferences {
   newsShowOnlyUnread?: boolean;
   /** User-selected accent color (hex string, e.g. "#4a9eff"). Falls back to #4a9eff when null/undefined. */
   accentColor?: string | null;
+  /** Language code for metadata search (e.g. "english", "french"). Falls back to UI language if null. */
+  metadataSearchLanguage?: string | null;
   /** Hardware monitoring configuration */
   hardwareMonitorConfig?: {
     enabled: boolean;

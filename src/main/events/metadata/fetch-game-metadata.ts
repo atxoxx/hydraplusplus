@@ -66,7 +66,8 @@ ipcMain.handle(
     _event,
     query: string,
     source: string,
-    shop?: string
+    shop?: string,
+    language?: string
   ): Promise<MetadataSearchResult[]> => {
     try {
       const trimmed = (query ?? "").trim();
@@ -74,13 +75,14 @@ ipcMain.handle(
 
       const limit = 10;
       const normalized = (source ?? "all").toLowerCase();
+      const lang = language || "english";
 
       if (normalized === "vndb") {
         return searchVnDb(trimmed, limit);
       }
 
       if (normalized === "steam") {
-        return searchSteamFirst(trimmed, limit);
+        return searchSteamFirst(trimmed, limit, lang);
       }
 
       if (normalized === "steamgriddb") {
@@ -97,7 +99,7 @@ ipcMain.handle(
 
       // Default: "all" / legacy "igdb" / legacy "hydra" — fan out everywhere.
       const [broad, vn] = await Promise.all([
-        searchAllSources(trimmed, limit),
+        searchAllSources(trimmed, limit, lang),
         searchVnDb(trimmed, 2).catch(() => []),
       ]);
       // If the user's `shop` parameter is set (e.g. game is on "steam"), keep

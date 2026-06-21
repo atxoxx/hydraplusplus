@@ -7,6 +7,46 @@
   &__search-row {
     display: flex;
     gap: 8px;
+    align-items: center;
+  }
+
+  &__language-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+
+  &__language-dropdown {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    font-size: 12px;
+    font-family: inherit;
+    padding: 8px 20px 8px 4px;
+    cursor: pointer;
+    outline: none;
+    min-width: 90px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23999'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+
+    &:focus-visible {
+      outline: 1px solid var(--color-primary);
+      outline-offset: -1px;
+      border-radius: 4px;
+    }
+
+    option {
+      background: #1a1a1a;
+      color: #dadbe1;
+    }
   }
 
   &__results {

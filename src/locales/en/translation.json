@@ -813,6 +813,7 @@
     "hltb_submitted": "Playtime submitted!",
     "hltb_submit_failed": "Failed to submit playtime",
     "metadata_search_title": "Search Metadata",
+    "metadata_search_language": "Search Language",
     "metadata_search_placeholder": "Search for a game...",
     "metadata_source_hydra": "Hydra",
     "metadata_source_steam": "Steam",
